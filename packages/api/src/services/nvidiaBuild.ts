@@ -38,7 +38,9 @@ export async function callNvidiaBuildVision(
     throw new Error(`NVIDIA API error (${response.status}): ${errorText}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
   return data.choices?.[0]?.message?.content ?? "";
 }
 

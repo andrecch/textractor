@@ -8,17 +8,17 @@ import { ocrExtract, saveExtraction } from "@/services/api";
 import * as pdfjsLib from "pdfjs-dist";
 
 async function getSourceCanvas(): Promise<HTMLCanvasElement> {
-  const { document, currentPage, zoom } = useDocumentStore.getState();
-  if (!document) throw new Error("No document loaded");
+  const { document: doc, currentPage, zoom } = useDocumentStore.getState();
+  if (!doc) throw new Error("No document loaded");
 
   return new Promise((resolve, reject) => {
-    if (document.type === "pdf") {
+    if (doc.type === "pdf") {
       (async () => {
         try {
-          const pdf = await pdfjsLib.getDocument(document.url).promise;
+          const pdf = await pdfjsLib.getDocument(doc.url).promise;
           const page = await pdf.getPage(currentPage + 1);
           const viewport = page.getViewport({ scale: zoom * 2 });
-          const canvas = document.createElement("canvas");
+          const canvas = window.document.createElement("canvas");
           const ctx = canvas.getContext("2d")!;
           canvas.width = viewport.width;
           canvas.height = viewport.height;
@@ -33,7 +33,7 @@ async function getSourceCanvas(): Promise<HTMLCanvasElement> {
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
-        const canvas = document.createElement("canvas");
+        const canvas = window.document.createElement("canvas");
         canvas.width = img.naturalWidth * zoom;
         canvas.height = img.naturalHeight * zoom;
         const ctx = canvas.getContext("2d")!;
@@ -41,7 +41,7 @@ async function getSourceCanvas(): Promise<HTMLCanvasElement> {
         resolve(canvas);
       };
       img.onerror = reject;
-      img.src = document.url;
+      img.src = doc.url;
     }
   });
 }
@@ -51,11 +51,11 @@ export function useOCR() {
 
   const extractActive = useCallback(async () => {
     const { settings } = useSettingsStore.getState();
-    const { document } = useDocumentStore.getState();
+    const { document: doc } = useDocumentStore.getState();
     const { getActiveSection, updateSectionStatus, updateSectionExtractedText, updateSectionCroppedImage } =
       useSectionStore.getState();
 
-    if (!settings.ocrEnabled || !settings.apiKey || !document) return;
+    if (!settings.ocrEnabled || !settings.apiKey || !doc) return;
 
     const section = getActiveSection();
     if (!section || !section.region) return;
@@ -84,7 +84,7 @@ export function useOCR() {
       updateSectionExtractedText(section.id, response.text);
 
       await saveExtraction({
-        documentName: document.name,
+        documentName: doc.name,
         sectionName: section.name,
         pageIndex: section.pageIndex,
         zone: section.region,
