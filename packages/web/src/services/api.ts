@@ -2,12 +2,17 @@ const API_BASE = "/api";
 
 export async function ocrExtract(
   imageBase64: string,
-  apiKey: string
+  apiKey?: string
 ): Promise<{ text: string; provider: string }> {
+  const body: Record<string, string> = { imageBase64 };
+  if (apiKey) {
+    body.apiKey = apiKey;
+  }
+
   const response = await fetch(`${API_BASE}/ocr/extract`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imageBase64, apiKey }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -15,6 +20,14 @@ export async function ocrExtract(
     throw new Error(error.error ?? "OCR request failed");
   }
 
+  return response.json();
+}
+
+export async function getApiKeyStatus(): Promise<{ hasKey: boolean; preview: string }> {
+  const response = await fetch(`${API_BASE}/config/api-key`);
+  if (!response.ok) {
+    return { hasKey: false, preview: "" };
+  }
   return response.json();
 }
 

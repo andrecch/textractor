@@ -3,13 +3,19 @@ const MODEL_ID = "moonshotai/kimi-k2.6";
 
 export async function callNvidiaBuildVision(
   imageBase64: string,
-  apiKey: string
+  apiKey?: string
 ): Promise<string> {
+  const finalApiKey = apiKey || process.env.NVIDIA_API_KEY;
+
+  if (!finalApiKey) {
+    throw new Error("No API key provided. Set NVIDIA_API_KEY in .env or provide it in the request.");
+  }
+
   const response = await fetch(NVIDIA_API_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${finalApiKey}`,
     },
     body: JSON.stringify({
       model: MODEL_ID,

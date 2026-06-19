@@ -69,6 +69,7 @@
     "validate": "Validar conexion",
     "valid": "Conexion valida",
     "invalid": "Conexion invalida",
+    "usingServerKey": "Usando API Key del servidor",
     "language": "Idioma",
     "save": "Guardar"
   },

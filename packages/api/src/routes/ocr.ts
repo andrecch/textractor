@@ -10,8 +10,8 @@ router.post("/extract", async (req, res) => {
   try {
     const { imageBase64, apiKey } = req.body;
 
-    if (!imageBase64 || !apiKey) {
-      res.status(400).json({ error: "imageBase64 and apiKey are required" });
+    if (!imageBase64) {
+      res.status(400).json({ error: "imageBase64 is required" });
       return;
     }
 

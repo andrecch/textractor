@@ -55,7 +55,7 @@ export function useOCR() {
     const { getActiveSection, updateSectionStatus, updateSectionExtractedText, updateSectionCroppedImage } =
       useSectionStore.getState();
 
-    if (!settings.ocrEnabled || !settings.apiKey || !doc) return;
+    if (!settings.ocrEnabled || !doc) return;
 
     const section = getActiveSection();
     if (!section || !section.region) return;
@@ -79,7 +79,7 @@ export function useOCR() {
 
       updateSectionCroppedImage(section.id, imageData);
 
-      const response = await ocrExtract(imageData, settings.apiKey);
+      const response = await ocrExtract(imageData, settings.apiKey || undefined);
 
       updateSectionExtractedText(section.id, response.text);
 

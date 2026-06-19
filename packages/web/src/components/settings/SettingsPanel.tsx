@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { ocrValidate } from "@/services/api";
+import { ocrValidate, getApiKeyStatus } from "@/services/api";
 
 type ValidationState = "idle" | "validating" | "valid" | "invalid";
 
@@ -15,17 +15,33 @@ export function SettingsPanel() {
   const { settings, updateSettings } = useSettingsStore();
   const [validationState, setValidationState] = useState<ValidationState>("idle");
   const [validationError, setValidationError] = useState("");
+  const [serverKeyPreview, setServerKeyPreview] = useState("");
+  const [serverHasKey, setServerHasKey] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+
+  useEffect(() => {
+    getApiKeyStatus().then(({ hasKey, preview }) => {
+      setServerHasKey(hasKey);
+      setServerKeyPreview(preview);
+    });
+  }, []);
 
   const handleValidate = async () => {
-    if (!settings.apiKey) return;
+    const keyToValidate = settings.apiKey || (serverHasKey ? undefined : "");
+    if (!keyToValidate && !serverHasKey) return;
+
     setValidationState("validating");
     try {
-      const result = await ocrValidate(settings.apiKey);
-      if (result.valid) {
-        setValidationState("valid");
+      if (settings.apiKey) {
+        const result = await ocrValidate(settings.apiKey);
+        if (result.valid) {
+          setValidationState("valid");
+        } else {
+          setValidationState("invalid");
+          setValidationError(result.error ?? "");
+        }
       } else {
-        setValidationState("invalid");
-        setValidationError(result.error ?? "");
+        setValidationState("valid");
       }
     } catch {
       setValidationState("invalid");
@@ -37,6 +53,11 @@ export function SettingsPanel() {
     updateSettings({ language: lang });
     i18n.changeLanguage(lang);
   };
+
+  const isUsingServerKey = !settings.apiKey && serverHasKey;
+  const displayValue = settings.apiKey
+    ? settings.apiKey.substring(0, 15) + "***"
+    : serverKeyPreview;
 
   return (
     <div className="max-w-lg mx-auto p-8">
@@ -95,18 +116,40 @@ export function SettingsPanel() {
 
         <div className="space-y-2">
           <Label>{t("settings.apiKey")}</Label>
-          <Input
-            type="password"
-            placeholder={t("settings.apiKeyPlaceholder")}
-            value={settings.apiKey}
-            onChange={(e) => updateSettings({ apiKey: e.target.value })}
-          />
+          <div className="relative">
+            <Input
+              type={showApiKey ? "text" : "password"}
+              placeholder={t("settings.apiKeyPlaceholder")}
+              value={showApiKey ? settings.apiKey : displayValue}
+              onChange={(e) => {
+                updateSettings({ apiKey: e.target.value });
+                setValidationState("idle");
+              }}
+              className="pr-20"
+            />
+            {displayValue && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1 h-7 px-2 text-xs"
+                onClick={() => setShowApiKey(!showApiKey)}
+              >
+                {showApiKey ? "Ocultar" : "Mostrar"}
+              </Button>
+            )}
+          </div>
+          {isUsingServerKey && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Server className="h-3 w-3" />
+              <span>{t("settings.usingServerKey")}</span>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={handleValidate}
-              disabled={validationState === "validating" || !settings.apiKey}
+              disabled={validationState === "validating" || (!settings.apiKey && !serverHasKey)}
             >
               {validationState === "validating" && (
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
