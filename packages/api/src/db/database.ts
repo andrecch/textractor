@@ -9,7 +9,7 @@ let db: Database.Database;
 
 export function getDatabase(): Database.Database {
   if (!db) {
-    const dbPath = join(__dirname, "../../data/textractor.db");
+    const dbPath = join(__dirname, "../data/textractor.db");
     db = new Database(dbPath);
     db.pragma("journal_mode = WAL");
     db.pragma("foreign_keys = ON");

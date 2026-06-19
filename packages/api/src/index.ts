@@ -1,12 +1,15 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { runMigrations } from "./db/database.js";
 import ocrRoutes from "./routes/ocr.js";
 import historyRoutes from "./routes/history.js";
 import configRoutes from "./routes/config.js";
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
