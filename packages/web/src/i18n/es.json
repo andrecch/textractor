@@ -1,0 +1,76 @@
+{
+  "app": {
+    "title": "Extracto",
+    "subtitle": "Extraccion inteligente de zonas"
+  },
+  "nav": {
+    "viewer": "Visor",
+    "history": "Historial",
+    "settings": "Configuracion"
+  },
+  "upload": {
+    "title": "Abrir documento",
+    "dropzone": "Arrastra un archivo PDF o imagen aqui",
+    "or": "o",
+    "browse": "Seleccionar archivo",
+    "accepted": "PDF, PNG, JPG, WEBP"
+  },
+  "viewer": {
+    "page": "Pagina",
+    "of": "de",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "fitToScreen": "Ajustar",
+    "noDocument": "No hay documento abierto"
+  },
+  "section": {
+    "title": "Secciones",
+    "empty": "No hay secciones",
+    "add": "Agregar seccion",
+    "delete": "Eliminar",
+    "rename": "Renombrar",
+    "defaultName": "Seccion",
+    "status": {
+      "empty": "Sin region",
+      "regiondefined": "Region definida",
+      "processing": "Procesando...",
+      "extracted": "Extraido",
+      "error": "Error"
+    },
+    "extract": "Extraer texto",
+    "extractAll": "Extraer todas"
+  },
+  "ocr": {
+    "title": "Resultados OCR",
+    "empty": "Selecciona una region y extrae texto",
+    "processing": "Procesando...",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "exportTxt": "Exportar .txt",
+    "error": "Error en el reconocimiento",
+    "disabled": "OCR desactivado"
+  },
+  "settings": {
+    "title": "Configuracion",
+    "ocrEnabled": "Activar OCR",
+    "preprocessing": "Preprocesamiento de imagen",
+    "apiKey": "API Key de NVIDIA Build",
+    "apiKeyPlaceholder": "Introduce tu API Key",
+    "validate": "Validar conexion",
+    "valid": "Conexion valida",
+    "invalid": "Conexion invalida",
+    "language": "Idioma",
+    "save": "Guardar"
+  },
+  "history": {
+    "title": "Historial de extracciones",
+    "empty": "No hay extracciones previas",
+    "document": "Documento",
+    "section": "Seccion",
+    "page": "Pagina",
+    "date": "Fecha",
+    "provider": "Proveedor",
+    "view": "Ver texto",
+    "clear": "Limpiar historial"
+  }
+}

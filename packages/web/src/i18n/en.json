@@ -1,0 +1,76 @@
+{
+  "app": {
+    "title": "Extracto",
+    "subtitle": "Intelligent zone extraction"
+  },
+  "nav": {
+    "viewer": "Viewer",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "upload": {
+    "title": "Open document",
+    "dropzone": "Drop a PDF or image file here",
+    "or": "or",
+    "browse": "Browse files",
+    "accepted": "PDF, PNG, JPG, WEBP"
+  },
+  "viewer": {
+    "page": "Page",
+    "of": "of",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitToScreen": "Fit to screen",
+    "noDocument": "No document open"
+  },
+  "section": {
+    "title": "Sections",
+    "empty": "No sections",
+    "add": "Add section",
+    "delete": "Delete",
+    "rename": "Rename",
+    "defaultName": "Section",
+    "status": {
+      "empty": "No region",
+      "regiondefined": "Region defined",
+      "processing": "Processing...",
+      "extracted": "Extracted",
+      "error": "Error"
+    },
+    "extract": "Extract text",
+    "extractAll": "Extract all"
+  },
+  "ocr": {
+    "title": "OCR Results",
+    "empty": "Select a region and extract text",
+    "processing": "Processing...",
+    "copy": "Copy",
+    "copied": "Copied",
+    "exportTxt": "Export .txt",
+    "error": "Recognition error",
+    "disabled": "OCR disabled"
+  },
+  "settings": {
+    "title": "Settings",
+    "ocrEnabled": "Enable OCR",
+    "preprocessing": "Image preprocessing",
+    "apiKey": "NVIDIA Build API Key",
+    "apiKeyPlaceholder": "Enter your API Key",
+    "validate": "Validate connection",
+    "valid": "Connection valid",
+    "invalid": "Connection invalid",
+    "language": "Language",
+    "save": "Save"
+  },
+  "history": {
+    "title": "Extraction history",
+    "empty": "No previous extractions",
+    "document": "Document",
+    "section": "Section",
+    "page": "Page",
+    "date": "Date",
+    "provider": "Provider",
+    "view": "View text",
+    "clear": "Clear history"
+  }
+}
