@@ -16,6 +16,8 @@ export function PDFPageRenderer({
 }: PDFPageRendererProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pdfDocRef = useRef<pdfjsLib.PDFDocumentProxy | null>(null);
+  const renderTaskRef = useRef<pdfjsLib.RenderTask | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   const renderPage = useCallback(async () => {
     const canvas = canvasRef.current;
@@ -38,18 +40,48 @@ export function PDFPageRenderer({
 
       onPageSizeChange(viewport.width, viewport.height);
 
-      await page.render({
+      if (renderTaskRef.current) {
+        renderTaskRef.current.cancel();
+      }
+
+      const renderTask = page.render({
         canvasContext: context,
         viewport,
-      }).promise;
+      });
+      renderTaskRef.current = renderTask;
+
+      await renderTask.promise;
     } catch (err) {
-      console.error("Error rendering PDF page:", err);
+      if (err instanceof Error && err.name !== "RenderingCancelledException") {
+        console.error("Error rendering PDF page:", err);
+      }
     }
   }, [url, pageIndex, zoom, onPageSizeChange]);
 
   useEffect(() => {
-    renderPage();
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    rafRef.current = requestAnimationFrame(() => {
+      renderPage();
+    });
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, [renderPage]);
+
+  useEffect(() => {
+    return () => {
+      if (renderTaskRef.current) {
+        renderTaskRef.current.cancel();
+        renderTaskRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     return () => {

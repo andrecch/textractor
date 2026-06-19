@@ -19,6 +19,8 @@ export function DocumentViewer() {
 
   if (!document) return null;
 
+  const rendererKey = `${document.id}-${currentPage}`;
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-2 border-b">
@@ -32,6 +34,7 @@ export function DocumentViewer() {
         >
           {document.type === "pdf" ? (
             <PDFPageRenderer
+              key={rendererKey}
               url={document.url}
               pageIndex={currentPage}
               zoom={zoom}
@@ -39,6 +42,7 @@ export function DocumentViewer() {
             />
           ) : (
             <ImageRenderer
+              key={rendererKey}
               url={document.url}
               zoom={zoom}
               onPageSizeChange={handlePageSizeChange}

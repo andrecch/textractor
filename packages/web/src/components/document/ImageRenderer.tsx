@@ -12,12 +12,28 @@ export function ImageRenderer({
   onPageSizeChange,
 }: ImageRendererProps) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const naturalSizeRef = useRef({ width: 0, height: 0 });
+
+  const updateSize = useCallback(() => {
+    const { width, height } = naturalSizeRef.current;
+    if (width > 0 && height > 0) {
+      onPageSizeChange(width * zoom, height * zoom);
+    }
+  }, [zoom, onPageSizeChange]);
 
   const handleLoad = useCallback(() => {
     const img = imgRef.current;
     if (!img) return;
-    onPageSizeChange(img.naturalWidth * zoom, img.naturalHeight * zoom);
-  }, [zoom, onPageSizeChange]);
+    naturalSizeRef.current = {
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+    };
+    updateSize();
+  }, [updateSize]);
+
+  useEffect(() => {
+    updateSize();
+  }, [updateSize]);
 
   useEffect(() => {
     const img = imgRef.current;
@@ -26,6 +42,9 @@ export function ImageRenderer({
     }
   }, [handleLoad]);
 
+  const scaledWidth = naturalSizeRef.current.width * zoom;
+  const scaledHeight = naturalSizeRef.current.height * zoom;
+
   return (
     <img
       ref={imgRef}
@@ -33,10 +52,8 @@ export function ImageRenderer({
       alt="Document"
       onLoad={handleLoad}
       style={{
-        width: "auto",
-        height: "auto",
-        transform: `scale(${zoom})`,
-        transformOrigin: "top left",
+        width: scaledWidth > 0 ? `${scaledWidth}px` : "auto",
+        height: scaledHeight > 0 ? `${scaledHeight}px` : "auto",
       }}
       className="max-w-none shadow-lg"
       draggable={false}
