@@ -1,5 +1,5 @@
 const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const MODEL_ID = "microsoft/florence-2";
+const MODEL_ID = "moonshotai/kimi-k2.6";
 
 export async function callNvidiaBuildVision(
   imageBase64: string,
