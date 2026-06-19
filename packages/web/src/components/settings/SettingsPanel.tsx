@@ -17,7 +17,6 @@ export function SettingsPanel() {
   const [validationError, setValidationError] = useState("");
   const [serverKeyPreview, setServerKeyPreview] = useState("");
   const [serverHasKey, setServerHasKey] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
 
   useEffect(() => {
     getApiKeyStatus().then(({ hasKey, preview }) => {
@@ -116,28 +115,22 @@ export function SettingsPanel() {
 
         <div className="space-y-2">
           <Label>{t("settings.apiKey")}</Label>
-          <div className="relative">
-            <Input
-              type={showApiKey ? "text" : "password"}
-              placeholder={t("settings.apiKeyPlaceholder")}
-              value={showApiKey ? settings.apiKey : displayValue}
-              onChange={(e) => {
-                updateSettings({ apiKey: e.target.value });
-                setValidationState("idle");
-              }}
-              className="pr-20"
-            />
-            {displayValue && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-1 h-7 px-2 text-xs"
-                onClick={() => setShowApiKey(!showApiKey)}
-              >
-                {showApiKey ? "Ocultar" : "Mostrar"}
-              </Button>
-            )}
-          </div>
+          <Input
+            type="text"
+            placeholder={t("settings.apiKeyPlaceholder")}
+            value={displayValue}
+            readOnly
+            className="bg-muted"
+          />
+          <Input
+            type="password"
+            placeholder={t("settings.apiKeyOverridePlaceholder")}
+            value={settings.apiKey}
+            onChange={(e) => {
+              updateSettings({ apiKey: e.target.value });
+              setValidationState("idle");
+            }}
+          />
           {isUsingServerKey && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Server className="h-3 w-3" />

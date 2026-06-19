@@ -66,6 +66,7 @@
     "preprocessing": "Preprocesamiento de imagen",
     "apiKey": "API Key de NVIDIA Build",
     "apiKeyPlaceholder": "Introduce tu API Key",
+    "apiKeyOverridePlaceholder": "Sobrescribir con tu propia API Key (opcional)",
     "validate": "Validar conexion",
     "valid": "Conexion valida",
     "invalid": "Conexion invalida",
