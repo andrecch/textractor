@@ -22,7 +22,7 @@ export const useSettingsStore = create<SettingsState>()(
       resetSettings: () => set({ settings: DEFAULT_SETTINGS }),
     }),
     {
-      name: "extracto-settings",
+      name: "textractor-settings",
     }
   )
 );

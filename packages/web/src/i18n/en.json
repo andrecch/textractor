@@ -1,12 +1,22 @@
 {
   "app": {
-    "title": "Extracto",
+    "title": "Textractor",
     "subtitle": "Intelligent zone extraction"
   },
   "nav": {
     "viewer": "Viewer",
     "history": "History",
     "settings": "Settings"
+  },
+  "welcome": {
+    "title": "Textractor",
+    "subtitle": "Intelligent zone extraction",
+    "description": "Upload a PDF or image, draw a zone and extract text with precision using AI.",
+    "poweredBy": "OCR powered by NVIDIA Build",
+    "model": "Kimi 2.6 Vision Model",
+    "apiKeyTitle": "Configure your API Key",
+    "apiKeyDescription": "To get started, add your NVIDIA Build API Key in Settings.",
+    "goToSettings": "Go to Settings"
   },
   "upload": {
     "title": "Open document",

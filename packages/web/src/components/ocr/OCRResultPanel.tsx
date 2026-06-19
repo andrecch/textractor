@@ -26,7 +26,7 @@ export function OCRResultPanel() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `extracto-${activeSection.name}.txt`;
+    a.download = `textractor-${activeSection.name}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };

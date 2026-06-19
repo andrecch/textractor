@@ -17,7 +17,7 @@ export function Header() {
     <header className="border-b bg-background">
       <div className="flex items-center justify-between px-4 h-12">
         <Link to="/" className="flex items-center gap-2 font-bold text-lg">
-          Extracto
+          Textractor
         </Link>
         <nav className="flex items-center gap-1">
           {links.map(({ to, icon: Icon, label }) => (

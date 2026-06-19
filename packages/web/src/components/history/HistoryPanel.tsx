@@ -51,7 +51,7 @@ export function HistoryPanel() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `extracto-${record.sectionName}-${record.id.slice(0, 8)}.txt`;
+    a.download = `textractor-${record.sectionName}-${record.id.slice(0, 8)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };

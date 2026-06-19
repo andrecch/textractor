@@ -1,5 +1,5 @@
 import { useDocumentStore } from "@/stores/documentStore";
-import { FileUpload } from "@/components/upload/FileUpload";
+import { WelcomeScreen } from "@/components/upload/WelcomeScreen";
 import { DocumentViewer } from "@/components/document/DocumentViewer";
 import { SectionPanel } from "@/components/section/SectionPanel";
 import { OCRResultPanel } from "@/components/ocr/OCRResultPanel";
@@ -9,13 +9,7 @@ export function ViewerPage() {
   const { document } = useDocumentStore();
 
   if (!document) {
-    return (
-      <div className="flex items-center justify-center h-full p-8">
-        <div className="w-full max-w-2xl">
-          <FileUpload />
-        </div>
-      </div>
-    );
+    return <WelcomeScreen />;
   }
 
   return (

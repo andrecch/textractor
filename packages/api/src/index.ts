@@ -20,7 +20,7 @@ app.use("/api/history", historyRoutes);
 runMigrations();
 
 app.listen(PORT, () => {
-  console.log(`[extracto-api] running on http://localhost:${PORT}`);
+  console.log(`[textractor-api] running on http://localhost:${PORT}`);
 });
 
 export default app;
