@@ -15,11 +15,15 @@ export async function callNvidiaBuildVision(
       model: MODEL_ID,
       messages: [
         {
+          role: "system",
+          content: "You are an OCR engine. Output ONLY the exact text visible in the image. No explanations, no descriptions, no commentary. Just the raw extracted text.",
+        },
+        {
           role: "user",
           content: [
             {
               type: "text",
-              text: "Extract all visible text from this image. Return only the extracted text, nothing else.",
+              text: "OCR: Extract and return ONLY the visible text from this image. Do not add any explanation or description.",
             },
             {
               type: "image_url",
@@ -29,7 +33,7 @@ export async function callNvidiaBuildVision(
         },
       ],
       max_tokens: 4096,
-      temperature: 0.1,
+      temperature: 0,
     }),
   });
 
