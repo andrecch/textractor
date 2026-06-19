@@ -6,7 +6,8 @@
   "nav": {
     "viewer": "Viewer",
     "history": "History",
-    "settings": "Settings"
+    "settings": "Settings",
+    "new": "New"
   },
   "welcome": {
     "title": "Textractor",

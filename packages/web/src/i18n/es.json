@@ -6,7 +6,8 @@
   "nav": {
     "viewer": "Visor",
     "history": "Historial",
-    "settings": "Configuracion"
+    "settings": "Configuracion",
+    "new": "Nuevo"
   },
   "welcome": {
     "title": "Textractor",
