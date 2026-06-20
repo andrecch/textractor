@@ -1,7 +1,9 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSectionStore } from "@/stores/sectionStore";
 import { useDocumentStore } from "@/stores/documentStore";
 import type { SectionRegion } from "@/types/section";
+import { getSourceCanvas } from "@/services/canvasRenderer";
+import { cropRegion } from "@/services/imageProcessing";
 
 export function useSection() {
   const {
@@ -13,6 +15,7 @@ export function useSection() {
     removeSection,
     renameSection,
     updateSectionRegion,
+    updateSectionCroppedImageRaw,
   } = useSectionStore();
   const { currentPage } = useDocumentStore();
 
@@ -63,6 +66,36 @@ export function useSection() {
     setIsDrawing(false);
     setPreviewRect(null);
   }, [isDrawing, previewRect, activeSectionId, currentPage, updateSectionRegion]);
+
+  useEffect(() => {
+    if (!activeSection || !activeSection.region) return;
+    if (activeSection.pageIndex !== currentPage) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const sourceCanvas = await getSourceCanvas();
+        if (cancelled) return;
+        const r = activeSection.region!;
+        const cropped = cropRegion(sourceCanvas, r.x, r.y, r.width, r.height);
+        if (cancelled) return;
+        const dataUrl = cropped.toDataURL("image/png");
+        if (cancelled) return;
+        updateSectionCroppedImageRaw(activeSection.id, dataUrl);
+      } catch {
+        // Silently ignore render errors; the OCR step will surface them.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeSection,
+    currentPage,
+    activeSectionId,
+    updateSectionCroppedImageRaw,
+  ]);
 
   return {
     sections,

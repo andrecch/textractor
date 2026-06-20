@@ -58,6 +58,10 @@
     "copy": "Copy",
     "copied": "Copied",
     "exportTxt": "Export .txt",
+    "downloadRaw": "Download crop (original)",
+    "downloadProcessed": "Download crop (processed)",
+    "cropPreview": "Crop preview",
+    "regionDefinedHint": "Region defined. Press Extract to run OCR.",
     "error": "Recognition error",
     "disabled": "OCR disabled"
   },

@@ -13,7 +13,8 @@ interface SectionState {
   removeSection: (id: string) => void;
   renameSection: (id: string, name: string) => void;
   updateSectionRegion: (id: string, pageIndex: number, region: SectionRegion) => void;
-  updateSectionCroppedImage: (id: string, image: string) => void;
+  updateSectionCroppedImageRaw: (id: string, image: string) => void;
+  updateSectionCroppedImageProcessed: (id: string, image: string) => void;
   updateSectionExtractedText: (id: string, text: string) => void;
   updateSectionStatus: (id: string, status: Section["status"], error?: string) => void;
   clearSections: () => void;
@@ -78,11 +79,25 @@ export const useSectionStore = create<SectionState>((set, get) => ({
       ),
     })),
 
-  updateSectionCroppedImage: (id, image) =>
+  updateSectionCroppedImageRaw: (id, image) =>
     set((state) => ({
       sections: state.sections.map((s) =>
         s.id === id
-          ? { ...s, croppedImage: image, updatedAt: new Date().toISOString() }
+          ? { ...s, croppedImageRaw: image, updatedAt: new Date().toISOString() }
+          : s
+      ),
+    })),
+
+  updateSectionCroppedImageProcessed: (id, image) =>
+    set((state) => ({
+      sections: state.sections.map((s) =>
+        s.id === id
+          ? {
+              ...s,
+              croppedImageProcessed: image,
+              status: "extracted" as const,
+              updatedAt: new Date().toISOString(),
+            }
           : s
       ),
     })),
@@ -94,7 +109,6 @@ export const useSectionStore = create<SectionState>((set, get) => ({
           ? {
               ...s,
               extractedText: text,
-              status: "extracted" as const,
               updatedAt: new Date().toISOString(),
             }
           : s

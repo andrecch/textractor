@@ -12,7 +12,8 @@ export interface Section {
   name: string;
   pageIndex: number;
   region: SectionRegion | null;
-  croppedImage: string | null;
+  croppedImageRaw: string | null;
+  croppedImageProcessed: string | null;
   extractedText: string | null;
   status: SectionStatus;
   errorMessage: string | null;
@@ -27,7 +28,8 @@ export function createDefaultSection(name: string): Section {
     name,
     pageIndex: 0,
     region: null,
-    croppedImage: null,
+    croppedImageRaw: null,
+    croppedImageProcessed: null,
     extractedText: null,
     status: "empty",
     errorMessage: null,
