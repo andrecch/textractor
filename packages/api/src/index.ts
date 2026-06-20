@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
@@ -11,7 +11,7 @@ import configRoutes from "./routes/config.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
-const app = express();
+const app: Express = express();
 const PORT = process.env.PORT ?? 3001;
 
 app.use(cors());
@@ -28,7 +28,7 @@ app.use("/api/config", configRoutes);
 runMigrations();
 
 app.listen(PORT, () => {
-  console.log(`[textractor-api] running on http://localhost:${PORT}`);
+  console.log(`[textractor-api] running on http://127.0.0.1:${PORT}`);
 });
 
 export default app;

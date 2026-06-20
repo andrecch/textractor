@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, searchForWorkspaceRoot } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -14,9 +14,15 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:3001",
+        target: "http://127.0.0.1:3001",
         changeOrigin: true,
       },
+    },
+    fs: {
+      allow: [
+        // Esto busca de forma inteligente la raíz real (C:/Users/.../textracto)
+        searchForWorkspaceRoot(process.cwd()),
+      ],
     },
   },
 });
