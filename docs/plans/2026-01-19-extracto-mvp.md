@@ -4,7 +4,7 @@
 
 **Goal:** Build a web app for intelligent zone extraction from PDFs/images with OCR via Kimi 2.6 Vision (NVIDIA Build), using a section-based architecture.
 
-**Architecture:** Monorepo (npm workspaces) — React frontend (Vite + TS + Tailwind + shadcn) with section-based extraction model. Express backend proxies OCR calls to NVIDIA Build and manages SQLite history. Sections are the core abstraction: each section holds one region, its crop, and OCR result, decoupled from viewer and OCR engine.
+**Architecture:** Monorepo (npm workspaces) — React frontend (Vite + TS + Tailwind + shadcn) with section-based extraction model. Express backend proxies OCR calls to NVIDIA Build and manages SQLite history. Sections are the core abstraction: each section holds one zone, its crop, and OCR result, decoupled from viewer and OCR engine.
 
 **Tech Stack:**
 - Frontend: React 19, Vite 6, TypeScript 5, Tailwind CSS 4, shadcn/ui, Zustand, react-router-dom 7, react-i18next, pdfjs-dist
@@ -585,20 +585,20 @@ export interface DocumentFile {
 
 ```typescript
 // packages/web/src/types/section.ts
-export interface SectionRegion {
+export interface SectionZone {
   x: number;
   y: number;
   width: number;
   height: number;
 }
 
-export type SectionStatus = "empty" | "region-defined" | "processing" | "extracted" | "error";
+export type SectionStatus = "empty" | "zone-defined" | "processing" | "extracted" | "error";
 
 export interface Section {
   id: string;
   name: string;
   pageIndex: number;
-  region: SectionRegion | null;
+  zone: SectionZone | null;
   croppedImage: string | null;
   extractedText: string | null;
   status: SectionStatus;
@@ -613,7 +613,7 @@ export function createDefaultSection(name: string): Section {
     id: crypto.randomUUID(),
     name,
     pageIndex: 0,
-    region: null,
+    zone: null,
     croppedImage: null,
     extractedText: null,
     status: "empty",
@@ -780,7 +780,7 @@ export const useDocumentStore = create<DocumentState>((set) => ({
 ```typescript
 // packages/web/src/stores/sectionStore.ts
 import { create } from "zustand";
-import type { Section, SectionRegion } from "@/types/section";
+import type { Section, SectionZone } from "@/types/section";
 import { createDefaultSection } from "@/types/section";
 
 interface SectionState {
@@ -793,7 +793,7 @@ interface SectionState {
   addSection: () => void;
   removeSection: (id: string) => void;
   renameSection: (id: string, name: string) => void;
-  updateSectionRegion: (id: string, pageIndex: number, region: SectionRegion) => void;
+  updateSectionZone: (id: string, pageIndex: number, zone: SectionZone) => void;
   updateSectionCroppedImage: (id: string, image: string) => void;
   updateSectionExtractedText: (id: string, text: string) => void;
   updateSectionStatus: (id: string, status: Section["status"], error?: string) => void;
@@ -844,15 +844,15 @@ export const useSectionStore = create<SectionState>((set, get) => ({
       ),
     })),
 
-  updateSectionRegion: (id, pageIndex, region) =>
+  updateSectionZone: (id, pageIndex, zone) =>
     set((state) => ({
       sections: state.sections.map((s) =>
         s.id === id
           ? {
               ...s,
               pageIndex,
-              region,
-              status: "region-defined" as const,
+              zone,
+              status: "zone-defined" as const,
               updatedAt: new Date().toISOString(),
             }
           : s
@@ -1012,8 +1012,8 @@ git commit -m "feat: add Zustand stores with section-based architecture"
     "rename": "Renombrar",
     "defaultName": "Sección",
     "status": {
-      "empty": "Sin región",
-      "regionDefined": "Región definida",
+      "empty": "Sin zona",
+      "zonedefined": "Zona definida",
       "processing": "Procesando...",
       "extracted": "Extraído",
       "error": "Error"
@@ -1023,7 +1023,7 @@ git commit -m "feat: add Zustand stores with section-based architecture"
   },
   "ocr": {
     "title": "Resultados OCR",
-    "empty": "Selecciona una región y extrae texto",
+    "empty": "Selecciona una zona y extrae texto",
     "processing": "Procesando...",
     "copy": "Copiar",
     "copied": "Copiado",
@@ -1093,8 +1093,8 @@ git commit -m "feat: add Zustand stores with section-based architecture"
     "rename": "Rename",
     "defaultName": "Section",
     "status": {
-      "empty": "No region",
-      "regionDefined": "Region defined",
+      "empty": "No zone",
+      "zonedefined": "Zone defined",
       "processing": "Processing...",
       "extracted": "Extracted",
       "error": "Error"
@@ -1104,7 +1104,7 @@ git commit -m "feat: add Zustand stores with section-based architecture"
   },
   "ocr": {
     "title": "OCR Results",
-    "empty": "Select a region and extract text",
+    "empty": "Select a zone and extract text",
     "processing": "Processing...",
     "copy": "Copy",
     "copied": "Copied",
@@ -1679,7 +1679,7 @@ git commit -m "feat: add document viewer with PDF/image rendering, zoom, navigat
 import { useCallback, useRef, useState } from "react";
 import { useSectionStore } from "@/stores/sectionStore";
 import { useDocumentStore } from "@/stores/documentStore";
-import type { SectionRegion } from "@/types/section";
+import type { SectionZone } from "@/types/section";
 
 export function useSection() {
   const {
@@ -1690,13 +1690,13 @@ export function useSection() {
     addSection,
     removeSection,
     renameSection,
-    updateSectionRegion,
+    updateSectionZone,
   } = useSectionStore();
   const { currentPage } = useDocumentStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
   const startPoint = useRef<{ x: number; y: number } | null>(null);
-  const [previewRect, setPreviewRect] = useState<SectionRegion | null>(null);
+  const [previewRect, setPreviewRect] = useState<SectionZone | null>(null);
 
   const activeSection = getActiveSection();
 
@@ -1734,13 +1734,13 @@ export function useSection() {
     if (!isDrawing || !previewRect || !activeSectionId) return;
 
     if (previewRect.width > 5 && previewRect.height > 5) {
-      updateSectionRegion(activeSectionId, currentPage, previewRect);
+      updateSectionZone(activeSectionId, currentPage, previewRect);
     }
 
     startPoint.current = null;
     setIsDrawing(false);
     setPreviewRect(null);
-  }, [isDrawing, previewRect, activeSectionId, currentPage, updateSectionRegion]);
+  }, [isDrawing, previewRect, activeSectionId, currentPage, updateSectionZone]);
 
   return {
     sections,
@@ -1781,7 +1781,7 @@ interface SectionItemProps {
 
 const statusColors: Record<Section["status"], string> = {
   empty: "text-muted-foreground",
-  "region-defined": "text-blue-500",
+  "zone-defined": "text-blue-500",
   processing: "text-yellow-500",
   extracted: "text-green-500",
   error: "text-destructive",
@@ -1991,10 +1991,10 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
   } = useSection();
   const { currentPage } = useDocumentStore();
 
-  const showRegion =
+  const showZone =
     activeSection &&
     activeSection.pageIndex === currentPage &&
-    activeSection.region;
+    activeSection.zone;
 
   return (
     <div
@@ -2005,14 +2005,14 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {showRegion && activeSection.region && (
+      {showZone && activeSection.zone && (
         <div
           className="absolute border-2 border-primary bg-primary/10 pointer-events-none"
           style={{
-            left: activeSection.region.x,
-            top: activeSection.region.y,
-            width: activeSection.region.width,
-            height: activeSection.region.height,
+            left: activeSection.zone.x,
+            top: activeSection.zone.y,
+            width: activeSection.zone.width,
+            height: activeSection.zone.height,
           }}
         />
       )}
@@ -2038,7 +2038,7 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
 
 ```bash
 git add .
-git commit -m "feat: add section panel with add, delete, rename, and region selection"
+git commit -m "feat: add section panel with add, delete, rename, and zone selection"
 ```
 
 ---
@@ -2106,7 +2106,7 @@ export function preprocessImage(
   return outputCanvas.toDataURL("image/png");
 }
 
-export function cropRegion(
+export function cropZone(
   sourceCanvas: HTMLCanvasElement,
   x: number,
   y: number,
@@ -2457,7 +2457,7 @@ import { useOCRStore } from "@/stores/ocrStore";
 import { useSectionStore } from "@/stores/sectionStore";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { preprocessImage, cropRegion } from "@/services/imageProcessing";
+import { preprocessImage, cropZone } from "@/services/imageProcessing";
 import { ocrExtract, saveExtraction } from "@/services/api";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -2512,19 +2512,19 @@ export function useOCR() {
     if (!settings.ocrEnabled || !settings.apiKey || !document) return;
 
     const section = getActiveSection();
-    if (!section || !section.region) return;
+    if (!section || !section.zone) return;
 
     updateSectionStatus(section.id, "processing");
     setProcessing(true);
 
     try {
       const sourceCanvas = await getSourceCanvas();
-      const cropped = cropRegion(
+      const cropped = cropZone(
         sourceCanvas,
-        section.region.x,
-        section.region.y,
-        section.region.width,
-        section.region.height
+        section.zone.x,
+        section.zone.y,
+        section.zone.width,
+        section.zone.height
       );
 
       const imageData = settings.preprocessingEnabled
@@ -2541,7 +2541,7 @@ export function useOCR() {
         documentName: document.name,
         sectionName: section.name,
         pageIndex: section.pageIndex,
-        zone: section.region,
+        zone: section.zone,
         extractedText: response.text,
         provider: response.provider,
       });
@@ -3290,11 +3290,11 @@ git commit -m "feat: add app layout, routing, and final integration"
 1. Start both servers: `npm run dev`
 2. Upload a PDF or image
 3. Verify "Sección 1" is created automatically
-4. Draw a region on the document
+4. Draw a zone on the document
 5. Configure API key in Settings
 6. Click "Extraer texto"
 7. Verify OCR result appears
-8. Add a new section, draw another region
+8. Add a new section, draw another zone
 9. Rename a section
 10. Delete a section
 11. Check History page shows the extraction

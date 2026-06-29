@@ -35,8 +35,8 @@ reutilizar componentes existentes y mantener una interfaz consistente.
 -   Visualizar documentos con navegación por páginas.
 -   Zoom, desplazamiento y ajuste al tamaño de la pantalla.
 -   Seleccionar zonas mediante un rectángulo interactivo.
--   Obtener el recorte exacto de la región seleccionada.
--   Ejecutar OCR sobre la región seleccionada.
+-   Obtener el recorte exacto de la zona seleccionada.
+-   Ejecutar OCR sobre la zona seleccionada.
 -   Mostrar el texto reconocido.
 -   Copiar o exportar los resultados.
 

@@ -16,7 +16,7 @@ interface SectionItemProps {
 
 const statusColors: Record<Section["status"], string> = {
   empty: "text-muted-foreground",
-  "region-defined": "text-blue-500",
+  "zone-defined": "text-blue-500",
   processing: "text-yellow-500",
   extracted: "text-green-500",
   error: "text-destructive",

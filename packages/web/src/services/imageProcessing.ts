@@ -52,7 +52,7 @@ export function preprocessImage(
   return outputCanvas.toDataURL("image/png");
 }
 
-export function cropRegion(
+export function cropZone(
   sourceCanvas: HTMLCanvasElement,
   x: number,
   y: number,

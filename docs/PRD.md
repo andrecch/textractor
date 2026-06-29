@@ -13,10 +13,10 @@ Extracto es una aplicación web profesional para la extracción inteligente de i
 
 ### 1.2 Problem Statement
 
-Los usuarios necesitan extraer texto de regiones específicas de documentos PDF e imágenes de manera precisa y eficiente. Las herramientas actuales no ofrecen una experiencia fluida para:
+Los usuarios necesitan extraer texto de zonas específicas de documentos PDF e imágenes de manera precisa y eficiente. Las herramientas actuales no ofrecen una experiencia fluida para:
 - Visualizar documentos con navegación intuitiva
 - Seleccionar zonas de interés de forma interactiva
-- Ejecutar OCR de calidad sobre regiones específicas
+- Ejecutar OCR de calidad sobre zonas específicas
 - Administrar múltiples extracciones de forma organizada
 
 ### 1.3 Target Users
@@ -34,12 +34,12 @@ Los usuarios necesitan extraer texto de regiones específicas de documentos PDF 
 
 1. **Experiencia de usuario fluida**: Interfaz intuitiva y responsiva
 2. **Precisión en extracción**: OCR de alta calidad mediante IA
-3. **Organización por secciones**: Sistema de secciones para múltiples regiones
+3. **Organización por secciones**: Sistema de secciones para múltiples zonas
 4. **Arquitectura escalable**: Preparada para futuros proveedores OCR
 
 ### 2.2 Success Metrics
 
-- Tiempo de extracción < 5 segundos por región
+- Tiempo de extracción < 5 segundos por zona
 - Precisión OCR > 95% en texto impreso
 - Cero pérdida de datos entre sesiones
 - Satisfacción del usuario > 4/5 en usabilidad
@@ -70,26 +70,26 @@ Los usuarios necesitan extraer texto de regiones específicas de documentos PDF 
 | FR-014 | Nombres secuenciales: Sección 1, Sección 2, etc. | P0 |
 | FR-015 | Solo una sección activa a la vez | P0 |
 | FR-016 | Eliminar secciones existentes | P0 |
-| FR-017 | Cada sección almacena: nombre, ID, región, coordenadas, imagen recortada, resultado OCR, estado | P0 |
+| FR-017 | Cada sección almacena: nombre, ID, zona, coordenadas, imagen recortada, resultado OCR, estado | P0 |
 | FR-018 | Secciones independientes entre sí | P0 |
-| FR-019 | Cambiar de sección conserva todas las regiones | P0 |
-| FR-020 | Al seleccionar sección, mostrar y permitir editar solo su región | P0 |
+| FR-019 | Cambiar de sección conserva todas las zonas | P0 |
+| FR-020 | Al seleccionar sección, mostrar y permitir editar solo su zona | P0 |
 
-### 3.3 Selección de Regiones
+### 3.3 Selección de Zonas
 
 | ID | Requisito | Prioridad |
 |----|-----------|-----------|
 | FR-030 | Dibujar rectángulo de selección sobre el documento | P0 |
-| FR-031 | La región se asocia a la sección activa | P0 |
-| FR-032 | Visualizar región de la sección activa sobre el documento | P0 |
-| FR-033 | Redimensionar región arrastrando bordes/esquinas | P1 |
-| FR-034 | Mover región arrastrando el interior | P1 |
+| FR-031 | La zona se asocia a la sección activa | P0 |
+| FR-032 | Visualizar zona de la sección activa sobre el documento | P0 |
+| FR-033 | Redimensionar zona arrastrando bordes/esquinas | P1 |
+| FR-034 | Mover zona arrastrando el interior | P1 |
 
 ### 3.4 OCR y Extracción
 
 | ID | Requisito | Prioridad |
 |----|-----------|-----------|
-| FR-040 | Ejecutar OCR sobre región de la sección activa | P0 |
+| FR-040 | Ejecutar OCR sobre la zona de la sección activa | P0 |
 | FR-041 | Mostrar texto reconocido en panel de resultados | P0 |
 | FR-042 | Copiar texto al portapapeles | P0 |
 | FR-043 | Exportar resultado como archivo .txt | P0 |
@@ -126,7 +126,7 @@ Los usuarios necesitan extraer texto de regiones específicas de documentos PDF 
 | ID | Requisito | Target |
 |----|-----------|--------|
 | NFR-001 | Tiempo de carga de documento | < 2s para PDFs de 10 páginas |
-| NFR-002 | Tiempo de respuesta OCR | < 5s por región |
+| NFR-002 | Tiempo de respuesta OCR | < 5s por zona |
 | NFR-003 | Fluidez de navegación | 60 FPS en zoom/pan |
 | NFR-004 | Tamaño de bundle | < 500KB gzipped |
 
@@ -214,7 +214,7 @@ Las siguientes funcionalidades NO están incluidas en el MVP pero la arquitectur
 
 | Feature | Descripción | Prioridad |
 |---------|-------------|-----------|
-| Duplicar secciones | Copiar región y configuración a nueva sección | P2 |
+| Duplicar secciones | Copiar zona y configuración a nueva sección | P2 |
 | Reordenar secciones | Drag & drop para cambiar orden | P2 |
 | Agrupar secciones | Categorías/folders para organizar | P3 |
 | Reglas de procesamiento | Asociar prompts personalizados por sección | P2 |
@@ -259,9 +259,9 @@ El MVP se considera completo cuando:
 - [ ] Se puede hacer zoom y desplazamiento
 - [ ] Al abrir documento, se crea "Sección 1" automáticamente
 - [ ] Se pueden crear, renombrar y eliminar secciones
-- [ ] Se puede dibujar una región en la sección activa
-- [ ] Cambiar de sección muestra su región correspondiente
-- [ ] Se puede ejecutar OCR sobre la región activa
+- [ ] Se puede dibujar una zona en la sección activa
+- [ ] Cambiar de sección muestra su zona correspondiente
+- [ ] Se puede ejecutar OCR sobre la zona activa
 - [ ] Se puede copiar y exportar el resultado
 - [ ] La configuración se guarda y persiste
 - [ ] Las extracciones se guardan en historial
@@ -275,8 +275,8 @@ El MVP se considera completo cuando:
 
 ### 11.1 Glossary
 
-- **Sección**: Unidad de extracción que contiene una región, su imagen recortada y el resultado OCR
-- **Región**: Área rectangular seleccionada sobre el documento
+- **Sección**: Unidad de extracción que contiene una zona, su imagen recortada y el resultado OCR
+- **Zona**: Área rectangular seleccionada sobre el documento
 - **OCR**: Optical Character Recognition - reconocimiento óptico de caracteres
 - **NVIDIA Build**: Plataforma de NVIDIA para acceder a modelos de IA vía API
 

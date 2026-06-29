@@ -42,8 +42,8 @@
     "rename": "Renombrar",
     "defaultName": "Seccion",
     "status": {
-      "empty": "Sin region",
-      "regiondefined": "Region definida",
+      "empty": "Sin zona",
+      "zonedefined": "Zona definida",
       "processing": "Procesando...",
       "extracted": "Extraido",
       "error": "Error"
@@ -53,7 +53,7 @@
   },
   "ocr": {
     "title": "Resultados OCR",
-    "empty": "Selecciona una region y extrae texto",
+    "empty": "Selecciona una zona y extrae texto",
     "processing": "Procesando...",
     "copy": "Copiar",
     "copied": "Copiado",
@@ -61,7 +61,7 @@
     "downloadRaw": "Descargar recorte (original)",
     "downloadProcessed": "Descargar recorte (procesado)",
     "cropPreview": "Vista previa del recorte",
-    "regionDefinedHint": "Region definida. Pulsa Extraer para ejecutar OCR.",
+    "zoneDefinedHint": "Zona definida. Pulsa Extraer para ejecutar OCR.",
     "error": "Error en el reconocimiento",
     "disabled": "OCR desactivado"
   },

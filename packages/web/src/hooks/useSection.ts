@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSectionStore } from "@/stores/sectionStore";
 import { useDocumentStore } from "@/stores/documentStore";
-import type { SectionRegion } from "@/types/section";
+import type { SectionZone } from "@/types/section";
 import { getSourceCanvas } from "@/services/canvasRenderer";
-import { cropRegion } from "@/services/imageProcessing";
+import { cropZone } from "@/services/imageProcessing";
 
 export function useSection() {
   const {
@@ -14,14 +14,14 @@ export function useSection() {
     addSection,
     removeSection,
     renameSection,
-    updateSectionRegion,
+    updateSectionZone,
     updateSectionCroppedImageRaw,
   } = useSectionStore();
   const { currentPage } = useDocumentStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
   const startPoint = useRef<{ x: number; y: number } | null>(null);
-  const [previewRect, setPreviewRect] = useState<SectionRegion | null>(null);
+  const [previewRect, setPreviewRect] = useState<SectionZone | null>(null);
 
   const activeSection = getActiveSection();
 
@@ -59,16 +59,16 @@ export function useSection() {
     if (!isDrawing || !previewRect || !activeSectionId) return;
 
     if (previewRect.width > 5 && previewRect.height > 5) {
-      updateSectionRegion(activeSectionId, currentPage, previewRect);
+      updateSectionZone(activeSectionId, currentPage, previewRect);
     }
 
     startPoint.current = null;
     setIsDrawing(false);
     setPreviewRect(null);
-  }, [isDrawing, previewRect, activeSectionId, currentPage, updateSectionRegion]);
+  }, [isDrawing, previewRect, activeSectionId, currentPage, updateSectionZone]);
 
   useEffect(() => {
-    if (!activeSection || !activeSection.region) return;
+    if (!activeSection || !activeSection.zone) return;
     if (activeSection.pageIndex !== currentPage) return;
 
     let cancelled = false;
@@ -76,8 +76,8 @@ export function useSection() {
       try {
         const sourceCanvas = await getSourceCanvas();
         if (cancelled) return;
-        const r = activeSection.region!;
-        const cropped = cropRegion(sourceCanvas, r.x, r.y, r.width, r.height);
+        const z = activeSection.zone!;
+        const cropped = cropZone(sourceCanvas, z.x, z.y, z.width, z.height);
         if (cancelled) return;
         const dataUrl = cropped.toDataURL("image/png");
         if (cancelled) return;

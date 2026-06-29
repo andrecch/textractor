@@ -42,8 +42,8 @@
     "rename": "Rename",
     "defaultName": "Section",
     "status": {
-      "empty": "No region",
-      "regiondefined": "Region defined",
+      "empty": "No zone",
+      "zonedefined": "Zone defined",
       "processing": "Processing...",
       "extracted": "Extracted",
       "error": "Error"
@@ -53,7 +53,7 @@
   },
   "ocr": {
     "title": "OCR Results",
-    "empty": "Select a region and extract text",
+    "empty": "Select a zone and extract text",
     "processing": "Processing...",
     "copy": "Copy",
     "copied": "Copied",
@@ -61,7 +61,7 @@
     "downloadRaw": "Download crop (original)",
     "downloadProcessed": "Download crop (processed)",
     "cropPreview": "Crop preview",
-    "regionDefinedHint": "Region defined. Press Extract to run OCR.",
+    "zoneDefinedHint": "Zone defined. Press Extract to run OCR.",
     "error": "Recognition error",
     "disabled": "OCR disabled"
   },

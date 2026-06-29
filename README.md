@@ -19,15 +19,15 @@
 
 ### About
 
-Textractor is a modern web application for **intelligently extracting text from specific regions of PDF documents and images** using AI-powered OCR.
+Textractor is a modern web application for **intelligently extracting text from specific zones of PDF documents and images** using AI-powered OCR.
 
-Open a file, draw a rectangle over the area of interest, and Textractor crops that region and runs OCR on it — keeping every extraction organized in **Sections**. The first implementation uses **Kimi 2.6 Vision** via **NVIDIA Build**, but the OCR layer is fully decoupled (`OCRProvider` / `OCRManager`) so new engines can be added without touching the UI.
+Open a file, draw a rectangle over the area of interest, and Textractor crops that zone and runs OCR on it — keeping every extraction organized in **Sections**. The first implementation uses **Kimi 2.6 Vision** via **NVIDIA Build**, but the OCR layer is fully decoupled (`OCRProvider` / `OCRManager`) so new engines can be added without touching the UI.
 
 ### Features
 
 - 📄 **Document viewer** for PDF and images (PNG, JPG, WEBP) with multi-page navigation
 - 🔍 **Zoom and pan** with smooth controls
-- ✂️ **Interactive region selection** with drag-to-draw rectangles
+- ✂️ **Interactive zone selection** with drag-to-draw rectangles
 - 🗂️ **Sections** to organize multiple extractions in the same document
 - 🤖 **OCR via AI** (Kimi 2.6 Vision · NVIDIA Build), with optional image preprocessing
 - 🌍 **Bilingual interface** (Spanish / English)
@@ -40,7 +40,7 @@ Open a file, draw a rectangle over the area of interest, and Textractor crops th
 
 | Viewer | History | Settings |
 | :---: | :---: | :---: |
-| _Screenshot: viewer with region selection and OCR result_ | _Screenshot: history panel_ | _Screenshot: settings page_ |
+| _Screenshot: viewer with zone selection and OCR result_ | _Screenshot: history panel_ | _Screenshot: settings page_ |
 
 ### Tech Stack
 
@@ -115,9 +115,9 @@ Vite automatically proxies `/api/*` requests to the backend.
 1. Open the app and **load a PDF or image** (file picker or drag & drop).
 2. The first **Section** is created automatically — type a name for it if you want.
 3. **Draw a rectangle** over the area you want to extract.
-4. Click **Extract** to run OCR on that region.
+4. Click **Extract** to run OCR on that zone.
 5. **Copy** the text or **export** it as `.txt`.
-6. Add more sections for other regions of the document.
+6. Add more sections for other zones of the document.
 7. Find every extraction later in the **History** page.
 
 ### Project Structure
@@ -142,15 +142,15 @@ For deeper details, see [`docs/PRD.md`](docs/PRD.md) and [`docs/ARCHITECTURE.md`
 
 ### Acerca de
 
-Textractor es una aplicación web moderna para **extraer texto de forma inteligente desde regiones específicas de documentos PDF e imágenes** usando OCR con IA.
+Textractor es una aplicación web moderna para **extraer texto de forma inteligente desde zonas específicas de documentos PDF e imágenes** usando OCR con IA.
 
-Abre un archivo, dibuja un rectángulo sobre la zona de interés y Textractor recorta esa región y ejecuta OCR sobre ella, manteniendo cada extracción organizada en **Secciones**. La primera implementación utiliza **Kimi 2.6 Vision** a través de **NVIDIA Build**, pero la capa de OCR está completamente desacoplada (`OCRProvider` / `OCRManager`), por lo que se pueden añadir nuevos motores sin tocar la interfaz.
+Abre un archivo, dibuja un rectángulo sobre la zona de interés y Textractor recorta esa zona y ejecuta OCR sobre ella, manteniendo cada extracción organizada en **Secciones**. La primera implementación utiliza **Kimi 2.6 Vision** a través de **NVIDIA Build**, pero la capa de OCR está completamente desacoplada (`OCRProvider` / `OCRManager`), por lo que se pueden añadir nuevos motores sin tocar la interfaz.
 
 ### Características
 
 - 📄 **Visor de documentos** PDF e imágenes (PNG, JPG, WEBP) con navegación multipágina
 - 🔍 **Zoom y desplazamiento** con controles fluidos
-- ✂️ **Selección interactiva de regiones** con rectángulos arrastrables
+- ✂️ **Selección interactiva de zonas** con rectángulos arrastrables
 - 🗂️ **Secciones** para organizar múltiples extracciones en el mismo documento
 - 🤖 **OCR con IA** (Kimi 2.6 Vision · NVIDIA Build), con preprocesamiento de imagen opcional
 - 🌍 **Interfaz bilingüe** (Español / Inglés)
@@ -163,7 +163,7 @@ Abre un archivo, dibuja un rectángulo sobre la zona de interés y Textractor re
 
 | Visor | Historial | Configuración |
 | :---: | :---: | :---: |
-| _Captura: visor con selección de región y resultado OCR_ | _Captura: panel de historial_ | _Captura: página de configuración_ |
+| _Captura: visor con selección de zona y resultado OCR_ | _Captura: panel de historial_ | _Captura: página de configuración_ |
 
 ### Stack Tecnológico
 
@@ -238,9 +238,9 @@ Vite redirige automáticamente las peticiones `/api/*` al backend.
 1. Abre la app y **carga un PDF o imagen** (selector de archivos o drag & drop).
 2. La primera **Sección** se crea automáticamente — cámbiale el nombre si lo deseas.
 3. **Dibuja un rectángulo** sobre la zona que quieres extraer.
-4. Pulsa **Extraer** para ejecutar OCR sobre esa región.
+4. Pulsa **Extraer** para ejecutar OCR sobre esa zona.
 5. **Copia** el texto o **expórtalo** como `.txt`.
-6. Agrega más secciones para otras regiones del documento.
+6. Agrega más secciones para otras zonas del documento.
 7. Encuentra todas las extracciones después en la página de **Historial**.
 
 ### Estructura del proyecto

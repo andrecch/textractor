@@ -3,7 +3,7 @@ import { useOCRStore } from "@/stores/ocrStore";
 import { useSectionStore } from "@/stores/sectionStore";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { preprocessImage, cropRegion } from "@/services/imageProcessing";
+import { preprocessImage, cropZone } from "@/services/imageProcessing";
 import { getSourceCanvas } from "@/services/canvasRenderer";
 import { ocrExtract, saveExtraction } from "@/services/api";
 
@@ -19,19 +19,19 @@ export function useOCR() {
     if (!settings.ocrEnabled || !doc) return;
 
     const section = getActiveSection();
-    if (!section || !section.region) return;
+    if (!section || !section.zone) return;
 
     updateSectionStatus(section.id, "processing");
     setProcessing(true);
 
     try {
       const sourceCanvas = await getSourceCanvas();
-      const cropped = cropRegion(
+      const cropped = cropZone(
         sourceCanvas,
-        section.region.x,
-        section.region.y,
-        section.region.width,
-        section.region.height
+        section.zone.x,
+        section.zone.y,
+        section.zone.width,
+        section.zone.height
       );
 
       const imageData = settings.preprocessingEnabled
@@ -48,7 +48,7 @@ export function useOCR() {
         documentName: doc.name,
         sectionName: section.name,
         pageIndex: section.pageIndex,
-        zone: section.region,
+        zone: section.zone,
         extractedText: response.text,
         provider: response.provider,
       });

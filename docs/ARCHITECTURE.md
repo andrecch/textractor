@@ -172,9 +172,9 @@ The **Section** is the core abstraction of Extracto. Every extraction lives with
 interface Section {
   id: string;                    // Unique identifier
   name: string;                  // User-defined name (e.g., "Sección 1")
-  pageIndex: number;             // Document page where region is located
-  region: SectionRegion | null;  // Coordinates of the selected area
-  croppedImage: string | null;   // Base64 of the cropped region
+  pageIndex: number;             // Document page where zone is located
+  zone: SectionZone | null;      // Coordinates of the selected area
+  croppedImage: string | null;   // Base64 of the cropped zone
   extractedText: string | null;  // OCR result
   status: SectionStatus;         // Lifecycle state
   errorMessage: string | null;   // Error details if status is "error"
@@ -183,13 +183,13 @@ interface Section {
 }
 
 type SectionStatus = 
-  | "empty"           // No region defined
-  | "region-defined"  // Region drawn, ready for OCR
+  | "empty"           // No zone defined
+  | "zone-defined"    // Zone drawn, ready for OCR
   | "processing"      // OCR in progress
   | "extracted"       // OCR completed successfully
   | "error";          // OCR failed
 
-interface SectionRegion {
+interface SectionZone {
   x: number;
   y: number;
   width: number;
@@ -200,8 +200,8 @@ interface SectionRegion {
 **Key behaviors:**
 - On document load, "Sección 1" is created automatically
 - Only one section can be active at a time
-- Each section's region is independent and persists across navigation
-- Switching sections shows only that section's region on the viewer
+- Each section's zone is independent and persists across navigation
+- Switching sections shows only that section's zone on the viewer
 
 ### 3.2 OCR Architecture
 
@@ -237,7 +237,7 @@ The OCR system follows the **Strategy Pattern** for extensibility:
 ```
 
 **Flow:**
-1. Frontend crops region from canvas
+1. Frontend crops zone from canvas
 2. Optional preprocessing applied (grayscale, contrast, etc.)
 3. Image sent to backend via `/api/ocr/extract`
 4. Backend proxies to NVIDIA Build API
@@ -261,7 +261,7 @@ Zustand stores are organized by domain:
 │ setDocument()    │ addSection()     │ setProc()  │ update()     │
 │ setPage()        │ removeSection()  │            │ reset()      │
 │ setZoom()        │ renameSection()  │            │              │
-│ zoomIn/Out()     │ updateRegion()   │            │              │
+│ zoomIn/Out()     │ updateZone()     │            │              │
 │ clearDocument()  │ updateText()     │            │              │
 │                  │ setActive()      │            │              │
 │                  │ initialize()     │            │              │
@@ -295,7 +295,7 @@ User drops file
                                          └─────────────────┘
 ```
 
-### 4.2 Region Selection Flow
+### 4.2 Zone Selection Flow
 
 ```
 User draws rectangle on viewer
@@ -303,7 +303,7 @@ User draws rectangle on viewer
       ▼
 ┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
 │ SectionOverlay  │────▶│ useSection   │────▶│ sectionStore    │
-│ onMouseUp       │     │ hook         │     │ .updateRegion() │
+│ onMouseUp       │     │ hook         │     │ .updateZone()   │
 └─────────────────┘     └──────────────┘     └─────────────────┘
                                                       │
                                                       ▼
@@ -311,7 +311,7 @@ User draws rectangle on viewer
                                               │ Section state │
                                               │ updated:      │
                                               │ - pageIndex   │
-                                              │ - region      │
+                                              │ - zone        │
                                               │ - status      │
                                               └───────────────┘
 ```
@@ -329,7 +329,7 @@ User clicks "Extract"
                            │                        │
                            │                        ▼
                     ┌──────┴───────┐     ┌───────────────────┐
-                    │ sectionStore │     │ cropRegion()      │
+                     │ sectionStore │     │ cropZone()        │
                     │ .getStatus() │     │ + preprocessImage │
                     └──────────────┘     └─────────┬─────────┘
                                                    │
@@ -447,7 +447,7 @@ App
             │       │   ├── PageNavigation
             │       │   ├── ZoomControls
             │       │   ├── PDFPageRenderer | ImageRenderer
-            │       │   └── SectionOverlay (region drawing)
+            │       │   └── SectionOverlay (zone drawing)
             │       └── OCRResultPanel (right sidebar)
             │
             ├── HistoryPage
@@ -467,7 +467,7 @@ App
 | `ImageRenderer` | Render image with zoom | - |
 | `SectionPanel` | List sections, add/remove | `useSection`, `useOCR` |
 | `SectionItem` | Display section, edit name | - |
-| `SectionOverlay` | Draw region on document | `useSection` |
+| `SectionOverlay` | Draw zone on document | `useSection` |
 | `OCRResultPanel` | Show OCR result, copy/export | `sectionStore`, `ocrStore` |
 | `SettingsPanel` | Configure app settings | `settingsStore` |
 | `HistoryPanel` | List past extractions | API client |
@@ -504,7 +504,7 @@ Key points:
 - File type validation (PDF, PNG, JPG, WEBP only)
 - Image size limits (50MB max via Express body parser)
 - API key format validation
-- Region coordinates bounds checking
+- Zone coordinates bounds checking
 
 ---
 
@@ -548,7 +548,7 @@ Key points:
 ### 10.3 E2E Tests (Future)
 
 - Complete user flows with Playwright
-- File upload → region selection → extraction → history
+- File upload → zone selection → extraction → history
 
 ---
 
@@ -626,7 +626,7 @@ The section model is designed for extension:
 | SQLite | Embedded, no infra | PostgreSQL, MongoDB |
 | Express | Mature, large ecosystem | Fastify, Hono, Koa |
 | Tailwind v4 | Latest features, CSS-first | Styled-components, CSS modules |
-| Sections as core | Organized multi-region extraction | Flat zone list, no grouping |
+| Sections as core | Organized multi-zone extraction | Flat zone list, no grouping |
 
 ---
 
@@ -634,8 +634,8 @@ The section model is designed for extension:
 
 | Term | Definition |
 |------|------------|
-| Section | Core abstraction containing a region, its crop, and OCR result |
-| Region | Rectangular area selected on the document |
+| Section | Core abstraction containing a zone, its crop, and OCR result |
+| Zone | Rectangular area selected on the document |
 | OCR | Optical Character Recognition |
 | NVIDIA Build | NVIDIA's platform for accessing AI models via API |
 | Kimi 2.6 Vision | Vision model used for OCR |

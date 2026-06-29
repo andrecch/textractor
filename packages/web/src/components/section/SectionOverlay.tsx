@@ -18,10 +18,10 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
   } = useSection();
   const { currentPage } = useDocumentStore();
 
-  const showRegion =
+  const showZone =
     activeSection &&
     activeSection.pageIndex === currentPage &&
-    activeSection.region;
+    activeSection.zone;
 
   return (
     <div
@@ -32,14 +32,14 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {showRegion && activeSection.region && (
+      {showZone && activeSection.zone && (
         <div
           className="absolute border-2 border-primary bg-primary/10 pointer-events-none"
           style={{
-            left: activeSection.region.x,
-            top: activeSection.region.y,
-            width: activeSection.region.width,
-            height: activeSection.region.height,
+            left: activeSection.zone.x,
+            top: activeSection.zone.y,
+            width: activeSection.zone.width,
+            height: activeSection.zone.height,
           }}
         />
       )}

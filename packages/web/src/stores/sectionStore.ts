@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Section, SectionRegion } from "@/types/section";
+import type { Section, SectionZone } from "@/types/section";
 import { createDefaultSection } from "@/types/section";
 
 interface SectionState {
@@ -12,7 +12,7 @@ interface SectionState {
   addSection: () => void;
   removeSection: (id: string) => void;
   renameSection: (id: string, name: string) => void;
-  updateSectionRegion: (id: string, pageIndex: number, region: SectionRegion) => void;
+  updateSectionZone: (id: string, pageIndex: number, zone: SectionZone) => void;
   updateSectionCroppedImageRaw: (id: string, image: string) => void;
   updateSectionCroppedImageProcessed: (id: string, image: string) => void;
   updateSectionExtractedText: (id: string, text: string) => void;
@@ -64,15 +64,15 @@ export const useSectionStore = create<SectionState>((set, get) => ({
       ),
     })),
 
-  updateSectionRegion: (id, pageIndex, region) =>
+  updateSectionZone: (id, pageIndex, zone) =>
     set((state) => ({
       sections: state.sections.map((s) =>
         s.id === id
           ? {
               ...s,
               pageIndex,
-              region,
-              status: "region-defined" as const,
+              zone,
+              status: "zone-defined" as const,
               updatedAt: new Date().toISOString(),
             }
           : s

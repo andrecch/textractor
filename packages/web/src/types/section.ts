@@ -1,17 +1,17 @@
-export interface SectionRegion {
+export interface SectionZone {
   x: number;
   y: number;
   width: number;
   height: number;
 }
 
-export type SectionStatus = "empty" | "region-defined" | "processing" | "extracted" | "error";
+export type SectionStatus = "empty" | "zone-defined" | "processing" | "extracted" | "error";
 
 export interface Section {
   id: string;
   name: string;
   pageIndex: number;
-  region: SectionRegion | null;
+  zone: SectionZone | null;
   croppedImageRaw: string | null;
   croppedImageProcessed: string | null;
   extractedText: string | null;
@@ -27,7 +27,7 @@ export function createDefaultSection(name: string): Section {
     id: crypto.randomUUID(),
     name,
     pageIndex: 0,
-    region: null,
+    zone: null,
     croppedImageRaw: null,
     croppedImageProcessed: null,
     extractedText: null,

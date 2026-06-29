@@ -146,7 +146,7 @@ export function OCRResultPanel() {
             </div>
             <div className="flex-1 flex items-center justify-center p-4">
               <p className="text-sm text-muted-foreground text-center">
-                {t("ocr.regionDefinedHint")}
+                {t("ocr.zoneDefinedHint")}
               </p>
             </div>
           </div>
