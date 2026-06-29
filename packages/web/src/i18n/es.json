@@ -24,7 +24,11 @@
     "dropzone": "Arrastra un archivo PDF o imagen aqui",
     "or": "o",
     "browse": "Seleccionar archivo",
-    "accepted": "PDF, PNG, JPG, WEBP"
+    "accepted": "PDF, PNG, JPG, WEBP",
+    "error": {
+      "unsupported": "No se pudo cargar \"{{name}}\". Formatos admitidos: PDF, PNG, JPG, WEBP.",
+      "loadFailed": "No se pudo cargar \"{{name}}\". Verifica que el archivo no este danado."
+    }
   },
   "viewer": {
     "page": "Pagina",

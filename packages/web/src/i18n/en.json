@@ -24,7 +24,11 @@
     "dropzone": "Drop a PDF or image file here",
     "or": "or",
     "browse": "Browse files",
-    "accepted": "PDF, PNG, JPG, WEBP"
+    "accepted": "PDF, PNG, JPG, WEBP",
+    "error": {
+      "unsupported": "Could not load \"{{name}}\". Supported formats: PDF, PNG, JPG, WEBP.",
+      "loadFailed": "Could not load \"{{name}}\". Check that the file is not corrupted."
+    }
   },
   "viewer": {
     "page": "Page",

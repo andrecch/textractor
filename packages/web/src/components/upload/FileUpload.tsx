@@ -2,7 +2,7 @@ import { useCallback, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDocument } from "@/hooks/useDocument";
+import { useDocument, UnsupportedFileError } from "@/hooks/useDocument";
 
 export function FileUpload() {
   const { t } = useTranslation();
@@ -14,11 +14,15 @@ export function FileUpload() {
     async (file: File) => {
       try {
         await loadDocument(file);
-      } catch {
-        alert("Unsupported file type. Please use PDF, PNG, JPG, or WEBP.");
+      } catch (err) {
+        if (err instanceof UnsupportedFileError) {
+          alert(t("upload.error.unsupported", { name: file.name }));
+        } else {
+          alert(t("upload.error.loadFailed", { name: file.name }));
+        }
       }
     },
-    [loadDocument]
+    [loadDocument, t]
   );
 
   const handleDrop = useCallback(
