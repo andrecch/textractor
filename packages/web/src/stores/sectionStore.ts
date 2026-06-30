@@ -9,7 +9,7 @@ interface SectionState {
 
   getActiveSection: () => Section | null;
   setActiveSection: (id: string) => void;
-  addSection: () => void;
+  addSection: (documentName: string) => void;
   removeSection: (id: string) => void;
   renameSection: (id: string, name: string) => void;
   updateSectionZone: (id: string, pageIndex: number, zone: SectionZone) => void;
@@ -18,7 +18,7 @@ interface SectionState {
   updateSectionExtractedText: (id: string, text: string) => void;
   updateSectionStatus: (id: string, status: Section["status"], error?: string) => void;
   clearSections: () => void;
-  initializeForNewDocument: () => void;
+  initializeForNewDocument: (documentName: string) => void;
 }
 
 export const useSectionStore = create<SectionState>((set, get) => ({
@@ -33,10 +33,10 @@ export const useSectionStore = create<SectionState>((set, get) => ({
 
   setActiveSection: (id) => set({ activeSectionId: id }),
 
-  addSection: () =>
+  addSection: (documentName) =>
     set((state) => {
       const newCounter = state.sectionCounter + 1;
-      const newSection = createDefaultSection(`Seccion ${newCounter}`);
+      const newSection = createDefaultSection(`Seccion ${newCounter}`, documentName);
       return {
         sections: [...state.sections, newSection],
         activeSectionId: newSection.id,
@@ -131,8 +131,8 @@ export const useSectionStore = create<SectionState>((set, get) => ({
 
   clearSections: () => set({ sections: [], activeSectionId: null, sectionCounter: 0 }),
 
-  initializeForNewDocument: () => {
-    const firstSection = createDefaultSection("Seccion 1");
+  initializeForNewDocument: (documentName) => {
+    const firstSection = createDefaultSection("Seccion 1", documentName);
     set({
       sections: [firstSection],
       activeSectionId: firstSection.id,

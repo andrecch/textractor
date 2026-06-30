@@ -11,19 +11,24 @@ export function useSection() {
     activeSectionId,
     getActiveSection,
     setActiveSection,
-    addSection,
+    addSection: addSectionRaw,
     removeSection,
     renameSection,
     updateSectionZone,
     updateSectionCroppedImageRaw,
   } = useSectionStore();
-  const { currentPage } = useDocumentStore();
+  const { currentPage, document } = useDocumentStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
   const startPoint = useRef<{ x: number; y: number } | null>(null);
   const [previewRect, setPreviewRect] = useState<SectionZone | null>(null);
 
   const activeSection = getActiveSection();
+
+  const addSection = useCallback(() => {
+    if (!document) return;
+    addSectionRaw(document.name);
+  }, [document, addSectionRaw]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {

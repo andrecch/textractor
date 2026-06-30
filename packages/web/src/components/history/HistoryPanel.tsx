@@ -61,8 +61,8 @@ export function HistoryPanel() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-3xl mx-auto p-8 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <h1 className="text-2xl font-bold">{t("history.title")}</h1>
         {records.length > 0 && (
           <Button variant="outline" size="sm" onClick={handleClear}>
@@ -77,7 +77,7 @@ export function HistoryPanel() {
           {t("history.empty")}
         </p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pr-2">
           {records.map((record) => (
             <div
               key={record.id}

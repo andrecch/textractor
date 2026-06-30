@@ -23,9 +23,13 @@ export function OCRResultPanel() {
   const activeSection = getActiveSection();
 
   const buildImageFileName = (suffix: string) => {
-    const baseName = activeSection?.name ?? "section";
-    const page = (activeSection?.pageIndex ?? 0) + 1;
-    return `textractor-${sanitizeFileName(baseName)}-p${page}-${suffix}.png`;
+    const zoneName = sanitizeFileName(activeSection?.name ?? "section");
+    const docNameRaw = activeSection?.documentName ?? "document";
+    const docNameNoExt = docNameRaw.replace(/\.[^.]+$/, "");
+    const docNameTrunc = docNameNoExt.length > 20 ? docNameNoExt.slice(0, 20) : docNameNoExt;
+    const docName = sanitizeFileName(docNameTrunc);
+    const suffixPart = suffix ? `_${suffix}` : "";
+    return `txtor_${zoneName}_${docName}${suffixPart}.png`;
   };
 
   const handleCopy = async () => {
@@ -55,7 +59,7 @@ export function OCRResultPanel() {
     if (!activeSection?.croppedImageProcessed) return;
     downloadPng(
       activeSection.croppedImageProcessed,
-      buildImageFileName("processed")
+      buildImageFileName("proc")
     );
   };
 

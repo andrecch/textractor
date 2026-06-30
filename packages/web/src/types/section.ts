@@ -10,6 +10,7 @@ export type SectionStatus = "empty" | "zone-defined" | "processing" | "extracted
 export interface Section {
   id: string;
   name: string;
+  documentName: string;
   pageIndex: number;
   zone: SectionZone | null;
   croppedImageRaw: string | null;
@@ -21,11 +22,12 @@ export interface Section {
   updatedAt: string;
 }
 
-export function createDefaultSection(name: string): Section {
+export function createDefaultSection(name: string, documentName: string): Section {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),
     name,
+    documentName,
     pageIndex: 0,
     zone: null,
     croppedImageRaw: null,

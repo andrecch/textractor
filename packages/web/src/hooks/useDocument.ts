@@ -75,7 +75,7 @@ export function useDocument() {
       };
 
       setDocument(doc);
-      initializeForNewDocument();
+      initializeForNewDocument(doc.name);
     },
     [setDocument, initializeForNewDocument]
   );
