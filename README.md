@@ -4,12 +4,12 @@
 
 **Extracción inteligente de texto desde PDF e imágenes mediante OCR con IA**
 
-[![ES](https://img.shields.io/badge/Leer%20en-Español-red?style=for-the-badge)](#espa%C3%B1ol)
+[![ES](https://img.shields.io/badge/Leer%20en-Español-red?style=for-the-badge)](#espanol)
 [![EN](https://img.shields.io/badge/Read%20in-English-blue?style=for-the-badge)](#english)
 
 </div>
 
-> **Idiomas disponibles:** [English](#english) · [Español](#espa%C3%B1ol)
+> **Idiomas disponibles:** [English](#english) · [Español](#espanol)
 
 ---
 
@@ -136,7 +136,7 @@ For deeper details, see [`docs/PRD.md`](docs/PRD.md) and [`docs/ARCHITECTURE.md`
 
 ---
 
-<a id="espa%C3%B1ol"></a>
+<a id="espanol"></a>
 
 ## 🇪🇸 Español
 
