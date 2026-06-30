@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Trash2, Pencil, Check, X, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,13 @@ export function SectionItem({
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(section.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.select();
+    }
+  }, [isEditing]);
 
   const handleSaveRename = () => {
     if (editName.trim()) {
@@ -65,6 +72,7 @@ export function SectionItem({
       {isEditing ? (
         <div className="flex-1 flex items-center gap-1">
           <Input
+            ref={inputRef}
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
             onKeyDown={handleKeyDown}
