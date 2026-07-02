@@ -23,7 +23,7 @@ function WelcomeIllustration() {
 
       <rect x="40" y="50" width="50" height="35" rx="2" stroke="currentColor" strokeWidth="2" className="text-primary" fill="none" strokeDasharray="4 3" />
 
-      <path d="M95 67 C110 67, 115 67, 130 67" stroke="currentColor" strokeWidth="1.5" className="text-primary" strokeLinecap="round" markerEnd="url(#arrowhead)" />
+      <path d="M95 67 C110 67, 120 67, 135 67" stroke="currentColor" strokeWidth="1.5" className="text-primary" strokeLinecap="round" markerEnd="url(#arrowhead)" />
       <defs>
         <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
           <path d="M0 0 L8 3 L0 6 Z" className="fill-primary" />
@@ -37,8 +37,8 @@ function WelcomeIllustration() {
       <line x1="145" y1="88" x2="178" y2="88" stroke="currentColor" strokeWidth="1.5" className="text-primary/70" strokeLinecap="round" />
       <line x1="145" y1="100" x2="183" y2="100" stroke="currentColor" strokeWidth="1.5" className="text-primary" strokeLinecap="round" />
 
-      <circle cx="112" cy="67" r="10" className="fill-primary/10 stroke-primary" strokeWidth="1.5" />
-      <path d="M108 67 L111 70 L117 64" stroke="currentColor" strokeWidth="1.5" className="text-primary" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="118" cy="12" r="10" className="fill-primary/10 stroke-primary" strokeWidth="1.5" />
+      <path d="M114 12 L117 15 L123 9" stroke="currentColor" strokeWidth="1.5" className="text-primary" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
