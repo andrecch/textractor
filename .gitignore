@@ -6,3 +6,4 @@ dist
 *.db-wal
 *.tsbuildinfo
 .DS_Store
+opencode.json
