@@ -12,24 +12,24 @@ import {
   Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useAreaStore } from "@/stores/areaStore";
 import { useOCRStore } from "@/stores/ocrStore";
 import { useOCR } from "@/hooks/useOCR";
 import { downloadPng, sanitizeFileName } from "@/services/imageExport";
 
 export function OCRResultPanel() {
   const { t } = useTranslation();
-  const { getActiveSection, activeSectionId } = useSectionStore();
+  const { getActiveArea, activeAreaId } = useAreaStore();
   const { isProcessing } = useOCRStore();
   const { extractActive } = useOCR();
   const [copied, setCopied] = useState(false);
   const [showProcessed, setShowProcessed] = useState(false);
 
-  const activeSection = getActiveSection();
+  const activeArea = getActiveArea();
 
   const buildImageFileName = (suffix: string) => {
-    const zoneName = sanitizeFileName(activeSection?.name ?? "section");
-    const docNameRaw = activeSection?.documentName ?? "document";
+    const zoneName = sanitizeFileName(activeArea?.name ?? "area");
+    const docNameRaw = activeArea?.documentName ?? "document";
     const docNameNoExt = docNameRaw.replace(/\.[^.]+$/, "");
     const docNameTrunc = docNameNoExt.length > 20 ? docNameNoExt.slice(0, 20) : docNameNoExt;
     const docName = sanitizeFileName(docNameTrunc);
@@ -38,43 +38,43 @@ export function OCRResultPanel() {
   };
 
   const handleCopy = async () => {
-    if (!activeSection?.extractedText) return;
-    await navigator.clipboard.writeText(activeSection.extractedText);
+    if (!activeArea?.extractedText) return;
+    await navigator.clipboard.writeText(activeArea.extractedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleExportTxt = () => {
-    if (!activeSection?.extractedText) return;
-    const blob = new Blob([activeSection.extractedText], { type: "text/plain" });
+    if (!activeArea?.extractedText) return;
+    const blob = new Blob([activeArea.extractedText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `textractor-${activeSection.name}.txt`;
+    a.download = `textractor-${activeArea.name}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const handleDownloadRaw = () => {
-    if (!activeSection?.croppedImageRaw) return;
-    downloadPng(activeSection.croppedImageRaw, buildImageFileName("raw"));
+    if (!activeArea?.croppedImageRaw) return;
+    downloadPng(activeArea.croppedImageRaw, buildImageFileName("raw"));
   };
 
   const handleDownloadProcessed = () => {
-    if (!activeSection?.croppedImageProcessed) return;
+    if (!activeArea?.croppedImageProcessed) return;
     downloadPng(
-      activeSection.croppedImageProcessed,
+      activeArea.croppedImageProcessed,
       buildImageFileName("proc")
     );
   };
 
-  const hasCroppedRaw = !!activeSection?.croppedImageRaw;
-  const hasCroppedProcessed = !!activeSection?.croppedImageProcessed;
-  const hasText = !!activeSection?.extractedText;
+  const hasCroppedRaw = !!activeArea?.croppedImageRaw;
+  const hasCroppedProcessed = !!activeArea?.croppedImageProcessed;
+  const hasText = !!activeArea?.extractedText;
 
   const currentImageSrc = showProcessed
-    ? activeSection?.croppedImageProcessed
-    : activeSection?.croppedImageRaw;
+    ? activeArea?.croppedImageProcessed
+    : activeArea?.croppedImageRaw;
   const hasCurrentImage = showProcessed ? hasCroppedProcessed : hasCroppedRaw;
 
   return (
@@ -139,7 +139,7 @@ export function OCRResultPanel() {
               size="icon"
               className="h-7 w-7"
               onClick={extractActive}
-              disabled={isProcessing || !activeSectionId || !activeSection?.zone}
+              disabled={isProcessing || !activeAreaId || !activeArea?.zone}
               title={t("ocr.extract")}
             >
               <Play className="h-4 w-4" />
@@ -178,11 +178,11 @@ export function OCRResultPanel() {
                 {t("ocr.processing")}
               </div>
             </div>
-          ) : activeSection?.status === "error" ? (
+          ) : activeArea?.status === "error" ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex items-center gap-2 text-destructive">
                 <AlertCircle className="h-4 w-4" />
-                {t("ocr.error")}: {activeSection.errorMessage}
+                {t("ocr.error")}: {activeArea.errorMessage}
               </div>
             </div>
           ) : !hasText ? (
@@ -193,7 +193,7 @@ export function OCRResultPanel() {
             </div>
           ) : (
             <pre className="whitespace-pre-wrap text-sm">
-              {activeSection.extractedText}
+              {activeArea.extractedText}
             </pre>
           )}
         </div>

@@ -1,7 +1,7 @@
 import { useDocumentStore } from "@/stores/documentStore";
 import { WelcomeScreen } from "@/components/upload/WelcomeScreen";
 import { DocumentViewer } from "@/components/document/DocumentViewer";
-import { SectionPanel } from "@/components/section/SectionPanel";
+import { AreaPanel } from "@/components/area/AreaPanel";
 import { OCRResultPanel } from "@/components/ocr/OCRResultPanel";
 import { Separator } from "@/components/ui/separator";
 
@@ -14,7 +14,7 @@ export function ViewerPage() {
 
   return (
     <div className="flex h-full">
-      <SectionPanel />
+      <AreaPanel />
       <div className="flex-1 overflow-hidden">
         <DocumentViewer />
       </div>

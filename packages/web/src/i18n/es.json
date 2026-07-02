@@ -38,13 +38,13 @@
     "fitToScreen": "Ajustar",
     "noDocument": "No hay documento abierto"
   },
-  "section": {
-    "title": "Secciones",
-    "empty": "No hay secciones",
-    "add": "Agregar seccion",
+  "area": {
+    "title": "Delimitar Area",
+    "empty": "No hay areas",
+    "add": "Agregar area",
     "delete": "Eliminar",
     "rename": "Renombrar",
-    "defaultName": "Seccion",
+    "defaultName": "Area",
     "status": {
       "empty": "Sin zona",
       "zonedefined": "Zona definida",
@@ -93,7 +93,7 @@
     "title": "Historial de extracciones",
     "empty": "No hay extracciones previas",
     "document": "Documento",
-    "section": "Seccion",
+    "area": "Area",
     "page": "Pagina",
     "date": "Fecha",
     "provider": "Proveedor",

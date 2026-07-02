@@ -55,7 +55,7 @@ export async function getHistory(): Promise<unknown[]> {
 
 export async function saveExtraction(data: {
   documentName: string;
-  sectionName: string;
+  areaName: string;
   pageIndex: number;
   zone: { x: number; y: number; width: number; height: number };
   extractedText: string;

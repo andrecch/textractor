@@ -38,13 +38,13 @@
     "fitToScreen": "Fit to screen",
     "noDocument": "No document open"
   },
-  "section": {
-    "title": "Sections",
-    "empty": "No sections",
-    "add": "Add section",
+  "area": {
+    "title": "Delimit Area",
+    "empty": "No areas",
+    "add": "Add area",
     "delete": "Delete",
     "rename": "Rename",
-    "defaultName": "Section",
+    "defaultName": "Area",
     "status": {
       "empty": "No zone",
       "zonedefined": "Zone defined",
@@ -93,7 +93,7 @@
     "title": "Extraction history",
     "empty": "No previous extractions",
     "document": "Document",
-    "section": "Section",
+    "area": "Area",
     "page": "Page",
     "date": "Date",
     "provider": "Provider",

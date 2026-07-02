@@ -1,9 +1,9 @@
-import { useSection } from "@/hooks/useSection";
+import { useArea } from "@/hooks/useArea";
 import { useDocumentStore } from "@/stores/documentStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useAreaStore } from "@/stores/areaStore";
 import { cn } from "@/lib/utils";
 
-interface SectionOverlayProps {
+interface AreaOverlayProps {
   width: number;
   height: number;
 }
@@ -21,23 +21,23 @@ function getZoneColor(index: number) {
   return ZONE_COLORS[index % ZONE_COLORS.length]!;
 }
 
-export function SectionOverlay({ width, height }: SectionOverlayProps) {
+export function AreaOverlay({ width, height }: AreaOverlayProps) {
   const {
-    activeSection,
+    activeArea,
     isDrawing,
     previewRect,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-  } = useSection();
+  } = useArea();
   const { currentPage } = useDocumentStore();
-  const { sections } = useSectionStore();
+  const { areas } = useAreaStore();
 
-  const visibleZones = sections
-    .map((section, index) => ({ section, index }))
-    .filter(({ section }) => section.zone && section.pageIndex === currentPage);
+  const visibleZones = areas
+    .map((area, index) => ({ area, index }))
+    .filter(({ area }) => area.zone && area.pageIndex === currentPage);
 
-  const previewColor = getZoneColor(sections.length);
+  const previewColor = getZoneColor(areas.length);
 
   return (
     <div
@@ -48,15 +48,15 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      {visibleZones.map(({ section, index }) => {
+      {visibleZones.map(({ area, index }) => {
         const color = getZoneColor(index);
-        const isActive = section.id === activeSection?.id;
+        const isActive = area.id === activeArea?.id;
         const borderWidth = isActive ? "border-3" : "border-2";
         const shadow = isActive ? "shadow-sm" : "";
 
         return (
           <div
-            key={section.id}
+            key={area.id}
             className={cn(
               "absolute pointer-events-none",
               borderWidth,
@@ -65,10 +65,10 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
               shadow
             )}
             style={{
-              left: section.zone!.x,
-              top: section.zone!.y,
-              width: section.zone!.width,
-              height: section.zone!.height,
+              left: area.zone!.x,
+              top: area.zone!.y,
+              width: area.zone!.width,
+              height: area.zone!.height,
             }}
           >
             <span
@@ -77,7 +77,7 @@ export function SectionOverlay({ width, height }: SectionOverlayProps) {
                 color.label
               )}
             >
-              {section.name}
+              {area.name}
             </span>
           </div>
         );

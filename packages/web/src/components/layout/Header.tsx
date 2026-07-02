@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FileText, History, Settings, FilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDocumentStore } from "@/stores/documentStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useAreaStore } from "@/stores/areaStore";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
@@ -12,7 +12,7 @@ export function Header() {
   const navigate = useNavigate();
   const document = useDocumentStore((state) => state.document);
   const clearDocument = useDocumentStore((state) => state.clearDocument);
-  const clearSections = useSectionStore((state) => state.clearSections);
+  const clearAreas = useAreaStore((state) => state.clearAreas);
 
   const links = [
     { to: "/", icon: FileText, label: t("nav.viewer") },
@@ -22,7 +22,7 @@ export function Header() {
 
   const handleNewDocument = () => {
     clearDocument();
-    clearSections();
+    clearAreas();
     navigate("/");
   };
 

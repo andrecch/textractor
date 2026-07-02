@@ -12,7 +12,7 @@ export interface OCROptions {
 export interface ExtractionRecord {
   id: string;
   documentName: string;
-  sectionName: string;
+  areaName: string;
   pageIndex: number;
   zone: { x: number; y: number; width: number; height: number };
   extractedText: string;

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useOCRStore } from "@/stores/ocrStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useAreaStore } from "@/stores/areaStore";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { preprocessImage, cropZone } from "@/services/imageProcessing";
@@ -13,48 +13,48 @@ export function useOCR() {
   const extractActive = useCallback(async () => {
     const { settings } = useSettingsStore.getState();
     const { document: doc } = useDocumentStore.getState();
-    const { getActiveSection, updateSectionStatus, updateSectionExtractedText, updateSectionCroppedImageProcessed } =
-      useSectionStore.getState();
+    const { getActiveArea, updateAreaStatus, updateAreaExtractedText, updateAreaCroppedImageProcessed } =
+      useAreaStore.getState();
 
     if (!settings.ocrEnabled || !doc) return;
 
-    const section = getActiveSection();
-    if (!section || !section.zone) return;
+    const area = getActiveArea();
+    if (!area || !area.zone) return;
 
-    updateSectionStatus(section.id, "processing");
+    updateAreaStatus(area.id, "processing");
     setProcessing(true);
 
     try {
       const sourceCanvas = await getSourceCanvas();
       const cropped = cropZone(
         sourceCanvas,
-        section.zone.x,
-        section.zone.y,
-        section.zone.width,
-        section.zone.height
+        area.zone.x,
+        area.zone.y,
+        area.zone.width,
+        area.zone.height
       );
 
       const imageData = settings.preprocessingEnabled
         ? preprocessImage(cropped)
         : cropped.toDataURL("image/png");
 
-      updateSectionCroppedImageProcessed(section.id, imageData);
+      updateAreaCroppedImageProcessed(area.id, imageData);
 
       const response = await ocrExtract(imageData, settings.apiKey || undefined);
 
-      updateSectionExtractedText(section.id, response.text);
+      updateAreaExtractedText(area.id, response.text);
 
       await saveExtraction({
         documentName: doc.name,
-        sectionName: section.name,
-        pageIndex: section.pageIndex,
-        zone: section.zone,
+        areaName: area.name,
+        pageIndex: area.pageIndex,
+        zone: area.zone,
         extractedText: response.text,
         provider: response.provider,
       });
     } catch (err) {
-      updateSectionStatus(
-        section.id,
+      updateAreaStatus(
+        area.id,
         "error",
         err instanceof Error ? err.message : "Unknown error"
       );

@@ -1,28 +1,28 @@
-export interface SectionZone {
+export interface AreaZone {
   x: number;
   y: number;
   width: number;
   height: number;
 }
 
-export type SectionStatus = "empty" | "zone-defined" | "processing" | "extracted" | "error";
+export type AreaStatus = "empty" | "zone-defined" | "processing" | "extracted" | "error";
 
-export interface Section {
+export interface Area {
   id: string;
   name: string;
   documentName: string;
   pageIndex: number;
-  zone: SectionZone | null;
+  zone: AreaZone | null;
   croppedImageRaw: string | null;
   croppedImageProcessed: string | null;
   extractedText: string | null;
-  status: SectionStatus;
+  status: AreaStatus;
   errorMessage: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export function createDefaultSection(name: string, documentName: string): Section {
+export function createDefaultArea(name: string, documentName: string): Area {
   const now = new Date().toISOString();
   return {
     id: crypto.randomUUID(),

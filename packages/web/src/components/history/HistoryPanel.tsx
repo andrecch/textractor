@@ -14,7 +14,7 @@ import { getHistory, clearHistory } from "@/services/api";
 interface HistoryRecord {
   id: string;
   documentName: string;
-  sectionName: string;
+  areaName: string;
   pageIndex: number;
   extractedText: string;
   provider: string;
@@ -51,7 +51,7 @@ export function HistoryPanel() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `textractor-${record.sectionName}-${record.id.slice(0, 8)}.txt`;
+    a.download = `textractor-${record.areaName}-${record.id.slice(0, 8)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -88,7 +88,7 @@ export function HistoryPanel() {
                 <div>
                   <p className="text-sm font-medium">{record.documentName}</p>
                   <p className="text-xs text-muted-foreground">
-                    {record.sectionName} · {t("history.page")} {record.pageIndex + 1} ·{" "}
+                    {record.areaName} · {t("history.page")} {record.pageIndex + 1} ·{" "}
                     {record.provider} ·{" "}
                     {new Date(record.createdAt).toLocaleString()}
                   </p>
@@ -104,7 +104,7 @@ export function HistoryPanel() {
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>
-                        {record.documentName} — {record.sectionName}
+                        {record.documentName} — {record.areaName}
                       </DialogTitle>
                     </DialogHeader>
                     <pre className="whitespace-pre-wrap text-sm max-h-96 overflow-auto p-4 bg-muted rounded">

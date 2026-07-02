@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useDocumentStore } from "@/stores/documentStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useAreaStore } from "@/stores/areaStore";
 import type { DocumentFile } from "@/types/document";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
@@ -46,7 +46,7 @@ export class UnsupportedFileError extends Error {
 
 export function useDocument() {
   const { setDocument, clearDocument: clearDoc } = useDocumentStore();
-  const { initializeForNewDocument } = useSectionStore();
+  const { initializeForNewDocument } = useAreaStore();
 
   const loadDocument = useCallback(
     async (file: File) => {
@@ -82,7 +82,7 @@ export function useDocument() {
 
   const clearDocument = useCallback(() => {
     clearDoc();
-    useSectionStore.getState().clearSections();
+    useAreaStore.getState().clearAreas();
   }, [clearDoc]);
 
   return { loadDocument, clearDocument };

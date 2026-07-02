@@ -4,7 +4,7 @@ import { PDFPageRenderer } from "./PDFPageRenderer";
 import { ImageRenderer } from "./ImageRenderer";
 import { PageNavigation } from "./PageNavigation";
 import { ZoomControls } from "./ZoomControls";
-import { SectionOverlay } from "@/components/section/SectionOverlay";
+import { AreaOverlay } from "@/components/area/AreaOverlay";
 
 export function DocumentViewer() {
   const { document, currentPage, zoom } = useDocumentStore();
@@ -48,7 +48,7 @@ export function DocumentViewer() {
               onPageSizeChange={handlePageSizeChange}
             />
           )}
-          <SectionOverlay
+          <AreaOverlay
             width={pageSize.width}
             height={pageSize.height}
           />
