@@ -67,7 +67,13 @@
     "cropPreview": "Vista previa del recorte",
     "zoneDefinedHint": "Zona definida. Pulsa Extraer para ejecutar OCR.",
     "error": "Error en el reconocimiento",
-    "disabled": "OCR desactivado"
+    "disabled": "OCR desactivado",
+    "imageCropTitle": "Recorte de Imagen",
+    "textRecognitionTitle": "Reconocimiento de Texto",
+    "noImage": "Define una zona para ver el recorte",
+    "noText": "Extrae texto para ver el reconocimiento",
+    "toggleImage": "Alternar imagen",
+    "extract": "Extraer texto"
   },
   "settings": {
     "title": "Configuracion",

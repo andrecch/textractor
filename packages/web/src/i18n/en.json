@@ -67,7 +67,13 @@
     "cropPreview": "Crop preview",
     "zoneDefinedHint": "Zone defined. Press Extract to run OCR.",
     "error": "Recognition error",
-    "disabled": "OCR disabled"
+    "disabled": "OCR disabled",
+    "imageCropTitle": "Image Crop",
+    "textRecognitionTitle": "Text Recognition",
+    "noImage": "Define a zone to see the crop",
+    "noText": "Extract text to see the recognition",
+    "toggleImage": "Toggle image",
+    "extract": "Extract text"
   },
   "settings": {
     "title": "Settings",

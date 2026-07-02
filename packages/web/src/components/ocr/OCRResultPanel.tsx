@@ -8,17 +8,22 @@ import {
   Image as ImageIcon,
   Loader2,
   AlertCircle,
+  RefreshCcw,
+  Play,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSectionStore } from "@/stores/sectionStore";
 import { useOCRStore } from "@/stores/ocrStore";
+import { useOCR } from "@/hooks/useOCR";
 import { downloadPng, sanitizeFileName } from "@/services/imageExport";
 
 export function OCRResultPanel() {
   const { t } = useTranslation();
-  const { getActiveSection } = useSectionStore();
+  const { getActiveSection, activeSectionId } = useSectionStore();
   const { isProcessing } = useOCRStore();
+  const { extractActive } = useOCR();
   const [copied, setCopied] = useState(false);
+  const [showProcessed, setShowProcessed] = useState(false);
 
   const activeSection = getActiveSection();
 
@@ -67,107 +72,132 @@ export function OCRResultPanel() {
   const hasCroppedProcessed = !!activeSection?.croppedImageProcessed;
   const hasText = !!activeSection?.extractedText;
 
+  const currentImageSrc = showProcessed
+    ? activeSection?.croppedImageProcessed
+    : activeSection?.croppedImageRaw;
+  const hasCurrentImage = showProcessed ? hasCroppedProcessed : hasCroppedRaw;
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-4 border-b gap-2">
-        <h2 className="text-lg font-semibold shrink-0">{t("ocr.title")}</h2>
-        <div className="flex gap-1 flex-wrap justify-end">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleDownloadRaw}
-            disabled={!hasCroppedRaw}
-            title={t("ocr.downloadRaw")}
-          >
-            <ImageIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleDownloadProcessed}
-            disabled={!hasCroppedProcessed}
-            title={t("ocr.downloadProcessed")}
-          >
-            <ImageDown className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleCopy}
-            disabled={!hasText}
-            title={t("ocr.copy")}
-          >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-500" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={handleExportTxt}
-            disabled={!hasText}
-            title={t("ocr.exportTxt")}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
+      <section className="flex-1 flex flex-col border-b overflow-hidden">
+        <div className="flex items-center justify-between p-3 border-b gap-2">
+          <h3 className="text-sm font-semibold">{t("ocr.imageCropTitle")}</h3>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setShowProcessed((prev) => !prev)}
+              disabled={!hasCroppedRaw && !hasCroppedProcessed}
+              title={t("ocr.toggleImage")}
+            >
+              <RefreshCcw className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleDownloadRaw}
+              disabled={!hasCroppedRaw}
+              title={t("ocr.downloadRaw")}
+            >
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleDownloadProcessed}
+              disabled={!hasCroppedProcessed}
+              title={t("ocr.downloadProcessed")}
+            >
+              <ImageDown className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
+        <div className="flex-1 overflow-auto p-3 flex items-center justify-center">
+          {hasCurrentImage ? (
+            <img
+              src={currentImageSrc ?? ""}
+              alt="Crop preview"
+              className="max-w-full h-auto rounded border bg-muted/30"
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground text-center">
+              {t("ocr.noImage")}
+            </p>
+          )}
+        </div>
+      </section>
 
-      <div className="flex-1 overflow-auto">
-        {isProcessing ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t("ocr.processing")}
-            </div>
+      <section className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between p-3 border-b gap-2">
+          <h3 className="text-sm font-semibold">{t("ocr.textRecognitionTitle")}</h3>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={extractActive}
+              disabled={isProcessing || !activeSectionId}
+              title={t("ocr.extract")}
+            >
+              <Play className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleCopy}
+              disabled={!hasText}
+              title={t("ocr.copy")}
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-green-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleExportTxt}
+              disabled={!hasText}
+              title={t("ocr.exportTxt")}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
           </div>
-        ) : activeSection?.status === "error" ? (
-          <div className="flex items-center justify-center h-full p-4">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-4 w-4" />
-              {t("ocr.error")}: {activeSection.errorMessage}
-            </div>
-          </div>
-        ) : hasCroppedRaw && !hasText && activeSection ? (
-          <div className="flex flex-col h-full">
-            <div className="p-4 border-b">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                {t("ocr.cropPreview")}
-              </p>
-              <div className="rounded border bg-muted/30 p-2 flex items-center justify-center">
-                <img
-                  src={activeSection.croppedImageRaw ?? ""}
-                  alt="Crop preview"
-                  className="max-w-full h-auto"
-                />
+        </div>
+        <div className="flex-1 overflow-auto p-3">
+          {isProcessing ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {t("ocr.processing")}
               </div>
             </div>
-            <div className="flex-1 flex items-center justify-center p-4">
+          ) : activeSection?.status === "error" ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex items-center gap-2 text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                {t("ocr.error")}: {activeSection.errorMessage}
+              </div>
+            </div>
+          ) : !hasText ? (
+            <div className="flex items-center justify-center h-full">
               <p className="text-sm text-muted-foreground text-center">
-                {t("ocr.zoneDefinedHint")}
+                {t("ocr.noText")}
               </p>
             </div>
-          </div>
-        ) : !hasText ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-muted-foreground text-center px-4">
-              {t("ocr.empty")}
-            </p>
-          </div>
-        ) : (
-          <div className="p-4">
+          ) : (
             <pre className="whitespace-pre-wrap text-sm">
               {activeSection.extractedText}
             </pre>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
