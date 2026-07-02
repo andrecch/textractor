@@ -80,7 +80,7 @@ export function OCRResultPanel() {
   return (
     <div className="flex flex-col h-full">
       <section className="flex-1 flex flex-col border-b overflow-hidden">
-        <div className="flex items-center justify-between p-3 border-b gap-2">
+        <div className="flex items-center justify-between p-2 border-b gap-2">
           <h3 className="text-sm font-semibold">{t("ocr.imageCropTitle")}</h3>
           <div className="flex gap-1">
             <Button
@@ -88,7 +88,7 @@ export function OCRResultPanel() {
               size="icon"
               className="h-7 w-7"
               onClick={() => setShowProcessed((prev) => !prev)}
-              disabled={!hasCroppedRaw && !hasCroppedProcessed}
+              disabled={!hasCroppedRaw || !hasCroppedProcessed}
               title={t("ocr.toggleImage")}
             >
               <RefreshCcw className="h-4 w-4" />
@@ -131,7 +131,7 @@ export function OCRResultPanel() {
       </section>
 
       <section className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between p-3 border-b gap-2">
+        <div className="flex items-center justify-between p-2 border-b gap-2">
           <h3 className="text-sm font-semibold">{t("ocr.textRecognitionTitle")}</h3>
           <div className="flex gap-1">
             <Button
@@ -139,7 +139,7 @@ export function OCRResultPanel() {
               size="icon"
               className="h-7 w-7"
               onClick={extractActive}
-              disabled={isProcessing || !activeSectionId}
+              disabled={isProcessing || !activeSectionId || !activeSection?.zone}
               title={t("ocr.extract")}
             >
               <Play className="h-4 w-4" />
