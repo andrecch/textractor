@@ -73,6 +73,8 @@
     "noImage": "Define una zona para ver el recorte",
     "noText": "Extrae texto para ver el reconocimiento",
     "toggleImage": "Alternar imagen",
+    "collapseImage": "Colapsar imagen",
+    "expandImage": "Expandir imagen",
     "extract": "Extraer texto"
   },
   "settings": {

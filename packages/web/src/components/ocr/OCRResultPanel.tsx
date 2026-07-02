@@ -10,6 +10,8 @@ import {
   AlertCircle,
   RefreshCcw,
   Play,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAreaStore } from "@/stores/areaStore";
@@ -24,6 +26,7 @@ export function OCRResultPanel() {
   const { extractActive } = useOCR();
   const [copied, setCopied] = useState(false);
   const [showProcessed, setShowProcessed] = useState(false);
+  const [imageCollapsed, setImageCollapsed] = useState(false);
 
   const activeArea = getActiveArea();
 
@@ -79,7 +82,7 @@ export function OCRResultPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      <section className="flex-1 flex flex-col border-b overflow-hidden">
+      <section className={`flex flex-col border-b overflow-hidden ${imageCollapsed ? "" : "flex-1"}`}>
         <div className="flex items-center justify-between p-2 border-b gap-2">
           <h3 className="text-base font-semibold">{t("ocr.imageCropTitle")}</h3>
           <div className="flex gap-1">
@@ -113,21 +116,36 @@ export function OCRResultPanel() {
             >
               <ImageDown className="h-4 w-4" />
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setImageCollapsed((prev) => !prev)}
+              title={imageCollapsed ? t("ocr.expandImage") : t("ocr.collapseImage")}
+            >
+              {imageCollapsed ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronUp className="h-4 w-4" />
+              )}
+            </Button>
           </div>
         </div>
-        <div className="flex-1 overflow-auto p-3 flex items-center justify-center">
-          {hasCurrentImage ? (
-            <img
-              src={currentImageSrc ?? ""}
-              alt="Crop preview"
-              className="max-w-full h-auto rounded border bg-muted/30"
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground text-center">
-              {t("ocr.noImage")}
-            </p>
-          )}
-        </div>
+        {!imageCollapsed && (
+          <div className="flex-1 overflow-auto p-3 flex items-center justify-center">
+            {hasCurrentImage ? (
+              <img
+                src={currentImageSrc ?? ""}
+                alt="Crop preview"
+                className="max-w-full h-auto rounded border bg-muted/30"
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground text-center">
+                {t("ocr.noImage")}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="flex-1 flex flex-col overflow-hidden">

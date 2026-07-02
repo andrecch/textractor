@@ -73,6 +73,8 @@
     "noImage": "Define a zone to see the crop",
     "noText": "Extract text to see the recognition",
     "toggleImage": "Toggle image",
+    "collapseImage": "Collapse image",
+    "expandImage": "Expand image",
     "extract": "Extract text"
   },
   "settings": {
