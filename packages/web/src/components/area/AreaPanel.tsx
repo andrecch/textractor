@@ -18,7 +18,7 @@ export function AreaPanel() {
   return (
     <div className="flex flex-col h-full w-64 border-r bg-background">
       <div className="flex items-center justify-between p-2 border-b">
-        <h2 className="text-sm font-semibold">{t("area.title")}</h2>
+        <h2 className="text-base font-semibold">{t("area.title")}</h2>
         <Button
           variant="outline"
           size="icon"

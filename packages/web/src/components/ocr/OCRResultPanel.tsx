@@ -81,7 +81,7 @@ export function OCRResultPanel() {
     <div className="flex flex-col h-full">
       <section className="flex-1 flex flex-col border-b overflow-hidden">
         <div className="flex items-center justify-between p-2 border-b gap-2">
-          <h3 className="text-sm font-semibold">{t("ocr.imageCropTitle")}</h3>
+          <h3 className="text-base font-semibold">{t("ocr.imageCropTitle")}</h3>
           <div className="flex gap-1">
             <Button
               variant="ghost"
@@ -132,7 +132,7 @@ export function OCRResultPanel() {
 
       <section className="flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center justify-between p-2 border-b gap-2">
-          <h3 className="text-sm font-semibold">{t("ocr.textRecognitionTitle")}</h3>
+          <h3 className="text-base font-semibold">{t("ocr.textRecognitionTitle")}</h3>
           <div className="flex gap-1">
             <Button
               variant="ghost"
