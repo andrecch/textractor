@@ -12,6 +12,7 @@ interface AreaItemProps {
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   onRename: (id: string, name: string) => void;
+  autoEdit?: boolean;
 }
 
 const statusColors: Record<Area["status"], string> = {
@@ -28,9 +29,10 @@ export function AreaItem({
   onSelect,
   onDelete,
   onRename,
+  autoEdit,
 }: AreaItemProps) {
   const { t } = useTranslation();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(autoEdit ?? false);
   const [editName, setEditName] = useState(area.name);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -39,6 +41,12 @@ export function AreaItem({
       inputRef.current?.select();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    if (autoEdit) {
+      setIsEditing(true);
+    }
+  }, [autoEdit]);
 
   const handleSaveRename = () => {
     if (editName.trim()) {

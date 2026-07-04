@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,16 @@ export function AreaPanel() {
     removeArea,
     renameArea,
   } = useArea();
+
+  const [newAreaId, setNewAreaId] = useState<string | null>(null);
+  const prevLengthRef = useRef(areas.length);
+
+  useEffect(() => {
+    if (areas.length > prevLengthRef.current) {
+      setNewAreaId(areas[areas.length - 1].id);
+    }
+    prevLengthRef.current = areas.length;
+  }, [areas]);
 
   return (
     <div className="flex flex-col h-full w-64 border-r bg-background">
@@ -38,6 +49,7 @@ export function AreaPanel() {
             onSelect={setActiveArea}
             onDelete={removeArea}
             onRename={renameArea}
+            autoEdit={area.id === newAreaId}
           />
         ))}
       </div>
