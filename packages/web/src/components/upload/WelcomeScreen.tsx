@@ -6,12 +6,10 @@ import { FileUpload } from "./FileUpload";
 function WelcomeIllustration() {
   return (
     <svg
-      width="220"
-      height="160"
       viewBox="0 0 220 160"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-foreground"
+      className="w-full max-w-[220px] h-auto text-foreground"
     >
       <rect x="20" y="20" width="80" height="110" rx="4" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground" fill="none" />
       <line x1="32" y1="42" x2="88" y2="42" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground/50" strokeLinecap="round" />
@@ -47,7 +45,7 @@ export function WelcomeScreen() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center justify-center h-full overflow-auto p-6">
+    <div className="flex flex-col items-center justify-start h-full overflow-auto pt-8 pb-6 px-6">
       <div className="w-full max-w-lg flex flex-col items-center gap-6">
         <WelcomeIllustration />
 
