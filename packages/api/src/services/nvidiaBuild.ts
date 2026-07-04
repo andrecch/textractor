@@ -22,14 +22,14 @@ export async function callNvidiaBuildVision(
       messages: [
         {
           role: "system",
-          content: "You are an OCR engine. Output ONLY the exact text visible in the image. No explanations, no descriptions, no commentary. Just the raw extracted text.",
+          content: "You are an OCR engine. Output ONLY the exact text visible in the image. No explanations, no descriptions, no commentary. Your response must begin with the first character of the extracted text. Never start with words like 'here', 'here is', 'here you go', 'sure', 'of course', 'certainly', 'aquí', 'claro', 'por supuesto'. Just the raw extracted text.",
         },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: "OCR: Extract and return ONLY the visible text from this image. Do not add any explanation or description.",
+              text: "OCR: Extract and return ONLY the visible text from this image. Start your response directly with the first character of the text. No preamble, no explanation, no description.",
             },
             {
               type: "image_url",
@@ -51,7 +51,14 @@ export async function callNvidiaBuildVision(
   const data = (await response.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
-  return data.choices?.[0]?.message?.content ?? "";
+  const raw = data.choices?.[0]?.message?.content ?? "";
+  return cleanOcrResponse(raw);
+}
+
+const CONVERSATIONAL_PREFIX = /^(here(?:'s| is| are)?\s+(?:the|your|below)|here you go|sure[,.]?|of course[,.]?|certainly[,.]?|aqu[ií]\s+(?:tienes|está|te dejo|te muestro)|claro[,.]?|por supuesto[,.]?|d[ií]a:)\b[^a-zA-Z0-9]*/i;
+
+function cleanOcrResponse(text: string): string {
+  return text.replace(CONVERSATIONAL_PREFIX, "").trim();
 }
 
 export async function validateNvidiaBuildKey(

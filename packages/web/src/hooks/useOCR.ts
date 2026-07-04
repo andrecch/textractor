@@ -41,15 +41,16 @@ export function useOCR() {
       updateAreaCroppedImageProcessed(area.id, imageData);
 
       const response = await ocrExtract(imageData, settings.apiKey || undefined);
+      const cleanText = response.text.trim();
 
-      updateAreaExtractedText(area.id, response.text);
+      updateAreaExtractedText(area.id, cleanText);
 
       await saveExtraction({
         documentName: doc.name,
         areaName: area.name,
         pageIndex: area.pageIndex,
         zone: area.zone,
-        extractedText: response.text,
+        extractedText: cleanText,
         provider: response.provider,
       });
     } catch (err) {
