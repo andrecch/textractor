@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import type { Area, AreaZone } from "@/types/area";
 import { createDefaultArea } from "@/types/area";
+import {
+  setAreaImage,
+  clearAreaImages,
+  clearAllImages,
+} from "@/stores/imageStore";
 
 interface AreaState {
   areas: Area[];
@@ -13,8 +18,8 @@ interface AreaState {
   removeArea: (id: string) => void;
   renameArea: (id: string, name: string) => void;
   updateAreaZone: (id: string, pageIndex: number, zone: AreaZone) => void;
-  updateAreaCroppedImageRaw: (id: string, image: string) => void;
-  updateAreaCroppedImageProcessed: (id: string, image: string) => void;
+  setAreaCroppedImageRaw: (id: string, image: string | null) => void;
+  setAreaCroppedImageProcessed: (id: string, image: string | null) => void;
   updateAreaExtractedText: (id: string, text: string) => void;
   updateAreaStatus: (id: string, status: Area["status"], error?: string) => void;
   clearAreas: () => void;
@@ -51,6 +56,7 @@ export const useAreaStore = create<AreaState>((set, get) => ({
       if (state.activeAreaId === id) {
         newActiveId = newAreas[0]?.id ?? null;
       }
+      clearAreaImages(id);
       return {
         areas: newAreas,
         activeAreaId: newActiveId,
@@ -79,28 +85,13 @@ export const useAreaStore = create<AreaState>((set, get) => ({
       ),
     })),
 
-  updateAreaCroppedImageRaw: (id, image) =>
-    set((state) => ({
-      areas: state.areas.map((a) =>
-        a.id === id
-          ? { ...a, croppedImageRaw: image, updatedAt: new Date().toISOString() }
-          : a
-      ),
-    })),
+  setAreaCroppedImageRaw: (id, image) => {
+    setAreaImage(id, "raw", image);
+  },
 
-  updateAreaCroppedImageProcessed: (id, image) =>
-    set((state) => ({
-      areas: state.areas.map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              croppedImageProcessed: image,
-              status: "extracted" as const,
-              updatedAt: new Date().toISOString(),
-            }
-          : a
-      ),
-    })),
+  setAreaCroppedImageProcessed: (id, image) => {
+    setAreaImage(id, "processed", image);
+  },
 
   updateAreaExtractedText: (id, text) =>
     set((state) => ({
@@ -129,9 +120,13 @@ export const useAreaStore = create<AreaState>((set, get) => ({
       ),
     })),
 
-  clearAreas: () => set({ areas: [], activeAreaId: null, areaCounter: 0 }),
+  clearAreas: () => {
+    clearAllImages();
+    set({ areas: [], activeAreaId: null, areaCounter: 0 });
+  },
 
   initializeForNewDocument: (documentName) => {
+    clearAllImages();
     const firstArea = createDefaultArea("Area 1", documentName);
     set({
       areas: [firstArea],

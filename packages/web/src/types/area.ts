@@ -13,8 +13,6 @@ export interface Area {
   documentName: string;
   pageIndex: number;
   zone: AreaZone | null;
-  croppedImageRaw: string | null;
-  croppedImageProcessed: string | null;
   extractedText: string | null;
   status: AreaStatus;
   errorMessage: string | null;
@@ -30,8 +28,6 @@ export function createDefaultArea(name: string, documentName: string): Area {
     documentName,
     pageIndex: 0,
     zone: null,
-    croppedImageRaw: null,
-    croppedImageProcessed: null,
     extractedText: null,
     status: "empty",
     errorMessage: null,

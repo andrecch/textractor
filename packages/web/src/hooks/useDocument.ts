@@ -2,10 +2,8 @@ import { useCallback } from "react";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useAreaStore } from "@/stores/areaStore";
 import type { DocumentFile } from "@/types/document";
-import * as pdfjsLib from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+import { pdfjsLib } from "@/services/pdfConfig";
+import { clearAllPdfCaches } from "@/services/pdfCache";
 
 const ACCEPTED_MIMES = new Set([
   "application/pdf",
@@ -45,7 +43,7 @@ export class UnsupportedFileError extends Error {
 }
 
 export function useDocument() {
-  const { setDocument, clearDocument: clearDoc } = useDocumentStore();
+  const { setDocument, clearDocument: clearDoc, document: currentDoc } = useDocumentStore();
   const { initializeForNewDocument } = useAreaStore();
 
   const loadDocument = useCallback(
@@ -53,6 +51,12 @@ export function useDocument() {
       if (!isAcceptedFile(file)) {
         throw new UnsupportedFileError(file.name);
       }
+
+      if (currentDoc?.url) {
+        URL.revokeObjectURL(currentDoc.url);
+      }
+
+      clearAllPdfCaches();
 
       const url = URL.createObjectURL(file);
       const isImage = isImageFile(file);
@@ -77,13 +81,17 @@ export function useDocument() {
       setDocument(doc);
       initializeForNewDocument(doc.name);
     },
-    [setDocument, initializeForNewDocument]
+    [setDocument, initializeForNewDocument, currentDoc]
   );
 
   const clearDocument = useCallback(() => {
+    if (currentDoc?.url) {
+      URL.revokeObjectURL(currentDoc.url);
+    }
+    clearAllPdfCaches();
     clearDoc();
     useAreaStore.getState().clearAreas();
-  }, [clearDoc]);
+  }, [clearDoc, currentDoc]);
 
   return { loadDocument, clearDocument };
 }

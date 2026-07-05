@@ -4,30 +4,70 @@ import type { ExtractionRow } from "../types/index.js";
 
 const router = Router();
 
-router.get("/", (_req, res) => {
+const DEFAULT_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 100;
+
+function mapRow(row: ExtractionRow) {
+  return {
+    id: row.id,
+    documentName: row.document_name,
+    sectionName: row.section_name,
+    pageIndex: row.page_index,
+    zone: {
+      x: row.zone_x,
+      y: row.zone_y,
+      width: row.zone_width,
+      height: row.zone_height,
+    },
+    extractedText: row.extracted_text,
+    provider: row.provider,
+    createdAt: row.created_at,
+  };
+}
+
+router.get("/", (req, res) => {
   try {
     const db = getDatabase();
+
+    const wantPaged = req.query.paged === "true" || req.query.paged === "1";
+
+    const limit = Math.min(
+      MAX_PAGE_SIZE,
+      Math.max(
+        1,
+        Number.parseInt(String(req.query.limit ?? DEFAULT_PAGE_SIZE), 10) ||
+          DEFAULT_PAGE_SIZE
+      )
+    );
+    const offset = Math.max(
+      0,
+      Number.parseInt(String(req.query.offset ?? 0), 10) || 0
+    );
+
     const rows = db
-      .prepare("SELECT * FROM extractions ORDER BY created_at DESC LIMIT 100")
-      .all() as ExtractionRow[];
+      .prepare(
+        "SELECT * FROM extractions ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?"
+      )
+      .all(limit, offset) as ExtractionRow[];
 
-    const records = rows.map((row) => ({
-      id: row.id,
-      documentName: row.document_name,
-      sectionName: row.section_name,
-      pageIndex: row.page_index,
-      zone: {
-        x: row.zone_x,
-        y: row.zone_y,
-        width: row.zone_width,
-        height: row.zone_height,
-      },
-      extractedText: row.extracted_text,
-      provider: row.provider,
-      createdAt: row.created_at,
-    }));
+    const records = rows.map(mapRow);
 
-    res.json(records);
+    if (!wantPaged) {
+      res.json(records);
+      return;
+    }
+
+    const totalRow = db
+      .prepare("SELECT COUNT(*) as count FROM extractions")
+      .get() as { count: number };
+
+    res.json({
+      records,
+      total: totalRow.count,
+      limit,
+      offset,
+      hasMore: offset + records.length < totalRow.count,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to fetch";
     res.status(500).json({ error: message });

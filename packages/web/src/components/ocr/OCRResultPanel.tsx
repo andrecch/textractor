@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { useAreaStore } from "@/stores/areaStore";
 import { useOCRStore } from "@/stores/ocrStore";
 import { useOCR } from "@/hooks/useOCR";
+import { useAreaImage } from "@/hooks/useAreaImage";
+import { getAreaImage } from "@/stores/imageStore";
 import { downloadPng, sanitizeFileName } from "@/services/imageExport";
 
 export function OCRResultPanel() {
@@ -29,6 +31,8 @@ export function OCRResultPanel() {
   const [imageCollapsed, setImageCollapsed] = useState(false);
 
   const activeArea = getActiveArea();
+  const croppedImageRaw = useAreaImage(activeAreaId, "raw");
+  const croppedImageProcessed = useAreaImage(activeAreaId, "processed");
 
   const buildImageFileName = (suffix: string) => {
     const zoneName = sanitizeFileName(activeArea?.name ?? "area");
@@ -59,25 +63,24 @@ export function OCRResultPanel() {
   };
 
   const handleDownloadRaw = () => {
-    if (!activeArea?.croppedImageRaw) return;
-    downloadPng(activeArea.croppedImageRaw, buildImageFileName("raw"));
+    if (!activeAreaId) return;
+    const img = getAreaImage(activeAreaId, "raw");
+    if (!img) return;
+    downloadPng(img, buildImageFileName("raw"));
   };
 
   const handleDownloadProcessed = () => {
-    if (!activeArea?.croppedImageProcessed) return;
-    downloadPng(
-      activeArea.croppedImageProcessed,
-      buildImageFileName("proc")
-    );
+    if (!activeAreaId) return;
+    const img = getAreaImage(activeAreaId, "processed");
+    if (!img) return;
+    downloadPng(img, buildImageFileName("proc"));
   };
 
-  const hasCroppedRaw = !!activeArea?.croppedImageRaw;
-  const hasCroppedProcessed = !!activeArea?.croppedImageProcessed;
+  const hasCroppedRaw = !!croppedImageRaw;
+  const hasCroppedProcessed = !!croppedImageProcessed;
   const hasText = !!activeArea?.extractedText;
 
-  const currentImageSrc = showProcessed
-    ? activeArea?.croppedImageProcessed
-    : activeArea?.croppedImageRaw;
+  const currentImageSrc = showProcessed ? croppedImageProcessed : croppedImageRaw;
   const hasCurrentImage = showProcessed ? hasCroppedProcessed : hasCroppedRaw;
 
   return (

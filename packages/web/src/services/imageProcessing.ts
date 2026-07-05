@@ -1,3 +1,5 @@
+import { binarizeImageData } from "@/services/binarizeWorkerClient";
+
 export interface PreprocessOptions {
   grayscale: boolean;
   brightness: number;
@@ -14,17 +16,23 @@ const DEFAULT_OPTIONS: PreprocessOptions = {
   binarizeThreshold: 128,
 };
 
-export function preprocessImage(
+export interface PreprocessResult {
+  canvas: HTMLCanvasElement;
+  dataUrl: string;
+}
+
+export async function preprocessImage(
   sourceCanvas: HTMLCanvasElement,
   options: Partial<PreprocessOptions> = {}
-): string {
+): Promise<PreprocessResult> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const { width, height } = sourceCanvas;
 
   const outputCanvas = document.createElement("canvas");
   outputCanvas.width = width;
   outputCanvas.height = height;
-  const ctx = outputCanvas.getContext("2d")!;
+  const ctx = outputCanvas.getContext("2d");
+  if (!ctx) throw new Error("Failed to get 2d context");
 
   ctx.filter = [
     opts.grayscale ? "grayscale(100%)" : "",
@@ -36,20 +44,21 @@ export function preprocessImage(
 
   ctx.drawImage(sourceCanvas, 0, 0);
 
+  ctx.filter = "none";
+
   if (opts.binarize) {
     const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const avg = (data[i]! + data[i + 1]! + data[i + 2]!) / 3;
-      const val = avg >= opts.binarizeThreshold ? 255 : 0;
-      data[i] = val;
-      data[i + 1] = val;
-      data[i + 2] = val;
-    }
-    ctx.putImageData(imageData, 0, 0);
+    const binarized = await binarizeImageData(
+      imageData,
+      opts.binarizeThreshold
+    );
+    ctx.putImageData(binarized, 0, 0);
   }
 
-  return outputCanvas.toDataURL("image/png");
+  return {
+    canvas: outputCanvas,
+    dataUrl: outputCanvas.toDataURL("image/png"),
+  };
 }
 
 export function cropZone(
@@ -62,7 +71,8 @@ export function cropZone(
   const cropped = document.createElement("canvas");
   cropped.width = width;
   cropped.height = height;
-  const ctx = cropped.getContext("2d")!;
+  const ctx = cropped.getContext("2d");
+  if (!ctx) throw new Error("Failed to get 2d context");
   ctx.drawImage(sourceCanvas, x, y, width, height, 0, 0, width, height);
   return cropped;
 }

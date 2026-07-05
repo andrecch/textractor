@@ -1,5 +1,6 @@
 import express, { Express } from "express";
 import cors from "cors";
+import compression from "compression";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -15,6 +16,7 @@ const app: Express = express();
 const PORT = process.env.PORT ?? 3001;
 
 app.use(cors());
+app.use(compression());
 app.use(express.json({ limit: "50mb" }));
 
 app.get("/api/health", (_req, res) => {

@@ -7,13 +7,15 @@ import { preprocessImage, cropZone } from "@/services/imageProcessing";
 import { getSourceCanvas } from "@/services/canvasRenderer";
 import { ocrExtract, saveExtraction } from "@/services/api";
 
+const OCR_JPEG_QUALITY = 0.85;
+
 export function useOCR() {
   const { isProcessing, setProcessing } = useOCRStore();
 
   const extractActive = useCallback(async () => {
     const { settings } = useSettingsStore.getState();
     const { document: doc } = useDocumentStore.getState();
-    const { getActiveArea, updateAreaStatus, updateAreaExtractedText, updateAreaCroppedImageProcessed } =
+    const { getActiveArea, updateAreaStatus, updateAreaExtractedText, setAreaCroppedImageProcessed } =
       useAreaStore.getState();
 
     if (!settings.ocrEnabled || !doc) return;
@@ -34,13 +36,23 @@ export function useOCR() {
         area.zone.height
       );
 
-      const imageData = settings.preprocessingEnabled
-        ? preprocessImage(cropped)
-        : cropped.toDataURL("image/png");
+      let ocrCanvas: HTMLCanvasElement;
+      let displayDataUrl: string;
 
-      updateAreaCroppedImageProcessed(area.id, imageData);
+      if (settings.preprocessingEnabled) {
+        const { canvas, dataUrl } = await preprocessImage(cropped);
+        ocrCanvas = canvas;
+        displayDataUrl = dataUrl;
+      } else {
+        ocrCanvas = cropped;
+        displayDataUrl = cropped.toDataURL("image/png");
+      }
 
-      const response = await ocrExtract(imageData, settings.apiKey || undefined);
+      setAreaCroppedImageProcessed(area.id, displayDataUrl);
+
+      const ocrPayload = ocrCanvas.toDataURL("image/jpeg", OCR_JPEG_QUALITY);
+
+      const response = await ocrExtract(ocrPayload, settings.apiKey || undefined);
       const cleanText = response.text.trim();
 
       updateAreaExtractedText(area.id, cleanText);

@@ -47,8 +47,33 @@ export async function ocrValidate(
   return response.json();
 }
 
-export async function getHistory(): Promise<unknown[]> {
-  const response = await fetch(`${API_BASE}/history`);
+export interface HistoryResponse {
+  records: Array<{
+    id: string;
+    documentName: string;
+    sectionName: string;
+    pageIndex: number;
+    zone: { x: number; y: number; width: number; height: number };
+    extractedText: string;
+    provider: string;
+    createdAt: string;
+  }>;
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+export async function getHistory(
+  limit = 20,
+  offset = 0
+): Promise<HistoryResponse> {
+  const params = new URLSearchParams({
+    paged: "true",
+    limit: String(limit),
+    offset: String(offset),
+  });
+  const response = await fetch(`${API_BASE}/history?${params}`);
   if (!response.ok) throw new Error("Failed to fetch history");
   return response.json();
 }

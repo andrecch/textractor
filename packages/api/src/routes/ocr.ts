@@ -3,6 +3,7 @@ import {
   callNvidiaBuildVision,
   validateNvidiaBuildKey,
 } from "../services/nvidiaBuild.js";
+import { getCachedOcr, setCachedOcr } from "../services/ocrCache.js";
 
 const router = Router();
 
@@ -15,7 +16,18 @@ router.post("/extract", async (req, res) => {
       return;
     }
 
+    const cached = getCachedOcr(imageBase64);
+    if (cached) {
+      res.json({ text: cached, provider: "nvidia-build", cached: true });
+      return;
+    }
+
     const text = await callNvidiaBuildVision(imageBase64, apiKey);
+
+    if (text) {
+      setCachedOcr(imageBase64, text);
+    }
+
     res.json({ text, provider: "nvidia-build" });
   } catch (err) {
     const message = err instanceof Error ? err.message : "OCR failed";

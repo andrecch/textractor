@@ -15,13 +15,32 @@ export function useArea() {
     removeArea,
     renameArea,
     updateAreaZone,
-    updateAreaCroppedImageRaw,
+    setAreaCroppedImageRaw,
   } = useAreaStore();
   const { currentPage, document } = useDocumentStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
   const startPoint = useRef<{ x: number; y: number } | null>(null);
   const [previewRect, setPreviewRect] = useState<AreaZone | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const pendingRectRef = useRef<AreaZone | null>(null);
+
+  const flushPreviewRect = useCallback(() => {
+    rafIdRef.current = null;
+    if (pendingRectRef.current) {
+      setPreviewRect(pendingRectRef.current);
+      pendingRectRef.current = null;
+    }
+  }, []);
+
+  const schedulePreviewRect = useCallback(
+    (rect: AreaZone) => {
+      pendingRectRef.current = rect;
+      if (rafIdRef.current !== null) return;
+      rafIdRef.current = requestAnimationFrame(flushPreviewRect);
+    },
+    [flushPreviewRect]
+  );
 
   const activeArea = getActiveArea();
 
@@ -55,12 +74,17 @@ export function useArea() {
       const width = Math.abs(currentX - startPoint.current.x);
       const height = Math.abs(currentY - startPoint.current.y);
 
-      setPreviewRect({ x, y, width, height });
+      schedulePreviewRect({ x, y, width, height });
     },
-    [isDrawing]
+    [isDrawing, schedulePreviewRect]
   );
 
   const handleMouseUp = useCallback(() => {
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+
     if (!isDrawing || !previewRect || !activeAreaId) return;
 
     if (previewRect.width > 5 && previewRect.height > 5) {
@@ -71,6 +95,14 @@ export function useArea() {
     setIsDrawing(false);
     setPreviewRect(null);
   }, [isDrawing, previewRect, activeAreaId, currentPage, updateAreaZone]);
+
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!activeArea || !activeArea.zone) return;
@@ -86,7 +118,7 @@ export function useArea() {
         if (cancelled) return;
         const dataUrl = cropped.toDataURL("image/png");
         if (cancelled) return;
-        updateAreaCroppedImageRaw(activeArea.id, dataUrl);
+        setAreaCroppedImageRaw(activeArea.id, dataUrl);
       } catch {
         // Silently ignore render errors; the OCR step will surface them.
       }
@@ -99,7 +131,7 @@ export function useArea() {
     activeArea,
     currentPage,
     activeAreaId,
-    updateAreaCroppedImageRaw,
+    setAreaCroppedImageRaw,
   ]);
 
   return {
