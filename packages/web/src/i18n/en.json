@@ -89,7 +89,8 @@
     "invalid": "Connection invalid",
     "usingServerKey": "Using server API Key",
     "language": "Language",
-    "save": "Save"
+    "save": "Save",
+    "darkMode": "Theme"
   },
   "history": {
     "title": "Extraction history",

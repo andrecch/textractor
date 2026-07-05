@@ -1,8 +1,18 @@
+import { ThemeProvider } from "next-themes";
 import { RouterProvider } from "react-router-dom";
 import { router } from "@/app/routes";
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 }
 
 export default App;

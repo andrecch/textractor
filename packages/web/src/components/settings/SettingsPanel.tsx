@@ -1,18 +1,22 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckCircle, XCircle, Loader2, Server } from "lucide-react";
+import { useTheme } from "next-themes";
+import { CheckCircle, XCircle, Loader2, Server, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ocrValidate, getApiKeyStatus } from "@/services/api";
+import { cn } from "@/lib/utils";
 
 type ValidationState = "idle" | "validating" | "valid" | "invalid";
 
 export function SettingsPanel() {
   const { t, i18n } = useTranslation();
   const { settings, updateSettings } = useSettingsStore();
+  const { resolvedTheme, setTheme } = useTheme();
   const [validationState, setValidationState] = useState<ValidationState>("idle");
   const [validationError, setValidationError] = useState("");
   const [serverKeyPreview, setServerKeyPreview] = useState("");
@@ -63,6 +67,31 @@ export function SettingsPanel() {
       <h1 className="text-2xl font-bold mb-6">{t("settings.title")}</h1>
 
       <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Label>{t("settings.darkMode")}</Label>
+          <div className="flex items-center gap-2">
+            <Sun
+              className={cn(
+                "h-4 w-4 transition-opacity",
+                resolvedTheme === "dark" ? "opacity-40" : "opacity-100"
+              )}
+            />
+            <Switch
+              checked={resolvedTheme === "dark"}
+              onCheckedChange={(checked) =>
+                setTheme(checked ? "dark" : "light")
+              }
+              aria-label={t("settings.darkMode")}
+            />
+            <Moon
+              className={cn(
+                "h-4 w-4 transition-opacity",
+                resolvedTheme === "dark" ? "opacity-100" : "opacity-40"
+              )}
+            />
+          </div>
+        </div>
+
         <div className="flex items-center justify-between">
           <Label>{t("settings.language")}</Label>
           <div className="flex gap-2">
