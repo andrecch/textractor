@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 interface AreaOverlayProps {
   width: number;
   height: number;
+  isPanActive?: boolean;
+  isPanning?: boolean;
 }
 
 const ZONE_COLORS = [
@@ -21,7 +23,12 @@ function getZoneColor(index: number) {
   return ZONE_COLORS[index % ZONE_COLORS.length]!;
 }
 
-export function AreaOverlay({ width, height }: AreaOverlayProps) {
+export function AreaOverlay({
+  width,
+  height,
+  isPanActive = false,
+  isPanning = false,
+}: AreaOverlayProps) {
   const {
     activeArea,
     isDrawing,
@@ -39,14 +46,20 @@ export function AreaOverlay({ width, height }: AreaOverlayProps) {
 
   const previewColor = getZoneColor(areas.length);
 
+  const cursorClass = isPanActive
+    ? isPanning
+      ? "cursor-grabbing"
+      : "cursor-grab"
+    : "cursor-crosshair";
+
   return (
     <div
-      className="absolute inset-0 cursor-crosshair"
-      style={{ width, height }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      className={cn("absolute inset-0", cursorClass)}
+      style={{ width, height, userSelect: isPanActive ? "none" : "auto" }}
+      onMouseDown={isPanActive ? undefined : handleMouseDown}
+      onMouseMove={isPanActive ? undefined : handleMouseMove}
+      onMouseUp={isPanActive ? undefined : handleMouseUp}
+      onMouseLeave={isPanActive ? undefined : handleMouseUp}
     >
       {visibleZones.map(({ area, index }) => {
         const color = getZoneColor(index);

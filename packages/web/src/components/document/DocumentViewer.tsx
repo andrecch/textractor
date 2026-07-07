@@ -1,14 +1,17 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useDocumentStore } from "@/stores/documentStore";
 import { PDFPageRenderer } from "./PDFPageRenderer";
 import { ImageRenderer } from "./ImageRenderer";
 import { PageNavigation } from "./PageNavigation";
 import { ZoomControls } from "./ZoomControls";
 import { AreaOverlay } from "@/components/area/AreaOverlay";
+import { usePanMode } from "@/hooks/usePanMode";
 
 export function DocumentViewer() {
   const { document, currentPage, zoom } = useDocumentStore();
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { isPanActive, isPanning } = usePanMode(scrollContainerRef);
 
   const handlePageSizeChange = useCallback(
     (width: number, height: number) => {
@@ -27,7 +30,10 @@ export function DocumentViewer() {
         <PageNavigation />
         <ZoomControls />
       </div>
-      <div className="flex-1 overflow-auto p-4 bg-muted/30">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-auto p-4 bg-muted/30"
+      >
         <div
           className="relative inline-block"
           style={{ width: pageSize.width, height: pageSize.height }}
@@ -51,6 +57,8 @@ export function DocumentViewer() {
           <AreaOverlay
             width={pageSize.width}
             height={pageSize.height}
+            isPanActive={isPanActive}
+            isPanning={isPanning}
           />
         </div>
       </div>
