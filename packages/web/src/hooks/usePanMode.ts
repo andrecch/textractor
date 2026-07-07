@@ -32,11 +32,13 @@ export function usePanMode(
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code !== "Space") return;
-      if (e.repeat) return;
-      if (isPanActiveRef.current) return;
       if (isInteractiveTarget(e.target)) return;
 
       e.preventDefault();
+
+      if (e.repeat) return;
+      if (isPanActiveRef.current) return;
+
       isPanActiveRef.current = true;
       setIsPanActive(true);
     };
