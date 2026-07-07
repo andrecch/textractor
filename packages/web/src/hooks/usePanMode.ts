@@ -99,11 +99,11 @@ export function usePanMode(
 
       container.scrollLeft = Math.max(
         0,
-        Math.min(maxScrollLeft, panState.startScrollLeft + dx)
+        Math.min(maxScrollLeft, panState.startScrollLeft - dx)
       );
       container.scrollTop = Math.max(
         0,
-        Math.min(maxScrollTop, panState.startScrollTop + dy)
+        Math.min(maxScrollTop, panState.startScrollTop - dy)
       );
     };
 
