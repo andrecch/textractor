@@ -75,7 +75,8 @@
     "toggleImage": "Alternar imagen",
     "collapseImage": "Colapsar imagen",
     "expandImage": "Expandir imagen",
-    "extract": "Extraer texto"
+    "extract": "Extraer texto",
+    "cancel": "Cancelar extraccion"
   },
   "settings": {
     "title": "Configuracion",

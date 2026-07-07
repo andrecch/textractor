@@ -2,7 +2,8 @@ const API_BASE = "/api";
 
 export async function ocrExtract(
   imageBase64: string,
-  apiKey?: string
+  apiKey?: string,
+  signal?: AbortSignal
 ): Promise<{ text: string; provider: string }> {
   const body: Record<string, string> = { imageBase64 };
   if (apiKey) {
@@ -13,6 +14,7 @@ export async function ocrExtract(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+    signal,
   });
 
   if (!response.ok) {

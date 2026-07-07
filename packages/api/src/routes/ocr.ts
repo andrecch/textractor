@@ -22,7 +22,10 @@ router.post("/extract", async (req, res) => {
       return;
     }
 
-    const text = await callNvidiaBuildVision(imageBase64, apiKey);
+    const abortController = new AbortController();
+    req.on("close", () => abortController.abort());
+
+    const text = await callNvidiaBuildVision(imageBase64, apiKey, abortController.signal);
 
     if (text) {
       setCachedOcr(imageBase64, text);
@@ -30,6 +33,9 @@ router.post("/extract", async (req, res) => {
 
     res.json({ text, provider: "nvidia-build" });
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      return;
+    }
     const message = err instanceof Error ? err.message : "OCR failed";
     res.status(500).json({ error: message });
   }

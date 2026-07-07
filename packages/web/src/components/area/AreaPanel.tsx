@@ -21,7 +21,10 @@ export function AreaPanel() {
 
   useEffect(() => {
     if (areas.length > prevLengthRef.current) {
-      setNewAreaId(areas[areas.length - 1].id);
+      const lastArea = areas[areas.length - 1];
+      if (lastArea) {
+        setNewAreaId(lastArea.id);
+      }
     }
     prevLengthRef.current = areas.length;
   }, [areas]);

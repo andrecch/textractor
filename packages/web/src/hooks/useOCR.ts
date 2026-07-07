@@ -10,7 +10,7 @@ import { ocrExtract, saveExtraction } from "@/services/api";
 const OCR_JPEG_QUALITY = 0.85;
 
 export function useOCR() {
-  const { isProcessing, setProcessing } = useOCRStore();
+  const { isProcessing, setProcessing, setAbortController } = useOCRStore();
 
   const extractActive = useCallback(async () => {
     const { settings } = useSettingsStore.getState();
@@ -23,11 +23,22 @@ export function useOCR() {
     const area = getActiveArea();
     if (!area || !area.zone) return;
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+    const signal = abortController.signal;
+
     updateAreaStatus(area.id, "processing");
     setProcessing(true);
 
+    let wasCancelled = false;
+
     try {
       const sourceCanvas = await getSourceCanvas();
+      if (signal.aborted) {
+        wasCancelled = true;
+        return;
+      }
+
       const cropped = cropZone(
         sourceCanvas,
         area.zone.x,
@@ -52,7 +63,13 @@ export function useOCR() {
 
       const ocrPayload = ocrCanvas.toDataURL("image/jpeg", OCR_JPEG_QUALITY);
 
-      const response = await ocrExtract(ocrPayload, settings.apiKey || undefined);
+      const response = await ocrExtract(ocrPayload, settings.apiKey || undefined, signal);
+
+      if (signal.aborted) {
+        wasCancelled = true;
+        return;
+      }
+
       const cleanText = response.text.trim();
 
       updateAreaExtractedText(area.id, cleanText);
@@ -66,15 +83,27 @@ export function useOCR() {
         provider: response.provider,
       });
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        wasCancelled = true;
+        return;
+      }
+      if (signal.aborted) {
+        wasCancelled = true;
+        return;
+      }
       updateAreaStatus(
         area.id,
         "error",
         err instanceof Error ? err.message : "Unknown error"
       );
     } finally {
+      if (wasCancelled) {
+        updateAreaStatus(area.id, "zone-defined");
+      }
       setProcessing(false);
+      setAbortController(null);
     }
-  }, [setProcessing]);
+  }, [setProcessing, setAbortController]);
 
   return { extractActive, isProcessing };
 }
