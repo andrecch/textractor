@@ -6,8 +6,10 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { preprocessImage, cropZone } from "@/services/imageProcessing";
 import { getSourceCanvas } from "@/services/canvasRenderer";
 import { ocrExtract, saveExtraction } from "@/services/api";
+import i18n from "@/i18n";
 
 const OCR_JPEG_QUALITY = 0.85;
+const OCR_TIMEOUT_MS = 30000;
 
 export function useOCR() {
   const { isProcessing, setProcessing, setAbortController } = useOCRStore();
@@ -27,15 +29,25 @@ export function useOCR() {
     setAbortController(abortController);
     const signal = abortController.signal;
 
+    const timeoutId = setTimeout(() => {
+      abortController.abort(
+        new DOMException("OCR request timed out", "TimeoutError")
+      );
+    }, OCR_TIMEOUT_MS);
+
     updateAreaStatus(area.id, "processing");
     setProcessing(true);
 
     let wasCancelled = false;
+    let wasTimeout = false;
 
     try {
       const sourceCanvas = await getSourceCanvas();
       if (signal.aborted) {
         wasCancelled = true;
+        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+          wasTimeout = true;
+        }
         return;
       }
 
@@ -67,6 +79,9 @@ export function useOCR() {
 
       if (signal.aborted) {
         wasCancelled = true;
+        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+          wasTimeout = true;
+        }
         return;
       }
 
@@ -83,12 +98,23 @@ export function useOCR() {
         provider: response.provider,
       });
     } catch (err) {
+      if (err instanceof DOMException && err.name === "TimeoutError") {
+        wasCancelled = true;
+        wasTimeout = true;
+        return;
+      }
       if (err instanceof DOMException && err.name === "AbortError") {
         wasCancelled = true;
+        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+          wasTimeout = true;
+        }
         return;
       }
       if (signal.aborted) {
         wasCancelled = true;
+        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+          wasTimeout = true;
+        }
         return;
       }
       updateAreaStatus(
@@ -97,7 +123,10 @@ export function useOCR() {
         err instanceof Error ? err.message : "Unknown error"
       );
     } finally {
-      if (wasCancelled) {
+      clearTimeout(timeoutId);
+      if (wasTimeout) {
+        updateAreaStatus(area.id, "error", i18n.t("ocr.timeout"));
+      } else if (wasCancelled) {
         updateAreaStatus(area.id, "zone-defined");
       }
       setProcessing(false);

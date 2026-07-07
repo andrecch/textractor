@@ -76,7 +76,8 @@
     "collapseImage": "Colapsar imagen",
     "expandImage": "Expandir imagen",
     "extract": "Extraer texto",
-    "cancel": "Cancelar extraccion"
+    "cancel": "Cancelar extraccion",
+    "timeout": "La solicitud excedio el tiempo limite de 30 segundos. El modelo tardo demasiado en responder."
   },
   "settings": {
     "title": "Configuracion",

@@ -76,7 +76,8 @@
     "collapseImage": "Collapse image",
     "expandImage": "Expand image",
     "extract": "Extract text",
-    "cancel": "Cancel extraction"
+    "cancel": "Cancel extraction",
+    "timeout": "Request timed out after 30 seconds. The model took too long to respond."
   },
   "settings": {
     "title": "Settings",
