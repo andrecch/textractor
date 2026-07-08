@@ -30,7 +30,11 @@ router.post("/extract", async (req, res) => {
     }
 
     const abortController = new AbortController();
-    req.on("close", () => abortController.abort());
+    req.on("close", () => {
+      if (!res.writableEnded) {
+        abortController.abort();
+      }
+    });
 
     const text = await callNvidiaBuildVision(imageBase64, apiKey, abortController.signal);
 
