@@ -1,5 +1,5 @@
 const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const MODEL_ID = "moonshotai/kimi-k2.6";
+const MODEL_ID = "nvidia/nemotron-ocr-v2";
 const OCR_TIMEOUT_MS = 60000;
 const DEBUG_OCR = true;
 
