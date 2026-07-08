@@ -92,7 +92,8 @@
     "usingServerKey": "Using server API Key",
     "language": "Language",
     "save": "Save",
-    "darkMode": "Theme"
+    "darkMode": "Theme",
+    "ocrModel": "OCR Model"
   },
   "history": {
     "title": "Extraction history",

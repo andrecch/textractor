@@ -10,10 +10,10 @@ const DEBUG_OCR = true;
 
 router.post("/extract", async (req, res) => {
   const tRouteStart = performance.now();
-  const { imageBase64, apiKey } = req.body;
+  const { imageBase64, apiKey, model } = req.body;
   if (DEBUG_OCR) {
     const sizeKB = imageBase64 ? (new Blob([imageBase64]).size / 1024).toFixed(1) : "0";
-    console.log(`[OCR-API] /extract received, image size: ${sizeKB} KB`);
+    console.log(`[OCR-API] /extract received, image size: ${sizeKB} KB, model: ${model ?? "default"}`);
   }
 
   try {
@@ -36,7 +36,7 @@ router.post("/extract", async (req, res) => {
       }
     });
 
-    const text = await callNvidiaBuildVision(imageBase64, apiKey, abortController.signal);
+    const text = await callNvidiaBuildVision(imageBase64, apiKey, model, abortController.signal);
 
     if (text) {
       setCachedOcr(imageBase64, text);

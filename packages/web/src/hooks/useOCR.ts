@@ -93,7 +93,7 @@ export function useOCR() {
 
       if (DEBUG_OCR) console.log(`[OCR] Sending request to backend...`);
       const tReqStart = performance.now();
-      const response = await ocrExtract(ocrPayload, settings.apiKey || undefined, signal);
+      const response = await ocrExtract(ocrPayload, settings.apiKey || undefined, settings.ocrModel, signal);
       const tReqEnd = performance.now();
       if (DEBUG_OCR) console.log(`[OCR] Backend response received in ${((tReqEnd - tReqStart) / 1000).toFixed(1)}s`);
 

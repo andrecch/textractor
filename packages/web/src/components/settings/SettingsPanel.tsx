@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
-import { CheckCircle, XCircle, Loader2, Server, Sun, Moon } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Server, Sun, Moon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ocrValidate, getApiKeyStatus } from "@/services/api";
+import { OCR_MODELS } from "@/config/ocrModels";
 import { cn } from "@/lib/utils";
 
 type ValidationState = "idle" | "validating" | "valid" | "invalid";
@@ -138,6 +139,28 @@ export function SettingsPanel() {
           >
             {settings.preprocessingEnabled ? "ON" : "OFF"}
           </Button>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="flex items-center gap-1.5">
+            {t("settings.ocrModel")}
+            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+          </Label>
+          <select
+            value={settings.ocrModel}
+            onChange={(e) => updateSettings({ ocrModel: e.target.value })}
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {OCR_MODELS.map((model) => (
+              <option key={model.id} value={model.id}>
+                {model.name}
+                {model.recommended ? " ⭐" : ""}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            {OCR_MODELS.find((m) => m.id === settings.ocrModel)?.description}
+          </p>
         </div>
 
         <Separator />

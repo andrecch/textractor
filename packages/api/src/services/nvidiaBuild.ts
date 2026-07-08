@@ -1,14 +1,16 @@
 const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const MODEL_ID = "nvidia/nemotron-ocr-v2";
+const DEFAULT_MODEL = "nvidia/nemotron-ocr-v2";
 const OCR_TIMEOUT_MS = 60000;
 const DEBUG_OCR = true;
 
 export async function callNvidiaBuildVision(
   imageBase64: string,
   apiKey?: string,
+  modelId?: string,
   signal?: AbortSignal
 ): Promise<string> {
   const finalApiKey = apiKey || process.env.NVIDIA_API_KEY;
+  const finalModel = modelId || DEFAULT_MODEL;
 
   if (!finalApiKey) {
     throw new Error("No API key provided. Set NVIDIA_API_KEY in .env or provide it in the request.");
@@ -21,7 +23,7 @@ export async function callNvidiaBuildVision(
 
   if (DEBUG_OCR) {
     const sizeKB = (new Blob([imageBase64]).size / 1024).toFixed(1);
-    console.log(`[OCR-API] Calling NVIDIA API (model: ${MODEL_ID}), image size: ${sizeKB} KB, timeout: ${OCR_TIMEOUT_MS}ms`);
+    console.log(`[OCR-API] Calling NVIDIA API (model: ${finalModel}), image size: ${sizeKB} KB, timeout: ${OCR_TIMEOUT_MS}ms`);
   }
   const tStart = performance.now();
 
@@ -32,7 +34,7 @@ export async function callNvidiaBuildVision(
       Authorization: `Bearer ${finalApiKey}`,
     },
     body: JSON.stringify({
-      model: MODEL_ID,
+      model: finalModel,
       messages: [
         {
           role: "system",
