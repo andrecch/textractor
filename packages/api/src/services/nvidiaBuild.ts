@@ -1,6 +1,7 @@
 const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const MODEL_ID = "moonshotai/kimi-k2.6";
-const OCR_TIMEOUT_MS = 30000;
+const OCR_TIMEOUT_MS = 60000;
+const DEBUG_OCR = true;
 
 export async function callNvidiaBuildVision(
   imageBase64: string,
@@ -17,6 +18,12 @@ export async function callNvidiaBuildVision(
   const combinedSignal = signal
     ? AbortSignal.any([signal, timeoutSignal])
     : timeoutSignal;
+
+  if (DEBUG_OCR) {
+    const sizeKB = (new Blob([imageBase64]).size / 1024).toFixed(1);
+    console.log(`[OCR-API] Calling NVIDIA API (model: ${MODEL_ID}), image size: ${sizeKB} KB, timeout: ${OCR_TIMEOUT_MS}ms`);
+  }
+  const tStart = performance.now();
 
   const response = await fetch(NVIDIA_API_URL, {
     method: "POST",
@@ -50,6 +57,11 @@ export async function callNvidiaBuildVision(
     }),
     signal: combinedSignal,
   });
+
+  const tEnd = performance.now();
+  if (DEBUG_OCR) {
+    console.log(`[OCR-API] NVIDIA response: ${response.status} ${response.statusText} in ${((tEnd - tStart) / 1000).toFixed(1)}s`);
+  }
 
   if (!response.ok) {
     const errorText = await response.text();

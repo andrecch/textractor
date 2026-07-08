@@ -7,7 +7,8 @@ import { getAreaImage } from "@/stores/imageStore";
 import { ocrExtract, saveExtraction } from "@/services/api";
 import i18n from "@/i18n";
 
-const OCR_TIMEOUT_MS = 30000;
+const OCR_TIMEOUT_MS = 60000;
+const DEBUG_OCR = true;
 
 function dataUrlToJpegDataUrl(dataUrl: string, quality: number): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -58,12 +59,20 @@ export function useOCR() {
 
     let wasCancelled = false;
     let wasTimeout = false;
+    const t0 = performance.now();
+
+    if (DEBUG_OCR) console.log(`[OCR] Starting extraction for area "${area.name}"`);
 
     try {
       const processedDataUrl = getAreaImage(area.id, "processed") ?? getAreaImage(area.id, "raw");
       if (!processedDataUrl) {
         updateAreaStatus(area.id, "error", "No crop image available");
         return;
+      }
+
+      if (DEBUG_OCR) {
+        const sizeKB = (new Blob([processedDataUrl]).size / 1024).toFixed(1);
+        console.log(`[OCR] Source image size: ${sizeKB} KB`);
       }
 
       if (signal.aborted) {
@@ -74,9 +83,19 @@ export function useOCR() {
         return;
       }
 
+      const tJpegStart = performance.now();
       const ocrPayload = await dataUrlToJpegDataUrl(processedDataUrl, 0.85);
+      const tJpegEnd = performance.now();
+      if (DEBUG_OCR) {
+        const jpegSizeKB = (new Blob([ocrPayload]).size / 1024).toFixed(1);
+        console.log(`[OCR] JPEG conversion: ${(tJpegEnd - tJpegStart).toFixed(0)}ms, size: ${jpegSizeKB} KB`);
+      }
 
+      if (DEBUG_OCR) console.log(`[OCR] Sending request to backend...`);
+      const tReqStart = performance.now();
       const response = await ocrExtract(ocrPayload, settings.apiKey || undefined, signal);
+      const tReqEnd = performance.now();
+      if (DEBUG_OCR) console.log(`[OCR] Backend response received in ${((tReqEnd - tReqStart) / 1000).toFixed(1)}s`);
 
       if (signal.aborted) {
         wasCancelled = true;
@@ -87,6 +106,9 @@ export function useOCR() {
       }
 
       const cleanText = response.text.trim();
+      if (DEBUG_OCR) {
+        console.log(`[OCR] Text received (${cleanText.length} chars): "${cleanText.substring(0, 80)}${cleanText.length > 80 ? '...' : ''}"`);
+      }
 
       updateAreaExtractedText(area.id, cleanText);
 
@@ -99,6 +121,12 @@ export function useOCR() {
         provider: response.provider,
       });
     } catch (err) {
+      if (DEBUG_OCR) {
+        const tErr = performance.now() - t0;
+        const errName = err instanceof Error ? err.name : "Unknown";
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.log(`[OCR] ERROR after ${(tErr / 1000).toFixed(1)}s - ${errName}: ${errMsg}`);
+      }
       if (err instanceof DOMException && err.name === "TimeoutError") {
         wasCancelled = true;
         wasTimeout = true;
@@ -125,6 +153,11 @@ export function useOCR() {
       );
     } finally {
       clearTimeout(timeoutId);
+      if (DEBUG_OCR) {
+        const totalMs = performance.now() - t0;
+        const result = wasTimeout ? "TIMEOUT" : wasCancelled ? "CANCELLED" : "SUCCESS";
+        console.log(`[OCR] Finished: ${result} (total ${(totalMs / 1000).toFixed(1)}s)`);
+      }
       if (wasTimeout) {
         updateAreaStatus(area.id, "error", i18n.t("ocr.timeout"));
       } else if (wasCancelled) {
