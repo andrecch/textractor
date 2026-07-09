@@ -6,11 +6,17 @@ import {
 import { getCachedOcr, setCachedOcr } from "../services/ocrCache.js";
 
 const router = Router();
+const DEBUG_OCR = true;
 
 router.post("/extract", async (req, res) => {
-  try {
-    const { imageBase64, apiKey } = req.body;
+  const tRouteStart = performance.now();
+  const { imageBase64, apiKey, model } = req.body;
+  if (DEBUG_OCR) {
+    const sizeKB = imageBase64 ? (new Blob([imageBase64]).size / 1024).toFixed(1) : "0";
+    console.log(`[OCR-API] /extract received, image size: ${sizeKB} KB, model: ${model ?? "default"}`);
+  }
 
+  try {
     if (!imageBase64) {
       res.status(400).json({ error: "imageBase64 is required" });
       return;
@@ -18,11 +24,19 @@ router.post("/extract", async (req, res) => {
 
     const cached = getCachedOcr(imageBase64);
     if (cached) {
+      if (DEBUG_OCR) console.log(`[OCR-API] Cache hit, returning immediately`);
       res.json({ text: cached, provider: "nvidia-build", cached: true });
       return;
     }
 
-    const text = await callNvidiaBuildVision(imageBase64, apiKey);
+    const abortController = new AbortController();
+    req.on("close", () => {
+      if (!res.writableEnded) {
+        abortController.abort();
+      }
+    });
+
+    const text = await callNvidiaBuildVision(imageBase64, apiKey, model, abortController.signal);
 
     if (text) {
       setCachedOcr(imageBase64, text);
@@ -30,8 +44,21 @@ router.post("/extract", async (req, res) => {
 
     res.json({ text, provider: "nvidia-build" });
   } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      if (DEBUG_OCR) console.log(`[OCR-API] Request aborted by client`);
+      return;
+    }
+    if (DEBUG_OCR) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.log(`[OCR-API] Error: ${errMsg}`);
+    }
     const message = err instanceof Error ? err.message : "OCR failed";
     res.status(500).json({ error: message });
+  } finally {
+    if (DEBUG_OCR) {
+      const totalMs = performance.now() - tRouteStart;
+      console.log(`[OCR-API] /extract finished in ${(totalMs / 1000).toFixed(1)}s`);
+    }
   }
 });
 

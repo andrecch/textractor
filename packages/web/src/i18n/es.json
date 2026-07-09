@@ -75,7 +75,9 @@
     "toggleImage": "Alternar imagen",
     "collapseImage": "Colapsar imagen",
     "expandImage": "Expandir imagen",
-    "extract": "Extraer texto"
+    "extract": "Extraer texto",
+    "cancel": "Cancelar extraccion",
+    "timeout": "La solicitud excedio el tiempo limite de 60 segundos. El modelo tardo demasiado en responder."
   },
   "settings": {
     "title": "Configuracion",
@@ -90,7 +92,8 @@
     "usingServerKey": "Usando API Key del servidor",
     "language": "Idioma",
     "save": "Guardar",
-    "darkMode": "Tema"
+    "darkMode": "Tema",
+    "ocrModel": "Modelo OCR"
   },
   "history": {
     "title": "Historial de extracciones",

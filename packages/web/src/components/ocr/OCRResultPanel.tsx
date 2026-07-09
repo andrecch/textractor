@@ -10,6 +10,7 @@ import {
   AlertCircle,
   RefreshCcw,
   Play,
+  Square,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
@@ -24,7 +25,7 @@ import { downloadPng, sanitizeFileName } from "@/services/imageExport";
 export function OCRResultPanel() {
   const { t } = useTranslation();
   const { getActiveArea, activeAreaId } = useAreaStore();
-  const { isProcessing } = useOCRStore();
+  const { isProcessing, cancelExtraction } = useOCRStore();
   const { extractActive } = useOCR();
   const [copied, setCopied] = useState(false);
   const [showProcessed, setShowProcessed] = useState(false);
@@ -158,12 +159,16 @@ export function OCRResultPanel() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
-              onClick={extractActive}
-              disabled={isProcessing || !activeAreaId || !activeArea?.zone}
-              title={t("ocr.extract")}
+              className={`h-7 w-7 ${isProcessing ? "text-destructive hover:text-destructive" : ""}`}
+              onClick={isProcessing ? cancelExtraction : extractActive}
+              disabled={!isProcessing && (!activeAreaId || !activeArea?.zone)}
+              title={isProcessing ? t("ocr.cancel") : t("ocr.extract")}
             >
-              <Play className="h-4 w-4" />
+              {isProcessing ? (
+                <Square className="h-4 w-4 fill-current" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
             </Button>
             <Button
               variant="ghost"

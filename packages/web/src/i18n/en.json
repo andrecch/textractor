@@ -75,7 +75,9 @@
     "toggleImage": "Toggle image",
     "collapseImage": "Collapse image",
     "expandImage": "Expand image",
-    "extract": "Extract text"
+    "extract": "Extract text",
+    "cancel": "Cancel extraction",
+    "timeout": "Request timed out after 60 seconds. The model took too long to respond."
   },
   "settings": {
     "title": "Settings",
@@ -90,7 +92,8 @@
     "usingServerKey": "Using server API Key",
     "language": "Language",
     "save": "Save",
-    "darkMode": "Theme"
+    "darkMode": "Theme",
+    "ocrModel": "OCR Model"
   },
   "history": {
     "title": "Extraction history",

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAreaStore } from "@/stores/areaStore";
 import { useDocumentStore } from "@/stores/documentStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import type { AreaZone } from "@/types/area";
 import { getSourceCanvas } from "@/services/canvasRenderer";
-import { cropZone } from "@/services/imageProcessing";
+import { cropZone, preprocessImage } from "@/services/imageProcessing";
 
 export function useArea() {
   const {
@@ -16,8 +17,10 @@ export function useArea() {
     renameArea,
     updateAreaZone,
     setAreaCroppedImageRaw,
+    setAreaCroppedImageProcessed,
   } = useAreaStore();
   const { currentPage, document } = useDocumentStore();
+  const { settings } = useSettingsStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
   const startPoint = useRef<{ x: number; y: number } | null>(null);
@@ -116,9 +119,17 @@ export function useArea() {
         const z = activeArea.zone!;
         const cropped = cropZone(sourceCanvas, z.x, z.y, z.width, z.height);
         if (cancelled) return;
-        const dataUrl = cropped.toDataURL("image/png");
+        const rawDataUrl = cropped.toDataURL("image/png");
         if (cancelled) return;
-        setAreaCroppedImageRaw(activeArea.id, dataUrl);
+        setAreaCroppedImageRaw(activeArea.id, rawDataUrl);
+
+        if (settings.preprocessingEnabled) {
+          const { dataUrl: processedDataUrl } = await preprocessImage(cropped);
+          if (cancelled) return;
+          setAreaCroppedImageProcessed(activeArea.id, processedDataUrl);
+        } else {
+          setAreaCroppedImageProcessed(activeArea.id, rawDataUrl);
+        }
       } catch {
         // Silently ignore render errors; the OCR step will surface them.
       }
@@ -131,7 +142,9 @@ export function useArea() {
     activeArea,
     currentPage,
     activeAreaId,
+    settings.preprocessingEnabled,
     setAreaCroppedImageRaw,
+    setAreaCroppedImageProcessed,
   ]);
 
   return {
