@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
-import { CheckCircle, XCircle, Loader2, Server, Sun, Moon, Sparkles } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Server, Sun, Moon, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { ocrValidate, getApiKeyStatus } from "@/services/api";
 import { OCR_MODELS } from "@/config/ocrModels";
@@ -142,22 +148,35 @@ export function SettingsPanel() {
         </div>
 
         <div className="space-y-2">
-          <Label className="flex items-center gap-1.5">
-            {t("settings.ocrModel")}
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-          </Label>
-          <select
-            value={settings.ocrModel}
-            onChange={(e) => updateSettings({ ocrModel: e.target.value })}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {OCR_MODELS.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.name}
-                {model.recommended ? " ⭐" : ""}
-              </option>
-            ))}
-          </select>
+          <Label>{t("settings.ocrModel")}</Label>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              className={cn(
+                "flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors",
+                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                "data-[popup-open]:border-ring/50 data-[popup-open]:ring-1 data-[popup-open]:ring-ring/20"
+              )}
+            >
+              <span>
+                {OCR_MODELS.find((m) => m.id === settings.ocrModel)?.name ??
+                  t("settings.ocrModel")}
+              </span>
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[var(--anchor-width)]">
+              {OCR_MODELS.map((model) => (
+                <DropdownMenuItem
+                  key={model.id}
+                  onClick={() => updateSettings({ ocrModel: model.id })}
+                >
+                  <span className="flex-1">{model.name}</span>
+                  {model.id === settings.ocrModel && (
+                    <Check className="h-4 w-4 text-primary" />
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <p className="text-xs text-muted-foreground">
             {OCR_MODELS.find((m) => m.id === settings.ocrModel)?.description}
           </p>
