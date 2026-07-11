@@ -124,10 +124,8 @@ export function HistoryPanel() {
                 </div>
                 <div className="flex gap-1">
                   <Dialog>
-                    <DialogTrigger>
-                      <Button variant="ghost" size="sm">
-                        {t("history.view")}
-                      </Button>
+                    <DialogTrigger render={<Button variant="ghost" size="sm" />}>
+                      {t("history.view")}
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>

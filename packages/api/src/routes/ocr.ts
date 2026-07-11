@@ -29,14 +29,7 @@ router.post("/extract", async (req, res) => {
       return;
     }
 
-    const abortController = new AbortController();
-    req.on("close", () => {
-      if (!res.writableEnded) {
-        abortController.abort();
-      }
-    });
-
-    const text = await callNvidiaBuildVision(imageBase64, apiKey, model, abortController.signal);
+    const text = await callNvidiaBuildVision(imageBase64, apiKey, model);
 
     if (text) {
       setCachedOcr(imageBase64, text);
@@ -46,6 +39,13 @@ router.post("/extract", async (req, res) => {
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       if (DEBUG_OCR) console.log(`[OCR-API] Request aborted by client`);
+      if (!res.headersSent) {
+        try {
+          res.status(499).json({ error: "Request aborted by client" });
+        } catch {
+          // Response already closed, ignore
+        }
+      }
       return;
     }
     if (DEBUG_OCR) {
