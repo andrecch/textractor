@@ -87,6 +87,7 @@ export function AreaItem({
             className="h-7 text-sm"
             autoFocus
             onClick={(e) => e.stopPropagation()}
+            onBlur={handleSaveRename}
           />
           <Button
             variant="ghost"
