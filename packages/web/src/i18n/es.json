@@ -14,7 +14,7 @@
     "subtitle": "Extraccion inteligente de zonas",
     "description": "Sube un PDF o imagen, dibuja una zona y extrae el texto con precision usando IA.",
     "poweredBy": "OCR impulsado por NVIDIA Build",
-    "model": "Modelo Kimi 2.6 Vision",
+    "model": "Modelo Nemotron OCR v2",
     "apiKeyTitle": "Configura tu API Key",
     "apiKeyDescription": "Para empezar, agrega tu API Key de NVIDIA Build en Configuracion.",
     "goToSettings": "Ir a Configuracion"
