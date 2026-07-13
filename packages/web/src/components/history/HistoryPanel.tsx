@@ -4,7 +4,10 @@ import { Trash2, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -92,10 +95,28 @@ export function HistoryPanel() {
           )}
         </div>
         {records.length > 0 && (
-          <Button variant="outline" size="sm" onClick={handleClear}>
-            <Trash2 className="h-4 w-4 mr-1" />
-            {t("history.clear")}
-          </Button>
+          <Dialog>
+            <DialogTrigger render={<Button variant="outline" size="sm" />}>
+              <Trash2 className="h-4 w-4 mr-1" />
+              {t("history.clear")}
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("history.clearConfirmTitle")}</DialogTitle>
+                <DialogDescription>
+                  {t("history.clearConfirmDescription")}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose render={<Button variant="outline" />}>
+                  {t("history.cancel")}
+                </DialogClose>
+                <Button variant="destructive" onClick={handleClear}>
+                  {t("history.confirmClear")}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         )}
       </div>
 

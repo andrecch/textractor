@@ -104,6 +104,10 @@
     "date": "Date",
     "provider": "Provider",
     "view": "View text",
-    "clear": "Clear history"
+    "clear": "Clear history",
+    "clearConfirmTitle": "Clear history",
+    "clearConfirmDescription": "All extraction records will be deleted. This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirmClear": "Clear all"
   }
 }

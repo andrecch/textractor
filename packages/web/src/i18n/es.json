@@ -104,6 +104,10 @@
     "date": "Fecha",
     "provider": "Proveedor",
     "view": "Ver texto",
-    "clear": "Limpiar historial"
+    "clear": "Limpiar historial",
+    "clearConfirmTitle": "Borrar historial",
+    "clearConfirmDescription": "Se eliminaran todas las extracciones del historial. Esta accion no se puede deshacer.",
+    "cancel": "Cancelar",
+    "confirmClear": "Borrar todo"
   }
 }
