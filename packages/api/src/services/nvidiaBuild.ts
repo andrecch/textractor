@@ -5,6 +5,8 @@ const CV_MODELS = ["nvidia/nemotron-ocr-v2"];
 const OCR_TIMEOUT_MS = 60000;
 const DEBUG_OCR = true;
 
+import { resolveApiKey } from "./settingsStore.js";
+
 interface CVResponse {
   data?: Array<{
     index: number;
@@ -21,11 +23,11 @@ export async function callNvidiaBuildVision(
   modelId?: string,
   signal?: AbortSignal
 ): Promise<string> {
-  const finalApiKey = apiKey || process.env.NVIDIA_API_KEY;
+  const finalApiKey = apiKey || resolveApiKey();
   const finalModel = modelId || DEFAULT_MODEL;
 
   if (!finalApiKey) {
-    throw new Error("No API key provided. Set NVIDIA_API_KEY in .env or provide it in the request.");
+    throw new Error("No API key configured. Set NVIDIA_API_KEY in .env, or configure one from Settings.");
   }
 
   const isCVModel = CV_MODELS.includes(finalModel);
@@ -123,12 +125,16 @@ function cleanOcrResponse(text: string): string {
 }
 
 export async function validateNvidiaBuildKey(
-  apiKey: string
+  apiKey?: string
 ): Promise<{ valid: boolean; error?: string }> {
   try {
+    const keyToValidate = apiKey || resolveApiKey();
+    if (!keyToValidate) {
+      return { valid: false, error: "No API key configured" };
+    }
     const tinyPng =
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
-    await callNvidiaBuildVision(tinyPng, apiKey);
+    await callNvidiaBuildVision(tinyPng, keyToValidate);
     return { valid: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
-import { CheckCircle, XCircle, Loader2, Server, Sun, Moon, ChevronDown, Check } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, Server, Trash2, Sun, Moon, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { ocrValidate, getApiKeyStatus } from "@/services/api";
+import {
+  ocrValidate,
+  getApiKeyStatus,
+  setApiKey,
+  clearApiKey,
+} from "@/services/api";
+import type { ApiKeySource } from "@/services/api";
 import { OCR_MODELS } from "@/config/ocrModels";
 import { cn } from "@/lib/utils";
 
@@ -24,34 +30,63 @@ export function SettingsPanel() {
   const { t, i18n } = useTranslation();
   const { settings, updateSettings } = useSettingsStore();
   const { resolvedTheme, setTheme } = useTheme();
+
+  const [inputKey, setInputKey] = useState("");
   const [validationState, setValidationState] = useState<ValidationState>("idle");
   const [validationError, setValidationError] = useState("");
-  const [serverKeyPreview, setServerKeyPreview] = useState("");
-  const [serverHasKey, setServerHasKey] = useState(false);
+  const [keySource, setKeySource] = useState<ApiKeySource>("none");
+  const [saving, setSaving] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
-  useEffect(() => {
-    getApiKeyStatus().then(({ hasKey, preview }) => {
-      setServerHasKey(hasKey);
-      setServerKeyPreview(preview);
-    });
+  const refreshStatus = useCallback(async () => {
+    const status = await getApiKeyStatus();
+    setKeySource(status.source);
   }, []);
 
-  const handleValidate = async () => {
-    const keyToValidate = settings.apiKey || (serverHasKey ? undefined : "");
-    if (!keyToValidate && !serverHasKey) return;
+  useEffect(() => {
+    refreshStatus();
+  }, [refreshStatus]);
 
+  const handleSave = async () => {
+    if (!inputKey.trim()) return;
+    setSaving(true);
+    setValidationState("idle");
+    try {
+      await setApiKey(inputKey.trim());
+      setInputKey("");
+      await refreshStatus();
+      setValidationState("valid");
+    } catch {
+      setValidationState("invalid");
+      setValidationError("Failed to save API key");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleClear = async () => {
+    setClearing(true);
+    setValidationState("idle");
+    try {
+      await clearApiKey();
+      await refreshStatus();
+    } catch {
+      // silently fail
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  const handleValidate = async () => {
     setValidationState("validating");
     try {
-      if (settings.apiKey) {
-        const result = await ocrValidate(settings.apiKey);
-        if (result.valid) {
-          setValidationState("valid");
-        } else {
-          setValidationState("invalid");
-          setValidationError(result.error ?? "");
-        }
-      } else {
+      const keyToValidate = inputKey.trim() || undefined;
+      const result = await ocrValidate(keyToValidate);
+      if (result.valid) {
         setValidationState("valid");
+      } else {
+        setValidationState("invalid");
+        setValidationError(result.error ?? "");
       }
     } catch {
       setValidationState("invalid");
@@ -64,10 +99,8 @@ export function SettingsPanel() {
     i18n.changeLanguage(lang);
   };
 
-  const isUsingServerKey = !settings.apiKey && serverHasKey;
-  const displayValue = settings.apiKey
-    ? settings.apiKey.substring(0, 15) + "***"
-    : serverKeyPreview;
+  const hasKey = keySource !== "none";
+  const canValidate = inputKey.trim().length > 0 || hasKey;
 
   return (
     <div className="max-w-lg mx-auto p-8">
@@ -185,41 +218,80 @@ export function SettingsPanel() {
         <Separator />
 
         <div className="space-y-2">
-          <Label>{t("settings.apiKey")}</Label>
-          <Input
-            type="text"
-            placeholder={t("settings.apiKeyPlaceholder")}
-            value={displayValue}
-            readOnly
-            className="bg-muted"
-          />
+          <div className="flex items-center justify-between">
+            <Label>{t("settings.apiKey")}</Label>
+            <div className="flex items-center gap-1.5">
+              {hasKey && keySource === "server" && (
+                <>
+                  <Server className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    {t("settings.serverKey")}
+                  </span>
+                </>
+              )}
+              {hasKey && keySource === "user" && (
+                <span className="text-xs font-medium text-green-600">
+                  {t("settings.userKey")}
+                </span>
+              )}
+              {!hasKey && (
+                <span className="text-xs font-medium text-destructive">
+                  {t("settings.notConfigured")}
+                </span>
+              )}
+            </div>
+          </div>
+
           <Input
             type="password"
-            placeholder={t("settings.apiKeyOverridePlaceholder")}
-            value={settings.apiKey}
+            placeholder={t("settings.apiKeyPlaceholder")}
+            value={inputKey}
             onChange={(e) => {
-              updateSettings({ apiKey: e.target.value });
+              setInputKey(e.target.value);
               setValidationState("idle");
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && inputKey.trim()) {
+                handleSave();
+              }
+            }}
           />
-          {isUsingServerKey && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Server className="h-3 w-3" />
-              <span>{t("settings.usingServerKey")}</span>
-            </div>
-          )}
+
           <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={saving || !inputKey.trim()}
+            >
+              {saving && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+              {t("settings.saveKey")}
+            </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={handleValidate}
-              disabled={validationState === "validating" || (!settings.apiKey && !serverHasKey)}
+              disabled={validationState === "validating" || !canValidate}
             >
               {validationState === "validating" && (
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
               )}
               {t("settings.validate")}
             </Button>
+            {keySource === "user" && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleClear}
+                disabled={clearing}
+              >
+                {clearing ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <Trash2 className="h-3 w-3 mr-1" />
+                )}
+                {t("settings.clearKey")}
+              </Button>
+            )}
             {validationState === "valid" && (
               <span className="flex items-center gap-1 text-sm text-green-600">
                 <CheckCircle className="h-4 w-4" />

@@ -2,14 +2,10 @@ const API_BASE = "/api";
 
 export async function ocrExtract(
   imageBase64: string,
-  apiKey?: string,
   model?: string,
   signal?: AbortSignal
 ): Promise<{ text: string; provider: string }> {
   const body: Record<string, string> = { imageBase64 };
-  if (apiKey) {
-    body.apiKey = apiKey;
-  }
   if (model) {
     body.model = model;
   }
@@ -29,21 +25,45 @@ export async function ocrExtract(
   return response.json();
 }
 
-export async function getApiKeyStatus(): Promise<{ hasKey: boolean; preview: string }> {
+export type ApiKeySource = "server" | "user" | "none";
+
+export async function getApiKeyStatus(): Promise<{
+  hasKey: boolean;
+  source: ApiKeySource;
+}> {
   const response = await fetch(`${API_BASE}/config/api-key`);
   if (!response.ok) {
-    return { hasKey: false, preview: "" };
+    return { hasKey: false, source: "none" };
   }
   return response.json();
 }
 
+export async function setApiKey(apiKey: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/config/api-key`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ apiKey }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error ?? "Failed to save API key");
+  }
+}
+
+export async function clearApiKey(): Promise<void> {
+  const response = await fetch(`${API_BASE}/config/api-key`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to clear API key");
+}
+
 export async function ocrValidate(
-  apiKey: string
+  apiKey?: string
 ): Promise<{ valid: boolean; error?: string }> {
   const response = await fetch(`${API_BASE}/ocr/validate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ apiKey }),
+    body: JSON.stringify(apiKey ? { apiKey } : {}),
   });
 
   if (!response.ok) {

@@ -21,9 +21,27 @@ export function getDatabase(): Database.Database {
 
 export function runMigrations(): void {
   const database = getDatabase();
-  const migration = readFileSync(
-    join(__dirname, "migrations/001_create_extractions.sql"),
-    "utf-8"
+
+  database.exec(
+    "CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT (datetime('now')))"
   );
-  database.exec(migration);
+
+  const migrationFiles = [
+    "001_create_extractions.sql",
+    "002_create_settings.sql",
+  ];
+
+  for (const file of migrationFiles) {
+    const alreadyApplied = database
+      .prepare("SELECT 1 FROM _migrations WHERE name = ?")
+      .get(file);
+    if (alreadyApplied) continue;
+
+    const migration = readFileSync(
+      join(__dirname, "migrations", file),
+      "utf-8"
+    );
+    database.exec(migration);
+    database.prepare("INSERT INTO _migrations (name) VALUES (?)").run(file);
+  }
 }

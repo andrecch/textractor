@@ -10,7 +10,7 @@ const DEBUG_OCR = true;
 
 router.post("/extract", async (req, res) => {
   const tRouteStart = performance.now();
-  const { imageBase64, apiKey, model } = req.body;
+  const { imageBase64, model } = req.body;
   if (DEBUG_OCR) {
     const sizeKB = imageBase64 ? (new Blob([imageBase64]).size / 1024).toFixed(1) : "0";
     console.log(`[OCR-API] /extract received, image size: ${sizeKB} KB, model: ${model ?? "default"}`);
@@ -29,7 +29,7 @@ router.post("/extract", async (req, res) => {
       return;
     }
 
-    const text = await callNvidiaBuildVision(imageBase64, apiKey, model);
+    const text = await callNvidiaBuildVision(imageBase64, undefined, model);
 
     if (text) {
       setCachedOcr(imageBase64, text);
@@ -65,13 +65,7 @@ router.post("/extract", async (req, res) => {
 router.post("/validate", async (req, res) => {
   try {
     const { apiKey } = req.body;
-
-    if (!apiKey) {
-      res.status(400).json({ error: "apiKey is required" });
-      return;
-    }
-
-    const result = await validateNvidiaBuildKey(apiKey);
+    const result = await validateNvidiaBuildKey(apiKey || undefined);
     res.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Validation failed";
