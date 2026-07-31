@@ -6,6 +6,9 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { getAreaImage } from "@/stores/imageStore";
 import { ocrExtract, saveExtraction } from "@/services/api";
 import i18n from "@/i18n";
+import type { Area } from "@/types/area";
+import type { AppSettings } from "@/types/settings";
+import type { DocumentFile } from "@/types/document";
 
 const OCR_TIMEOUT_MS = 60000;
 const DEBUG_OCR = true;
@@ -30,142 +33,213 @@ function dataUrlToJpegDataUrl(dataUrl: string, quality: number): Promise<string>
   });
 }
 
+export interface ExtractionDeps {
+  getSettings: () => AppSettings;
+  getDocument: () => DocumentFile | null;
+  getActiveArea: () => Area | null;
+  updateAreaStatus: (id: string, status: Area["status"], error?: string) => void;
+  updateAreaExtractedText: (id: string, text: string) => void;
+  setProcessing: (b: boolean) => void;
+  setAbortController: (c: AbortController | null) => void;
+  ocrExtract: (
+    imageBase64: string,
+    model?: string,
+    signal?: AbortSignal
+  ) => Promise<{ text: string; provider: string }>;
+  saveExtraction: (data: {
+    documentName: string;
+    areaName: string;
+    pageIndex: number;
+    zone: { x: number; y: number; width: number; height: number };
+    extractedText: string;
+    provider: string;
+  }) => Promise<void>;
+  dataUrlToJpegDataUrl: (dataUrl: string, quality: number) => Promise<string>;
+  getAreaImage: (id: string, kind: "raw" | "processed") => string | null;
+  getTimeoutMessage: () => string;
+  timeoutMs: number;
+  debug: boolean;
+}
+
+export type ExtractionOutcome = {
+  status: Area["status"] | null;
+  reason: "success" | "error" | "cancelled" | "timeout" | "skipped";
+};
+
+export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOutcome> {
+  const {
+    getSettings,
+    getDocument,
+    getActiveArea,
+    updateAreaStatus,
+    updateAreaExtractedText,
+    setProcessing,
+    setAbortController,
+    ocrExtract: doOcrExtract,
+    saveExtraction: doSaveExtraction,
+    dataUrlToJpegDataUrl: convertImage,
+    getAreaImage: getImage,
+    getTimeoutMessage,
+    timeoutMs,
+    debug,
+  } = deps;
+
+  const settings = getSettings();
+  const doc = getDocument();
+
+  if (!settings.ocrEnabled || !doc) {
+    return { status: null, reason: "skipped" };
+  }
+
+  const area = getActiveArea();
+  if (!area || !area.zone) {
+    return { status: null, reason: "skipped" };
+  }
+
+  const abortController = new AbortController();
+  setAbortController(abortController);
+  const signal = abortController.signal;
+
+  const timeoutId = setTimeout(() => {
+    abortController.abort(
+      new DOMException("OCR request timed out", "TimeoutError")
+    );
+  }, timeoutMs);
+
+  updateAreaStatus(area.id, "processing");
+  setProcessing(true);
+
+  let wasCancelled = false;
+  let wasTimeout = false;
+  let finalStatus: Area["status"] | null = null;
+  let finalReason: ExtractionOutcome["reason"] = "success";
+
+  try {
+    const processedDataUrl = getImage(area.id, "processed") ?? getImage(area.id, "raw");
+    if (!processedDataUrl) {
+      updateAreaStatus(area.id, "error", "No crop image available");
+      finalStatus = "error";
+      finalReason = "error";
+      return { status: finalStatus, reason: finalReason };
+    }
+
+    if (debug) {
+      const sizeKB = (new Blob([processedDataUrl]).size / 1024).toFixed(1);
+      console.log(`[OCR] Source image size: ${sizeKB} KB`);
+    }
+
+    if (signal.aborted) {
+      wasCancelled = true;
+      if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+        wasTimeout = true;
+      }
+      return { status: finalStatus, reason: wasTimeout ? "timeout" : "cancelled" };
+    }
+
+    const ocrPayload = await convertImage(processedDataUrl, 0.85);
+
+    if (debug) console.log(`[OCR] Sending request to backend...`);
+    const response = await doOcrExtract(ocrPayload, settings.ocrModel, signal);
+
+    if (signal.aborted) {
+      wasCancelled = true;
+      if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+        wasTimeout = true;
+      }
+      return { status: finalStatus, reason: wasTimeout ? "timeout" : "cancelled" };
+    }
+
+    const cleanText = response.text.trim();
+
+    updateAreaExtractedText(area.id, cleanText);
+
+    await doSaveExtraction({
+      documentName: doc.name,
+      areaName: area.name,
+      pageIndex: area.pageIndex,
+      zone: area.zone,
+      extractedText: cleanText,
+      provider: response.provider,
+    });
+
+    updateAreaStatus(area.id, "extracted");
+    finalStatus = "extracted";
+    finalReason = "success";
+    return { status: finalStatus, reason: finalReason };
+  } catch (err) {
+    if (debug) {
+      const errName = err instanceof Error ? err.name : "Unknown";
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.log(`[OCR] ERROR - ${errName}: ${errMsg}`);
+    }
+    if (err instanceof DOMException && err.name === "TimeoutError") {
+      wasCancelled = true;
+      wasTimeout = true;
+      return { status: null, reason: "timeout" };
+    }
+    if (err instanceof DOMException && err.name === "AbortError") {
+      wasCancelled = true;
+      if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+        wasTimeout = true;
+      }
+      return { status: null, reason: wasTimeout ? "timeout" : "cancelled" };
+    }
+    if (signal.aborted) {
+      wasCancelled = true;
+      if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
+        wasTimeout = true;
+      }
+      return { status: null, reason: wasTimeout ? "timeout" : "cancelled" };
+    }
+    updateAreaStatus(
+      area.id,
+      "error",
+      err instanceof Error ? err.message : "Unknown error"
+    );
+    finalStatus = "error";
+    finalReason = "error";
+    return { status: finalStatus, reason: finalReason };
+  } finally {
+    clearTimeout(timeoutId);
+    if (wasTimeout) {
+      updateAreaStatus(area.id, "error", getTimeoutMessage());
+      finalStatus = "error";
+      finalReason = "timeout";
+    } else if (wasCancelled) {
+      updateAreaStatus(area.id, "zone-defined");
+      finalStatus = "zone-defined";
+      finalReason = "cancelled";
+    }
+    setProcessing(false);
+    setAbortController(null);
+  }
+}
+
 export function useOCR() {
   const { isProcessing, setProcessing, setAbortController } = useOCRStore();
 
   const extractActive = useCallback(async () => {
-    const { settings } = useSettingsStore.getState();
-    const { document: doc } = useDocumentStore.getState();
-    const { getActiveArea, updateAreaStatus, updateAreaExtractedText } =
+    const { updateAreaStatus, updateAreaExtractedText, getActiveArea } =
       useAreaStore.getState();
 
-    if (!settings.ocrEnabled || !doc) return;
+    if (DEBUG_OCR) console.log(`[OCR] Starting extraction...`);
 
-    const area = getActiveArea();
-    if (!area || !area.zone) return;
-
-    const abortController = new AbortController();
-    setAbortController(abortController);
-    const signal = abortController.signal;
-
-    const timeoutId = setTimeout(() => {
-      abortController.abort(
-        new DOMException("OCR request timed out", "TimeoutError")
-      );
-    }, OCR_TIMEOUT_MS);
-
-    updateAreaStatus(area.id, "processing");
-    setProcessing(true);
-
-    let wasCancelled = false;
-    let wasTimeout = false;
-    const t0 = performance.now();
-
-    if (DEBUG_OCR) console.log(`[OCR] Starting extraction for area "${area.name}"`);
-
-    try {
-      const processedDataUrl = getAreaImage(area.id, "processed") ?? getAreaImage(area.id, "raw");
-      if (!processedDataUrl) {
-        updateAreaStatus(area.id, "error", "No crop image available");
-        return;
-      }
-
-      if (DEBUG_OCR) {
-        const sizeKB = (new Blob([processedDataUrl]).size / 1024).toFixed(1);
-        console.log(`[OCR] Source image size: ${sizeKB} KB`);
-      }
-
-      if (signal.aborted) {
-        wasCancelled = true;
-        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
-          wasTimeout = true;
-        }
-        return;
-      }
-
-      const tJpegStart = performance.now();
-      const ocrPayload = await dataUrlToJpegDataUrl(processedDataUrl, 0.85);
-      const tJpegEnd = performance.now();
-      if (DEBUG_OCR) {
-        const jpegSizeKB = (new Blob([ocrPayload]).size / 1024).toFixed(1);
-        console.log(`[OCR] JPEG conversion: ${(tJpegEnd - tJpegStart).toFixed(0)}ms, size: ${jpegSizeKB} KB`);
-      }
-
-      if (DEBUG_OCR) console.log(`[OCR] Sending request to backend...`);
-      const tReqStart = performance.now();
-      const response = await ocrExtract(ocrPayload, settings.ocrModel, signal);
-      const tReqEnd = performance.now();
-      if (DEBUG_OCR) console.log(`[OCR] Backend response received in ${((tReqEnd - tReqStart) / 1000).toFixed(1)}s`);
-
-      if (signal.aborted) {
-        wasCancelled = true;
-        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
-          wasTimeout = true;
-        }
-        return;
-      }
-
-      const cleanText = response.text.trim();
-      if (DEBUG_OCR) {
-        console.log(`[OCR] Text received (${cleanText.length} chars): "${cleanText.substring(0, 80)}${cleanText.length > 80 ? '...' : ''}"`);
-      }
-
-      updateAreaExtractedText(area.id, cleanText);
-
-      await saveExtraction({
-        documentName: doc.name,
-        areaName: area.name,
-        pageIndex: area.pageIndex,
-        zone: area.zone,
-        extractedText: cleanText,
-        provider: response.provider,
-      });
-    } catch (err) {
-      if (DEBUG_OCR) {
-        const tErr = performance.now() - t0;
-        const errName = err instanceof Error ? err.name : "Unknown";
-        const errMsg = err instanceof Error ? err.message : String(err);
-        console.log(`[OCR] ERROR after ${(tErr / 1000).toFixed(1)}s - ${errName}: ${errMsg}`);
-      }
-      if (err instanceof DOMException && err.name === "TimeoutError") {
-        wasCancelled = true;
-        wasTimeout = true;
-        return;
-      }
-      if (err instanceof DOMException && err.name === "AbortError") {
-        wasCancelled = true;
-        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
-          wasTimeout = true;
-        }
-        return;
-      }
-      if (signal.aborted) {
-        wasCancelled = true;
-        if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
-          wasTimeout = true;
-        }
-        return;
-      }
-      updateAreaStatus(
-        area.id,
-        "error",
-        err instanceof Error ? err.message : "Unknown error"
-      );
-    } finally {
-      clearTimeout(timeoutId);
-      if (DEBUG_OCR) {
-        const totalMs = performance.now() - t0;
-        const result = wasTimeout ? "TIMEOUT" : wasCancelled ? "CANCELLED" : "SUCCESS";
-        console.log(`[OCR] Finished: ${result} (total ${(totalMs / 1000).toFixed(1)}s)`);
-      }
-      if (wasTimeout) {
-        updateAreaStatus(area.id, "error", i18n.t("ocr.timeout"));
-      } else if (wasCancelled) {
-        updateAreaStatus(area.id, "zone-defined");
-      }
-      setProcessing(false);
-      setAbortController(null);
-    }
+    return runExtraction({
+      getSettings: () => useSettingsStore.getState().settings,
+      getDocument: () => useDocumentStore.getState().document,
+      getActiveArea,
+      updateAreaStatus,
+      updateAreaExtractedText,
+      setProcessing,
+      setAbortController,
+      ocrExtract,
+      saveExtraction,
+      dataUrlToJpegDataUrl,
+      getAreaImage,
+      getTimeoutMessage: () => i18n.t("ocr.timeout"),
+      timeoutMs: OCR_TIMEOUT_MS,
+      debug: DEBUG_OCR,
+    });
   }, [setProcessing, setAbortController]);
 
   return { extractActive, isProcessing };
