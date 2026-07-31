@@ -13,6 +13,12 @@ export const OCR_MODELS: OCRModel[] = [
     recommended: true,
   },
   {
+    id: "nvidia/nemotron-nano-12b-v2-vl",
+    name: "Nemotron Nano 12B v2 VL (lineas)",
+    description: "VLM por chat. Respeta saltos de linea entre renglones. Ideal para listas y tablas.",
+    recommended: true,
+  },
+  {
     id: "nvidia/llama-3.2-11b-vision-instruct",
     name: "Llama 3.2 11B Vision",
     description: "Modelo de vision general. Versatil para diversos tipos de contenido.",
@@ -24,7 +30,7 @@ export const OCR_MODELS: OCRModel[] = [
   },
 ];
 
-export const DEFAULT_OCR_MODEL = "nvidia/nemotron-ocr-v2";
+export const DEFAULT_OCR_MODEL = "nvidia/nemotron-nano-12b-v2-vl";
 
 export function isValidOcrModel(modelId: string): boolean {
   return OCR_MODELS.some((m) => m.id === modelId);

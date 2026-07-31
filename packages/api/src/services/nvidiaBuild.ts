@@ -2,10 +2,15 @@ const CHAT_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const CV_API_BASE = "https://ai.api.nvidia.com/v1/cv";
 const DEFAULT_MODEL = "nvidia/nemotron-ocr-v2";
 const CV_MODELS = ["nvidia/nemotron-ocr-v2"];
+const CHAT_VLM_MODELS = ["nvidia/nemotron-nano-12b-v2-vl"];
 const OCR_TIMEOUT_MS = 60000;
 const DEBUG_OCR = true;
 
 import { resolveApiKey } from "./settingsStore.js";
+import {
+  formatOCRDetections,
+  type OCRTextDetection,
+} from "./ocrLayout.js";
 
 interface CVResponse {
   data?: Array<{
@@ -16,6 +21,21 @@ interface CVResponse {
     }>;
   }>;
 }
+
+const VLM_SYSTEM_PROMPT = `You are a strict OCR engine. Output ONLY the exact text visible in the image.
+Rules:
+1) One visual line per output line, separated by a single \\n.
+2) Preserve all words and punctuation within a line.
+3) Never collapse, merge, reorder, or omit lines.
+4) Never add explanations, descriptions, greetings, or commentary.
+5) If a line is empty, output an empty line.
+6) Your first character MUST be the first character of the first line.`;
+
+const VLM_USER_PROMPT = "Transcribe every visible line separately. Each visual line becomes one output line. Use \\n between lines. No preamble.";
+
+const GENERIC_SYSTEM_PROMPT = "You are a strict OCR engine. Your ONLY task is to transcribe the exact text visible in the image. Rules: 1) Output ONLY the raw text from the image, nothing else. 2) Preserve the original line breaks and spacing. 3) Never add explanations, descriptions, greetings, or commentary. 4) Never start with phrases like 'Here is', 'Sure', 'Of course', 'Certainly', 'The text', 'Aquí tienes', 'Claro'. 5) Your first character MUST be the first character of the text in the image. 6) If the image has no text, output an empty string.";
+
+const GENERIC_USER_PROMPT = "Transcribe the text in this image. Output ONLY the exact text, preserving line breaks. No preamble.";
 
 export async function callNvidiaBuildVision(
   imageBase64: string,
@@ -31,6 +51,7 @@ export async function callNvidiaBuildVision(
   }
 
   const isCVModel = CV_MODELS.includes(finalModel);
+  const isChatVLM = CHAT_VLM_MODELS.includes(finalModel);
   const apiUrl = isCVModel
     ? `${CV_API_BASE}/${finalModel}`
     : CHAT_API_URL;
@@ -42,7 +63,8 @@ export async function callNvidiaBuildVision(
 
   if (DEBUG_OCR) {
     const sizeKB = (new Blob([imageBase64]).size / 1024).toFixed(1);
-    console.log(`[OCR-API] Calling NVIDIA API (model: ${finalModel}, endpoint: ${isCVModel ? "CV" : "Chat"}), image size: ${sizeKB} KB, timeout: ${OCR_TIMEOUT_MS}ms`);
+    const endpoint = isCVModel ? "CV" : isChatVLM ? "VLM" : "Chat";
+    console.log(`[OCR-API] Calling NVIDIA API (model: ${finalModel}, endpoint: ${endpoint}), image size: ${sizeKB} KB, timeout: ${OCR_TIMEOUT_MS}ms`);
   }
   const tStart = performance.now();
 
@@ -61,14 +83,14 @@ export async function callNvidiaBuildVision(
         messages: [
           {
             role: "system",
-            content: "You are a strict OCR engine. Your ONLY task is to transcribe the exact text visible in the image. Rules: 1) Output ONLY the raw text from the image, nothing else. 2) Preserve the original line breaks and spacing. 3) Never add explanations, descriptions, greetings, or commentary. 4) Never start with phrases like 'Here is', 'Sure', 'Of course', 'Certainly', 'The text', 'Aquí tienes', 'Claro'. 5) Your first character MUST be the first character of the text in the image. 6) If the image has no text, output an empty string.",
+            content: isChatVLM ? VLM_SYSTEM_PROMPT : GENERIC_SYSTEM_PROMPT,
           },
           {
             role: "user",
             content: [
               {
                 type: "text",
-                text: "Transcribe the text in this image. Output ONLY the exact text, preserving line breaks. No preamble.",
+                text: isChatVLM ? VLM_USER_PROMPT : GENERIC_USER_PROMPT,
               },
               {
                 type: "image_url",
@@ -110,12 +132,15 @@ export async function callNvidiaBuildVision(
   return cleanOcrResponse(raw);
 }
 
-function extractTextFromCVResponse(data: CVResponse): string {
-  const detections = data?.data?.[0]?.text_detections ?? [];
-  return detections
-    .map((d) => d?.text_prediction?.text ?? "")
-    .filter(Boolean)
-    .join("\n");
+export function extractTextFromCVResponse(data: CVResponse): string {
+  const detections: OCRTextDetection[] = (data?.data ?? []).flatMap(
+    (item) =>
+      item.text_detections?.map((detection) => ({
+        text: detection.text_prediction?.text,
+        boundingBox: detection.bounding_box,
+      })) ?? []
+  );
+  return formatOCRDetections(detections);
 }
 
 const CONVERSATIONAL_PREFIX = /^(here(?:'s| is| are)?\s+(?:the|your|below)|here you go|sure[,.]?|of course[,.]?|certainly[,.]?|aqu[ií]\s+(?:tienes|está|te dejo|te muestro)|claro[,.]?|por supuesto[,.]?|d[ií]a:|the text (?:in the image )?is:?|the extracted text (?:is)?:?|extracted text:?|transcription:?|text:?)\b[^a-zA-Z0-9]*/i;
