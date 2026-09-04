@@ -4,10 +4,20 @@ const API_KEY_NAME = "nvidia_api_key";
 
 export function getUserApiKey(): string | null {
   const db = getDatabase();
-  const row = db
-    .prepare("SELECT value FROM app_settings WHERE key = ?")
-    .get(API_KEY_NAME) as { value: string } | undefined;
-  return row?.value ?? null;
+  try {
+    const row = db
+      .prepare("SELECT value FROM app_settings WHERE key = ?")
+      .get(API_KEY_NAME) as { value: string } | undefined;
+    return row?.value ?? null;
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      err.message.includes("no such table: app_settings")
+    ) {
+      return null;
+    }
+    throw err;
+  }
 }
 
 export function setUserApiKey(value: string): void {
