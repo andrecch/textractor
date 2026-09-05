@@ -16,6 +16,7 @@ export function PageNavigation() {
         size="icon"
         onClick={() => setPage(currentPage - 1)}
         disabled={currentPage <= 0}
+        aria-label={t("viewer.previousPage")}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -28,6 +29,7 @@ export function PageNavigation() {
         size="icon"
         onClick={() => setPage(currentPage + 1)}
         disabled={currentPage >= document.pageCount - 1}
+        aria-label={t("viewer.nextPage")}
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

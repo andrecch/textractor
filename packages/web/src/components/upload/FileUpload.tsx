@@ -53,12 +53,27 @@ export function FileUpload() {
     [handleFile]
   );
 
+  const handleZoneKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.target !== e.currentTarget) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        inputRef.current?.click();
+      }
+    },
+    []
+  );
+
   return (
     <div
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onClick={() => inputRef.current?.click()}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleZoneKeyDown}
+      aria-label={t("upload.dropzone")}
       className={cn(
         "flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-12 cursor-pointer transition-colors",
         isDragOver

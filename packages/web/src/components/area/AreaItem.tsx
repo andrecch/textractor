@@ -61,8 +61,17 @@ export function AreaItem({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === "Enter") handleSaveRename();
     if (e.key === "Escape") handleCancelRename();
+  }
+
+  const handleRowKeyDown = (e: React.KeyboardEvent) => {
+    if (isEditing || e.target !== e.currentTarget) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onSelect(area.id);
+    }
   }
 
   const statusKey = area.status.replace("-", "") as keyof typeof t extends string ? string : string;
@@ -74,6 +83,9 @@ export function AreaItem({
         isActive ? "border-primary bg-primary/5" : "hover:bg-muted/50"
       )}
       onClick={() => !isEditing && onSelect(area.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleRowKeyDown}
     >
       <Circle className={cn("h-3 w-3 fill-current", statusColors[area.status])} />
 
@@ -97,6 +109,7 @@ export function AreaItem({
               e.stopPropagation();
               handleSaveRename();
             }}
+            aria-label={t("area.save")}
           >
             <Check className="h-3 w-3" />
           </Button>
@@ -108,6 +121,7 @@ export function AreaItem({
               e.stopPropagation();
               handleCancelRename();
             }}
+            aria-label={t("area.cancel")}
           >
             <X className="h-3 w-3" />
           </Button>
@@ -129,6 +143,7 @@ export function AreaItem({
                 e.stopPropagation();
                 setIsEditing(true);
               }}
+              aria-label={t("area.rename")}
             >
               <Pencil className="h-3 w-3" />
             </Button>
@@ -140,6 +155,7 @@ export function AreaItem({
                 e.stopPropagation();
                 onDelete(area.id);
               }}
+              aria-label={t("area.delete")}
             >
               <Trash2 className="h-3 w-3" />
             </Button>

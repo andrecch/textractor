@@ -38,6 +38,7 @@ export function AreaPanel() {
           size="icon"
           className="h-7 w-7"
           onClick={addArea}
+          aria-label={t("area.add")}
         >
           <Plus className="h-4 w-4" />
         </Button>
