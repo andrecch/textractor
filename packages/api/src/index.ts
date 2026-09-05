@@ -4,7 +4,7 @@ import compression from "compression";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import { runMigrations } from "./db/database.js";
+import { runMigrations, closeDatabase } from "./db/database.js";
 import ocrRoutes from "./routes/ocr.js";
 import historyRoutes from "./routes/history.js";
 import configRoutes from "./routes/config.js";
@@ -29,8 +29,23 @@ app.use("/api/config", configRoutes);
 
 runMigrations();
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`[textractor-api] running on http://127.0.0.1:${PORT}`);
 });
+
+function shutdown(signal: NodeJS.Signals): void {
+  console.log(`[textractor-api] ${signal} received, shutting down`);
+  server.close(() => {
+    try {
+      closeDatabase();
+    } finally {
+      process.exit(0);
+    }
+  });
+  setTimeout(() => process.exit(1), 10000).unref();
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 export default app;

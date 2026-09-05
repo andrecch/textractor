@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-let db: Database.Database;
+let db: Database.Database | undefined;
 
 export function getDatabase(): Database.Database {
   if (!db) {
@@ -19,6 +19,13 @@ export function getDatabase(): Database.Database {
     db.pragma("synchronous = NORMAL");
   }
   return db;
+}
+
+export function closeDatabase(): void {
+  if (db) {
+    db.close();
+    db = undefined;
+  }
 }
 
 export function runMigrations(): void {

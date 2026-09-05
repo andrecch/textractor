@@ -7,6 +7,32 @@ const router = Router();
 const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_SIZE = 100;
 
+function prepareHistoryStatements() {
+  const db = getDatabase();
+  return {
+    listAll: db.prepare(
+      "SELECT * FROM extractions ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?"
+    ),
+    countAll: db.prepare("SELECT COUNT(*) as count FROM extractions"),
+    insertOne: db.prepare(
+      `INSERT INTO extractions (id, document_name, section_name, page_index, zone_x, zone_y, zone_width, zone_height, extracted_text, provider)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ),
+    clearAll: db.prepare("DELETE FROM extractions"),
+  };
+}
+
+let historyStatements: ReturnType<
+  typeof prepareHistoryStatements
+> | null = null;
+
+function getHistoryStatements() {
+  if (!historyStatements) {
+    historyStatements = prepareHistoryStatements();
+  }
+  return historyStatements;
+}
+
 function mapRow(row: ExtractionRow) {
   return {
     id: row.id,
@@ -27,7 +53,7 @@ function mapRow(row: ExtractionRow) {
 
 router.get("/", (req, res) => {
   try {
-    const db = getDatabase();
+    const statements = getHistoryStatements();
 
     const wantPaged = req.query.paged === "true" || req.query.paged === "1";
 
@@ -44,11 +70,7 @@ router.get("/", (req, res) => {
       Number.parseInt(String(req.query.offset ?? 0), 10) || 0
     );
 
-    const rows = db
-      .prepare(
-        "SELECT * FROM extractions ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?"
-      )
-      .all(limit, offset) as ExtractionRow[];
+    const rows = statements.listAll.all(limit, offset) as ExtractionRow[];
 
     const records = rows.map(mapRow);
 
@@ -57,9 +79,7 @@ router.get("/", (req, res) => {
       return;
     }
 
-    const totalRow = db
-      .prepare("SELECT COUNT(*) as count FROM extractions")
-      .get() as { count: number };
+    const totalRow = statements.countAll.get() as { count: number };
 
     res.json({
       records,
@@ -84,13 +104,9 @@ router.post("/", (req, res) => {
       return;
     }
 
-    const db = getDatabase();
     const id = crypto.randomUUID();
 
-    db.prepare(
-      `INSERT INTO extractions (id, document_name, section_name, page_index, zone_x, zone_y, zone_width, zone_height, extracted_text, provider)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
+    getHistoryStatements().insertOne.run(
       id,
       documentName,
       sectionName ?? "Unknown",
@@ -112,8 +128,7 @@ router.post("/", (req, res) => {
 
 router.delete("/", (_req, res) => {
   try {
-    const db = getDatabase();
-    db.prepare("DELETE FROM extractions").run();
+    getHistoryStatements().clearAll.run();
     res.json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to clear";
