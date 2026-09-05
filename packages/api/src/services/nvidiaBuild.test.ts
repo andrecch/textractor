@@ -27,7 +27,7 @@ test("VLM route preserves line breaks from chat completions", async () => {
     choices: [{ message: { content: "line 1\nline 2\nline 3" } }],
   });
   try {
-    const text = await callNvidiaBuildVision(TINY_PNG, "fake-key", "nvidia/nemotron-nano-12b-v2-vl");
+    const text = await callNvidiaBuildVision(TINY_PNG, "fake-key", "meta/llama-3.2-11b-vision-instruct");
     assert.equal(text, "line 1\nline 2\nline 3");
   } finally {
     restore();
@@ -39,7 +39,7 @@ test("VLM route trims outer whitespace but keeps inner newlines", async () => {
     choices: [{ message: { content: "  line 1\nline 2  \n  line 3  " } }],
   });
   try {
-    const text = await callNvidiaBuildVision(TINY_PNG, "fake-key", "nvidia/nemotron-nano-12b-v2-vl");
+    const text = await callNvidiaBuildVision(TINY_PNG, "fake-key", "meta/llama-3.2-11b-vision-instruct");
     assert.equal(text, "line 1\nline 2  \n  line 3");
   } finally {
     restore();
@@ -51,7 +51,7 @@ test("VLM route returns empty string when content is empty", async () => {
     choices: [{ message: { content: "" } }],
   });
   try {
-    const text = await callNvidiaBuildVision(TINY_PNG, "fake-key", "nvidia/nemotron-nano-12b-v2-vl");
+    const text = await callNvidiaBuildVision(TINY_PNG, "fake-key", "meta/llama-3.2-11b-vision-instruct");
     assert.equal(text, "");
   } finally {
     restore();
@@ -123,7 +123,7 @@ test("throws when no API key is configured", async () => {
   delete process.env.NVIDIA_API_KEY;
   try {
     await assert.rejects(
-      () => callNvidiaBuildVision(TINY_PNG, undefined, "nvidia/nemotron-nano-12b-v2-vl"),
+      () => callNvidiaBuildVision(TINY_PNG, undefined, "meta/llama-3.2-11b-vision-instruct"),
       /No API key configured/
     );
   } finally {
@@ -142,7 +142,7 @@ test("throws when response is not ok", async () => {
   })) as unknown as typeof fetch;
   try {
     await assert.rejects(
-      () => callNvidiaBuildVision(TINY_PNG, "fake-key", "nvidia/nemotron-nano-12b-v2-vl"),
+      () => callNvidiaBuildVision(TINY_PNG, "fake-key", "meta/llama-3.2-11b-vision-instruct"),
       /NVIDIA API error \(500\)/
     );
   } finally {

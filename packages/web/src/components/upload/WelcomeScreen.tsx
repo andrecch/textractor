@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { KeyRound, ArrowRight, Sparkles, ScanLine } from "lucide-react";
 import { FileUpload } from "./FileUpload";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { OCR_MODELS } from "@/config/ocrModels";
 
 function WelcomeIllustration() {
   return (
@@ -43,6 +45,9 @@ function WelcomeIllustration() {
 
 export function WelcomeScreen() {
   const { t } = useTranslation();
+  const ocrModel = useSettingsStore((s) => s.settings.ocrModel);
+  const modelName =
+    OCR_MODELS.find((m) => m.id === ocrModel)?.name ?? ocrModel;
 
   return (
     <div className="flex flex-col items-center justify-start h-full overflow-auto pt-8 pb-6 px-6">
@@ -60,7 +65,7 @@ export function WelcomeScreen() {
 
         <div className="flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs text-muted-foreground">
           <Sparkles className="h-3 w-3 text-primary" />
-          <span>{t("welcome.model")}</span>
+          <span>{modelName}</span>
           <span className="text-border">|</span>
           <ScanLine className="h-3 w-3 text-primary" />
           <span>{t("welcome.poweredBy")}</span>

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { runExtraction, type ExtractionDeps, type ExtractionOutcome } from "./useOCR";
+import { OcrServerError, OcrModelRetiredError } from "@/services/api";
 import { useAreaStore } from "@/stores/areaStore";
 import { useOCRStore } from "@/stores/ocrStore";
 import { setAreaImage, clearAllImages } from "@/stores/imageStore";
@@ -95,6 +96,8 @@ function buildDeps(overrides: Partial<ExtractionDeps> = {}): {
       return map[`${id}:${kind}`] ?? null;
     },
     getTimeoutMessage: () => "Timeout",
+    getServerDownMessage: () => "Server down",
+    getModelRetiredMessage: () => "Model retired",
     timeoutMs: TEST_TIMEOUT,
     debug: false,
     ...overrides,
@@ -164,6 +167,38 @@ describe("runExtraction", () => {
 
     expect(outcome.reason).toBe("error");
     expect(mocks.updateAreaStatus).toHaveBeenLastCalledWith("area-1", "error", "backend down");
+    expect(mocks.updateAreaExtractedText).not.toHaveBeenCalled();
+    expect(mocks.saveExtraction).not.toHaveBeenCalled();
+    expect(mocks.setProcessing).toHaveBeenLastCalledWith(false);
+  });
+
+  it("error: ocrExtract throws OcrServerError -> area ends in 'error' with server-down message", async () => {
+    seedArea(makeArea());
+    const { deps, mocks } = buildDeps({
+      ocrExtract: vi.fn(async () => {
+        throw new OcrServerError();
+      }) as ExtractionDeps["ocrExtract"],
+    });
+    const outcome = await runExtraction(deps);
+
+    expect(outcome.reason).toBe("error");
+    expect(mocks.updateAreaStatus).toHaveBeenLastCalledWith("area-1", "error", "Server down");
+    expect(mocks.updateAreaExtractedText).not.toHaveBeenCalled();
+    expect(mocks.saveExtraction).not.toHaveBeenCalled();
+    expect(mocks.setProcessing).toHaveBeenLastCalledWith(false);
+  });
+
+  it("error: ocrExtract throws OcrModelRetiredError -> area ends in 'error' with retired message", async () => {
+    seedArea(makeArea());
+    const { deps, mocks } = buildDeps({
+      ocrExtract: vi.fn(async () => {
+        throw new OcrModelRetiredError("gone");
+      }) as ExtractionDeps["ocrExtract"],
+    });
+    const outcome = await runExtraction(deps);
+
+    expect(outcome.reason).toBe("error");
+    expect(mocks.updateAreaStatus).toHaveBeenLastCalledWith("area-1", "error", "Model retired");
     expect(mocks.updateAreaExtractedText).not.toHaveBeenCalled();
     expect(mocks.saveExtraction).not.toHaveBeenCalled();
     expect(mocks.setProcessing).toHaveBeenLastCalledWith(false);

@@ -13,10 +13,9 @@
     "title": "Textractor",
     "subtitle": "Intelligent zone extraction",
     "description": "Upload a PDF or image, draw a zone and extract text with precision using AI.",
-    "poweredBy": "OCR powered by NVIDIA Build",
-    "model": "Nemotron OCR v2 Model",
+    "poweredBy": "Powered by NVIDIA NIM",
     "apiKeyTitle": "Configure your API Key",
-    "apiKeyDescription": "To get started, add your NVIDIA Build API Key in Settings.",
+    "apiKeyDescription": "To get started, add your NVIDIA NIM API Key in Settings.",
     "goToSettings": "Go to Settings"
   },
   "upload": {
@@ -77,13 +76,15 @@
     "expandImage": "Expand image",
     "extract": "Extract text",
     "cancel": "Cancel extraction",
-    "timeout": "Request timed out after 60 seconds. The model took too long to respond."
+    "timeout": "Request timed out after 60 seconds. The model took too long to respond.",
+    "serverDown": "Could not reach the OCR server. Make sure the API is running.",
+    "modelRetired": "This model was retired by NVIDIA. Choose another model in Settings."
   },
   "settings": {
     "title": "Settings",
     "ocrEnabled": "Enable OCR",
     "preprocessing": "Image preprocessing",
-    "apiKey": "NVIDIA Build API Key",
+    "apiKey": "NVIDIA NIM API Key",
     "apiKeyPlaceholder": "Enter your NVIDIA API Key",
     "validate": "Validate connection",
     "valid": "Connection valid",

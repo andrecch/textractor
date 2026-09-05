@@ -4,7 +4,7 @@ import { useAreaStore } from "@/stores/areaStore";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { getAreaImage } from "@/stores/imageStore";
-import { ocrExtract, saveExtraction } from "@/services/api";
+import { ocrExtract, saveExtraction, OcrServerError, OcrModelRetiredError } from "@/services/api";
 import i18n from "@/i18n";
 import type { Area } from "@/types/area";
 import type { AppSettings } from "@/types/settings";
@@ -57,6 +57,8 @@ export interface ExtractionDeps {
   dataUrlToJpegDataUrl: (dataUrl: string, quality: number) => Promise<string>;
   getAreaImage: (id: string, kind: "raw" | "processed") => string | null;
   getTimeoutMessage: () => string;
+  getServerDownMessage: () => string;
+  getModelRetiredMessage: () => string;
   timeoutMs: number;
   debug: boolean;
 }
@@ -80,6 +82,8 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
     dataUrlToJpegDataUrl: convertImage,
     getAreaImage: getImage,
     getTimeoutMessage,
+    getServerDownMessage,
+    getModelRetiredMessage,
     timeoutMs,
     debug,
   } = deps;
@@ -191,6 +195,18 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
       }
       return { status: null, reason: wasTimeout ? "timeout" : "cancelled" };
     }
+    if (err instanceof OcrServerError) {
+      updateAreaStatus(area.id, "error", getServerDownMessage());
+      finalStatus = "error";
+      finalReason = "error";
+      return { status: finalStatus, reason: finalReason };
+    }
+    if (err instanceof OcrModelRetiredError) {
+      updateAreaStatus(area.id, "error", getModelRetiredMessage());
+      finalStatus = "error";
+      finalReason = "error";
+      return { status: finalStatus, reason: finalReason };
+    }
     updateAreaStatus(
       area.id,
       "error",
@@ -237,6 +253,8 @@ export function useOCR() {
       dataUrlToJpegDataUrl,
       getAreaImage,
       getTimeoutMessage: () => i18n.t("ocr.timeout"),
+      getServerDownMessage: () => i18n.t("ocr.serverDown"),
+      getModelRetiredMessage: () => i18n.t("ocr.modelRetired"),
       timeoutMs: OCR_TIMEOUT_MS,
       debug: DEBUG_OCR,
     });

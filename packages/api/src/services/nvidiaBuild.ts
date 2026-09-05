@@ -2,7 +2,7 @@ const CHAT_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 const CV_API_BASE = "https://ai.api.nvidia.com/v1/cv";
 const DEFAULT_MODEL = "nvidia/nemotron-ocr-v2";
 const CV_MODELS = ["nvidia/nemotron-ocr-v2"];
-const CHAT_VLM_MODELS = ["nvidia/nemotron-nano-12b-v2-vl"];
+const CHAT_VLM_MODELS = ["meta/llama-3.2-11b-vision-instruct"];
 const OCR_TIMEOUT_MS = 60000;
 const DEBUG_OCR = true;
 

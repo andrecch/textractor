@@ -1,5 +1,38 @@
 const API_BASE = "/api";
 
+export class OcrServerError extends Error {
+  constructor() {
+    super("OCR server unreachable");
+    this.name = "OcrServerError";
+  }
+}
+
+export class OcrModelRetiredError extends Error {
+  constructor(detail?: string) {
+    super(detail ?? "OCR model retired");
+    this.name = "OcrModelRetiredError";
+  }
+}
+
+const RETIRED_MODEL_PATTERNS = [
+  /end of life/i,
+  /no longer available/i,
+  /\bretired\b/i,
+  /\bdeprecated\b/i,
+];
+
+async function readJsonBody(response: Response): Promise<Record<string, unknown>> {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    throw new OcrServerError();
+  }
+  try {
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    throw new OcrServerError();
+  }
+}
+
 export async function ocrExtract(
   imageBase64: string,
   model?: string,
@@ -10,19 +43,46 @@ export async function ocrExtract(
     body.model = model;
   }
 
-  const response = await fetch(`${API_BASE}/ocr/extract`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    signal,
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error ?? "OCR request failed");
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/ocr/extract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch {
+    throw new OcrServerError();
   }
 
-  return response.json();
+  if (!response.ok) {
+    let serverDown = false;
+    let message = "OCR request failed";
+    try {
+      const errorBody = await readJsonBody(response);
+      const serverMessage = errorBody.error;
+      if (typeof serverMessage === "string" && serverMessage.length > 0) {
+        message = serverMessage;
+        if (
+          response.status === 410 ||
+          RETIRED_MODEL_PATTERNS.some((pattern) => pattern.test(serverMessage))
+        ) {
+          throw new OcrModelRetiredError(serverMessage);
+        }
+      }
+    } catch (err) {
+      if (err instanceof OcrServerError) serverDown = true;
+      else if (err instanceof OcrModelRetiredError) throw err;
+    }
+    if (serverDown) throw new OcrServerError();
+    throw new Error(message);
+  }
+
+  const data = await readJsonBody(response);
+  return {
+    text: typeof data.text === "string" ? data.text : "",
+    provider: typeof data.provider === "string" ? data.provider : "unknown",
+  };
 }
 
 export type ApiKeySource = "server" | "user" | "none";

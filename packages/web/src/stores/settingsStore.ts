@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AppSettings } from "@/types/settings";
 import { DEFAULT_SETTINGS } from "@/types/settings";
+import { DEFAULT_OCR_MODEL, isValidOcrModel } from "@/config/ocrModels";
 
 interface SettingsState {
   settings: AppSettings;
@@ -23,6 +24,22 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "textractor-settings",
+      version: 1,
+      migrate: (persistedState) => {
+        const state = persistedState as Partial<SettingsState> | undefined;
+        const settings = state?.settings;
+        if (!settings || !isValidOcrModel(settings.ocrModel)) {
+          return {
+            ...(state ?? {}),
+            settings: {
+              ...DEFAULT_SETTINGS,
+              ...(settings ?? {}),
+              ocrModel: DEFAULT_OCR_MODEL,
+            },
+          } as SettingsState;
+        }
+        return state as SettingsState;
+      },
     }
   )
 );
