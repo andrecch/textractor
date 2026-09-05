@@ -67,7 +67,7 @@ export function HistoryPanel() {
     fetchPage(records.length, true);
   };
 
-  const handleExport = (record: HistoryRecord) => {
+  const handleExport = useCallback((record: HistoryRecord) => {
     const blob = new Blob([record.extractedText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -75,7 +75,7 @@ export function HistoryPanel() {
     a.download = `textractor-${record.sectionName}-${record.id.slice(0, 8)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, []);
 
   if (loading) {
     return <div className="p-8 text-center text-muted-foreground">...</div>;
@@ -164,6 +164,7 @@ export function HistoryPanel() {
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => handleExport(record)}
+                    aria-label={t("history.export")}
                   >
                     <FileText className="h-4 w-4" />
                   </Button>
