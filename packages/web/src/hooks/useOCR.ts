@@ -68,6 +68,22 @@ export type ExtractionOutcome = {
   reason: "success" | "error" | "cancelled" | "timeout" | "skipped";
 };
 
+function classifyAbort(signal: AbortSignal): "timeout" | "cancelled" | null {
+  if (!signal.aborted) return null;
+  return signal.reason instanceof DOMException && signal.reason.name === "TimeoutError"
+    ? "timeout"
+    : "cancelled";
+}
+
+function resolveExtractionErrorMessage(
+  err: unknown,
+  messages: { getServerDownMessage: () => string; getModelRetiredMessage: () => string }
+): string {
+  if (err instanceof OcrServerError) return messages.getServerDownMessage();
+  if (err instanceof OcrModelRetiredError) return messages.getModelRetiredMessage();
+  return err instanceof Error ? err.message : "Unknown error";
+}
+
 export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOutcome> {
   const {
     getSettings,
@@ -181,36 +197,19 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
       wasTimeout = true;
       return { status: null, reason: "timeout" };
     }
-    if (err instanceof DOMException && err.name === "AbortError") {
+    if (
+      (err instanceof DOMException && err.name === "AbortError") ||
+      signal.aborted
+    ) {
+      const abortOutcome = classifyAbort(signal);
       wasCancelled = true;
-      if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
-        wasTimeout = true;
-      }
-      return { status: null, reason: wasTimeout ? "timeout" : "cancelled" };
-    }
-    if (signal.aborted) {
-      wasCancelled = true;
-      if (signal.reason instanceof DOMException && signal.reason.name === "TimeoutError") {
-        wasTimeout = true;
-      }
-      return { status: null, reason: wasTimeout ? "timeout" : "cancelled" };
-    }
-    if (err instanceof OcrServerError) {
-      updateAreaStatus(area.id, "error", getServerDownMessage());
-      finalStatus = "error";
-      finalReason = "error";
-      return { status: finalStatus, reason: finalReason };
-    }
-    if (err instanceof OcrModelRetiredError) {
-      updateAreaStatus(area.id, "error", getModelRetiredMessage());
-      finalStatus = "error";
-      finalReason = "error";
-      return { status: finalStatus, reason: finalReason };
+      if (abortOutcome === "timeout") wasTimeout = true;
+      return { status: null, reason: abortOutcome ?? "cancelled" };
     }
     updateAreaStatus(
       area.id,
       "error",
-      err instanceof Error ? err.message : "Unknown error"
+      resolveExtractionErrorMessage(err, { getServerDownMessage, getModelRetiredMessage })
     );
     finalStatus = "error";
     finalReason = "error";
