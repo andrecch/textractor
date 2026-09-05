@@ -3,3 +3,7 @@ packages:
 allowBuilds:
   better-sqlite3: true
   esbuild: true
+minimumReleaseAge: 1440
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - semver@6.3.1
