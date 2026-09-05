@@ -25,7 +25,31 @@ export function closeDatabase(): void {
   if (db) {
     db.close();
     db = undefined;
+    migrationStatements = null;
   }
+}
+
+function prepareMigrationStatements() {
+  const database = getDatabase();
+  return {
+    checkApplied: database.prepare(
+      "SELECT 1 FROM _migrations WHERE name = ?"
+    ),
+    markApplied: database.prepare(
+      "INSERT INTO _migrations (name) VALUES (?)"
+    ),
+  };
+}
+
+let migrationStatements: ReturnType<
+  typeof prepareMigrationStatements
+> | null = null;
+
+function getMigrationStatements() {
+  if (!migrationStatements) {
+    migrationStatements = prepareMigrationStatements();
+  }
+  return migrationStatements;
 }
 
 export function runMigrations(): void {
@@ -41,9 +65,7 @@ export function runMigrations(): void {
   ];
 
   for (const file of migrationFiles) {
-    const alreadyApplied = database
-      .prepare("SELECT 1 FROM _migrations WHERE name = ?")
-      .get(file);
+    const alreadyApplied = getMigrationStatements().checkApplied.get(file);
     if (alreadyApplied) continue;
 
     const migration = readFileSync(
@@ -51,6 +73,6 @@ export function runMigrations(): void {
       "utf-8"
     );
     database.exec(migration);
-    database.prepare("INSERT INTO _migrations (name) VALUES (?)").run(file);
+    getMigrationStatements().markApplied.run(file);
   }
 }

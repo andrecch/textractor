@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
-import test from "node:test";
-import { runMigrations } from "../db/database.js";
+import test, { after } from "node:test";
+import { runMigrations, closeDatabase } from "../db/database.js";
 import { callNvidiaBuildVision } from "./nvidiaBuild.js";
 
 process.env.TEXTRACTOR_DB_PATH = ":memory:";
 runMigrations();
+
+after(() => {
+  closeDatabase();
+});
 
 const TINY_PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
