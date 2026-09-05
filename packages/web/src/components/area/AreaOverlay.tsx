@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useArea } from "@/hooks/useArea";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useAreaStore } from "@/stores/areaStore";
@@ -39,10 +40,11 @@ export function AreaOverlay({
   } = useArea();
   const { currentPage } = useDocumentStore();
   const { areas } = useAreaStore();
+  const { t } = useTranslation();
 
-  const visibleZones = areas
-    .map((area, index) => ({ area, index }))
-    .filter(({ area }) => area.zone && area.pageIndex === currentPage);
+  const visibleZones = areas.flatMap((area, index) =>
+    area.zone && area.pageIndex === currentPage ? [{ area, index }] : []
+  );
 
   const previewColor = getZoneColor(areas.length);
 
@@ -56,6 +58,8 @@ export function AreaOverlay({
     <div
       className={cn("absolute inset-0", cursorClass)}
       style={{ width, height, userSelect: isPanActive ? "none" : "auto" }}
+      role="application"
+      aria-label={t("viewer.drawingCanvas")}
       onMouseDown={isPanActive ? undefined : handleMouseDown}
       onMouseMove={isPanActive ? undefined : handleMouseMove}
       onMouseUp={isPanActive ? undefined : handleMouseUp}
