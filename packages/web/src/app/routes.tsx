@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { RootErrorBoundary } from "@/app/RootErrorBoundary";
 
 const ViewerPage = lazy(() =>
   import("@/pages/ViewerPage").then((m) => ({ default: m.ViewerPage }))
@@ -27,6 +28,7 @@ function withSuspense(node: React.ReactNode) {
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
+    errorElement: <RootErrorBoundary />,
     children: [
       { path: "/", element: withSuspense(<ViewerPage />) },
       { path: "/history", element: withSuspense(<HistoryPage />) },

@@ -3,6 +3,11 @@
     "title": "Textractor",
     "subtitle": "Extraccion inteligente de zonas"
   },
+  "errorBoundary": {
+    "title": "Algo salió mal",
+    "message": "Ocurrió un error inesperado al mostrar esta página.",
+    "retry": "Reintentar"
+  },
   "nav": {
     "viewer": "Visor",
     "history": "Historial",
@@ -35,7 +40,10 @@
     "zoomIn": "Acercar",
     "zoomOut": "Alejar",
     "fitToScreen": "Ajustar",
-    "noDocument": "No hay documento abierto"
+    "noDocument": "No hay documento abierto",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente",
+    "drawingCanvas": "Zona de dibujo. Dibuja un área con el ratón o gestiona las áreas desde el panel."
   },
   "area": {
     "title": "Delimitar Area",
@@ -43,6 +51,8 @@
     "add": "Agregar area",
     "delete": "Eliminar",
     "rename": "Renombrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
     "defaultName": "Area",
     "status": {
       "empty": "Sin zona",
@@ -112,6 +122,7 @@
     "clearConfirmTitle": "Borrar historial",
     "clearConfirmDescription": "Se eliminaran todas las extracciones del historial. Esta accion no se puede deshacer.",
     "cancel": "Cancelar",
-    "confirmClear": "Borrar todo"
+    "confirmClear": "Borrar todo",
+    "export": "Exportar extracción"
   }
 }

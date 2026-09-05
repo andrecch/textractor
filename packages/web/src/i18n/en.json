@@ -3,6 +3,11 @@
     "title": "Textractor",
     "subtitle": "Intelligent zone extraction"
   },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred while showing this page.",
+    "retry": "Try again"
+  },
   "nav": {
     "viewer": "Viewer",
     "history": "History",
@@ -35,7 +40,10 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "fitToScreen": "Fit to screen",
-    "noDocument": "No document open"
+    "noDocument": "No document open",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "drawingCanvas": "Drawing canvas. Draw an area with the mouse or manage areas from the panel."
   },
   "area": {
     "title": "Delimit Area",
@@ -43,6 +51,8 @@
     "add": "Add area",
     "delete": "Delete",
     "rename": "Rename",
+    "save": "Save",
+    "cancel": "Cancel",
     "defaultName": "Area",
     "status": {
       "empty": "No zone",
@@ -112,6 +122,7 @@
     "clearConfirmTitle": "Clear history",
     "clearConfirmDescription": "All extraction records will be deleted. This action cannot be undone.",
     "cancel": "Cancel",
-    "confirmClear": "Clear all"
+    "confirmClear": "Clear all",
+    "export": "Export extraction"
   }
 }
