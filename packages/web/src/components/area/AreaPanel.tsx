@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AreaItem } from "./AreaItem";
 import { useArea } from "@/hooks/useArea";
 
-export function AreaPanel() {
+export function AreaPanel({ width }: { width: number }) {
   const { t } = useTranslation();
   const {
     areas,
@@ -30,7 +30,7 @@ export function AreaPanel() {
   }, [areas]);
 
   return (
-    <div className="flex flex-col h-full w-64 border-r bg-background">
+    <div className="flex flex-col h-full shrink-0 bg-background" style={{ width }}>
       <div className="flex items-center justify-between p-2 border-b">
         <h2 className="text-base font-semibold">{t("area.title")}</h2>
         <Button

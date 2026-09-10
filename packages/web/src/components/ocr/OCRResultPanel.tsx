@@ -5,11 +5,12 @@ import { useOCR } from "@/hooks/useOCR";
 import { useAreaImage } from "@/hooks/useAreaImage";
 import { getAreaImage } from "@/stores/imageStore";
 import { downloadPng, sanitizeFileName } from "@/services/imageExport";
+import { removeBlankLines } from "@/lib/text";
 import { CropPreviewSection } from "./CropPreviewSection";
 import { RecognitionSection } from "./RecognitionSection";
 
 export function OCRResultPanel() {
-  const { getActiveArea, activeAreaId } = useAreaStore();
+  const { getActiveArea, activeAreaId, updateAreaExtractedText } = useAreaStore();
   const { isProcessing, cancelExtraction } = useOCRStore();
   const { extractActive } = useOCR();
   const [copied, setCopied] = useState(false);
@@ -49,6 +50,11 @@ export function OCRResultPanel() {
     a.download = `textractor-${activeArea.name}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleRemoveBlankLines = () => {
+    if (!activeAreaId || !activeArea?.extractedText) return;
+    updateAreaExtractedText(activeAreaId, removeBlankLines(activeArea.extractedText));
   };
 
   const handleDownloadRaw = () => {
@@ -96,6 +102,7 @@ export function OCRResultPanel() {
         onToggleExtract={isProcessing ? cancelExtraction : extractActive}
         onCopy={handleCopy}
         onExportTxt={handleExportTxt}
+        onRemoveBlankLines={handleRemoveBlankLines}
       />
     </div>
   );

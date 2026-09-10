@@ -11,7 +11,7 @@ export function ZoomControls() {
     <div className="flex items-center gap-1">
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         onClick={zoomOut}
         title={t("viewer.zoomOut")}
       >
@@ -22,7 +22,7 @@ export function ZoomControls() {
       </span>
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         onClick={zoomIn}
         title={t("viewer.zoomIn")}
       >
@@ -30,7 +30,7 @@ export function ZoomControls() {
       </Button>
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         onClick={fitToScreen}
         title={t("viewer.fitToScreen")}
       >

@@ -3,10 +3,21 @@ import { WelcomeScreen } from "@/components/upload/WelcomeScreen";
 import { DocumentViewer } from "@/components/document/DocumentViewer";
 import { AreaPanel } from "@/components/area/AreaPanel";
 import { OCRResultPanel } from "@/components/ocr/OCRResultPanel";
-import { Separator } from "@/components/ui/separator";
+import { ResizeHandle } from "@/components/layout/ResizeHandle";
+import { usePanelSize } from "@/hooks/usePanelSize";
 
 export function ViewerPage() {
   const { document } = useDocumentStore();
+  const areaPanel = usePanelSize("textractor.panel.area.width", {
+    defaultWidth: 256,
+    min: 180,
+    max: 360,
+  });
+  const ocrPanel = usePanelSize("textractor.panel.ocr.width", {
+    defaultWidth: 336,
+    min: 280,
+    max: 480,
+  });
 
   if (!document) {
     return <WelcomeScreen />;
@@ -14,12 +25,13 @@ export function ViewerPage() {
 
   return (
     <div className="flex h-full">
-      <AreaPanel />
-      <div className="flex-1 overflow-hidden">
+      <AreaPanel width={areaPanel.width} />
+      <ResizeHandle side="left" onResize={areaPanel.resizeBy} />
+      <div className="flex-1 min-w-0 overflow-hidden">
         <DocumentViewer />
       </div>
-      <Separator orientation="vertical" />
-      <div className="w-80 overflow-hidden">
+      <ResizeHandle side="right" onResize={ocrPanel.resizeBy} />
+      <div className="overflow-hidden shrink-0" style={{ width: ocrPanel.width }}>
         <OCRResultPanel />
       </div>
     </div>

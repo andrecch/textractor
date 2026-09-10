@@ -14,6 +14,9 @@
     "settings": "Configuracion",
     "new": "Nuevo"
   },
+  "layout": {
+    "resizePanel": "Arrastrar para redimensionar"
+  },
   "welcome": {
     "title": "Textractor",
     "subtitle": "Extraccion inteligente de zonas",
@@ -86,6 +89,7 @@
     "expandImage": "Expandir imagen",
     "extract": "Extraer texto",
     "cancel": "Cancelar extraccion",
+    "removeBlankLines": "Quitar líneas en blanco",
     "timeout": "La solicitud excedio el tiempo limite de 60 segundos. El modelo tardo demasiado en responder.",
     "serverDown": "No se pudo conectar con el servidor de OCR. Revisa que la API esté en marcha.",
     "modelRetired": "Este modelo fue retirado por NVIDIA. Elige otro modelo en Configuración."

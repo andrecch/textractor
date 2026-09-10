@@ -13,7 +13,7 @@ export function PageNavigation() {
     <div className="flex items-center gap-2">
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         onClick={() => setPage(currentPage - 1)}
         disabled={currentPage <= 0}
         aria-label={t("viewer.previousPage")}
@@ -26,7 +26,7 @@ export function PageNavigation() {
       </span>
       <Button
         variant="outline"
-        size="icon"
+        size="icon-sm"
         onClick={() => setPage(currentPage + 1)}
         disabled={currentPage >= document.pageCount - 1}
         aria-label={t("viewer.nextPage")}

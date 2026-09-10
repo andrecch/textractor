@@ -14,6 +14,9 @@
     "settings": "Settings",
     "new": "New"
   },
+  "layout": {
+    "resizePanel": "Drag to resize"
+  },
   "welcome": {
     "title": "Textractor",
     "subtitle": "Intelligent zone extraction",
@@ -86,6 +89,7 @@
     "expandImage": "Expand image",
     "extract": "Extract text",
     "cancel": "Cancel extraction",
+    "removeBlankLines": "Remove blank lines",
     "timeout": "Request timed out after 60 seconds. The model took too long to respond.",
     "serverDown": "Could not reach the OCR server. Make sure the API is running.",
     "modelRetired": "This model was retired by NVIDIA. Choose another model in Settings."

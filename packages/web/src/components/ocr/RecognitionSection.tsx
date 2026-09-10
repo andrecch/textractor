@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Copy, Check, Download, Loader2, AlertCircle, Square, Play } from "lucide-react";
+import { Copy, Check, Download, Loader2, AlertCircle, Square, Play, Eraser } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Area } from "@/types/area";
 
@@ -67,6 +67,7 @@ interface RecognitionSectionProps {
   onToggleExtract: () => void;
   onCopy: () => void;
   onExportTxt: () => void;
+  onRemoveBlankLines: () => void;
 }
 
 export function RecognitionSection({
@@ -80,6 +81,7 @@ export function RecognitionSection({
   onToggleExtract,
   onCopy,
   onExportTxt,
+  onRemoveBlankLines,
 }: RecognitionSectionProps) {
   const { t } = useTranslation();
 
@@ -101,6 +103,16 @@ export function RecognitionSection({
             ) : (
               <Play className="h-4 w-4" />
             )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={onRemoveBlankLines}
+            disabled={!hasText || isProcessing}
+            title={t("ocr.removeBlankLines")}
+          >
+            <Eraser className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
