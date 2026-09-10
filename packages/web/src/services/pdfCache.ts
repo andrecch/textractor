@@ -16,8 +16,13 @@ const MAX_CACHED_CANVASES = 12;
 const documentCache = new Map<string, CachedDocument>();
 const canvasCache = new Map<string, CachedCanvas>();
 
-function canvasKey(url: string, pageIndex: number, scale: number): string {
-  return `${url}::${pageIndex}::${scale}`;
+function canvasKey(
+  url: string,
+  pageIndex: number,
+  scale: number,
+  rotation: number
+): string {
+  return `${url}::${pageIndex}::${scale}::${rotation}`;
 }
 
 async function getCachedDocument(url: string): Promise<PDFDocumentProxy> {
@@ -77,9 +82,10 @@ export function releasePdfDocument(url: string): void {
 export function getCachedCanvas(
   url: string,
   pageIndex: number,
-  scale: number
+  scale: number,
+  rotation = 0
 ): HTMLCanvasElement | null {
-  const key = canvasKey(url, pageIndex, scale);
+  const key = canvasKey(url, pageIndex, scale, rotation);
   const cached = canvasCache.get(key);
   if (!cached) return null;
 
@@ -91,9 +97,10 @@ export function setCachedCanvas(
   url: string,
   pageIndex: number,
   scale: number,
+  rotation: number,
   canvas: HTMLCanvasElement
 ): void {
-  const key = canvasKey(url, pageIndex, scale);
+  const key = canvasKey(url, pageIndex, scale, rotation);
   touchCanvas(key, canvas);
   evictOldCanvases();
 }
@@ -101,15 +108,19 @@ export function setCachedCanvas(
 export async function renderPdfPageToCanvas(
   url: string,
   pageIndex: number,
-  scale: number
+  scale: number,
+  rotation = 0
 ): Promise<HTMLCanvasElement> {
-  const cached = getCachedCanvas(url, pageIndex, scale);
+  const cached = getCachedCanvas(url, pageIndex, scale, rotation);
   if (cached) return cached;
 
   const pdfDoc = await acquirePdfDocument(url);
   try {
     const page = await pdfDoc.getPage(pageIndex + 1);
-    const viewport = page.getViewport({ scale });
+    const viewport = page.getViewport({
+      scale,
+      rotation: (page.rotate + rotation) % 360,
+    });
 
     const canvas = document.createElement("canvas");
     canvas.width = viewport.width;
@@ -120,7 +131,7 @@ export async function renderPdfPageToCanvas(
 
     await page.render({ canvasContext: ctx, viewport }).promise;
 
-    setCachedCanvas(url, pageIndex, scale, canvas);
+    setCachedCanvas(url, pageIndex, scale, rotation, canvas);
     return canvas;
   } finally {
     releasePdfDocument(url);

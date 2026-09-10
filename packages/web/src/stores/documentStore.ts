@@ -5,6 +5,7 @@ interface DocumentState {
   document: DocumentFile | null;
   currentPage: number;
   zoom: number;
+  rotationByPage: Record<number, number>;
 
   setDocument: (doc: DocumentFile) => void;
   setPage: (page: number) => void;
@@ -12,6 +13,8 @@ interface DocumentState {
   zoomIn: () => void;
   zoomOut: () => void;
   fitToScreen: () => void;
+  getRotation: (page: number) => number;
+  rotateCW: (page: number) => void;
   clearDocument: () => void;
 }
 
@@ -19,12 +22,14 @@ const ZOOM_STEP = 0.25;
 const ZOOM_MIN = 0.25;
 const ZOOM_MAX = 5;
 
-export const useDocumentStore = create<DocumentState>((set) => ({
+export const useDocumentStore = create<DocumentState>((set, get) => ({
   document: null,
   currentPage: 0,
   zoom: 1,
+  rotationByPage: {},
 
-  setDocument: (doc) => set({ document: doc, currentPage: 0, zoom: 1 }),
+  setDocument: (doc) =>
+    set({ document: doc, currentPage: 0, zoom: 1, rotationByPage: {} }),
 
   setPage: (page) => set({ currentPage: page }),
 
@@ -43,6 +48,16 @@ export const useDocumentStore = create<DocumentState>((set) => ({
 
   fitToScreen: () => set({ zoom: 1 }),
 
+  getRotation: (page) => get().rotationByPage[page] ?? 0,
+
+  rotateCW: (page) =>
+    set((state) => ({
+      rotationByPage: {
+        ...state.rotationByPage,
+        [page]: ((state.rotationByPage[page] ?? 0) + 90) % 360,
+      },
+    })),
+
   clearDocument: () =>
-    set({ document: null, currentPage: 0, zoom: 1 }),
+    set({ document: null, currentPage: 0, zoom: 1, rotationByPage: {} }),
 }));

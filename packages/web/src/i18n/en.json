@@ -43,6 +43,7 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "fitToScreen": "Fit to screen",
+    "rotateCw": "Rotate 90° clockwise",
     "noDocument": "No document open",
     "previousPage": "Previous page",
     "nextPage": "Next page",

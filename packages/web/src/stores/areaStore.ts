@@ -18,6 +18,7 @@ interface AreaState {
   removeArea: (id: string) => void;
   renameArea: (id: string, name: string) => void;
   updateAreaZone: (id: string, pageIndex: number, zone: AreaZone) => void;
+  rotateZonesCW: (pageIndex: number, pageHeight: number) => void;
   setAreaCroppedImageRaw: (id: string, image: string | null) => void;
   setAreaCroppedImageProcessed: (id: string, image: string | null) => void;
   updateAreaExtractedText: (id: string, text: string) => void;
@@ -79,6 +80,24 @@ export const useAreaStore = create<AreaState>((set, get) => ({
               pageIndex,
               zone,
               status: "zone-defined" as const,
+              updatedAt: new Date().toISOString(),
+            }
+          : a
+      ),
+    })),
+
+  rotateZonesCW: (pageIndex, pageHeight) =>
+    set((state) => ({
+      areas: state.areas.map((a) =>
+        a.zone && a.pageIndex === pageIndex
+          ? {
+              ...a,
+              zone: {
+                x: pageHeight - a.zone.y - a.zone.height,
+                y: a.zone.x,
+                width: a.zone.height,
+                height: a.zone.width,
+              },
               updatedAt: new Date().toISOString(),
             }
           : a

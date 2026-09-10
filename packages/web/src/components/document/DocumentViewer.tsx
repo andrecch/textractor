@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { useDocumentStore } from "@/stores/documentStore";
+import { useAreaStore } from "@/stores/areaStore";
 import { PDFPageRenderer } from "./PDFPageRenderer";
 import { ImageRenderer } from "./ImageRenderer";
 import { PageNavigation } from "./PageNavigation";
@@ -8,10 +9,13 @@ import { AreaOverlay } from "@/components/area/AreaOverlay";
 import { usePanMode } from "@/hooks/usePanMode";
 
 export function DocumentViewer() {
-  const { document, currentPage, zoom } = useDocumentStore();
+  const { document, currentPage, zoom, rotationByPage, rotateCW } =
+    useDocumentStore();
   const [pageSize, setPageSize] = useState({ width: 0, height: 0 });
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { isPanActive, isPanning } = usePanMode(scrollContainerRef);
+
+  const rotation = rotationByPage[currentPage] ?? 0;
 
   const handlePageSizeChange = useCallback(
     (width: number, height: number) => {
@@ -19,6 +23,13 @@ export function DocumentViewer() {
     },
     []
   );
+
+  const handleRotate = useCallback(() => {
+    if (pageSize.width > 0 && pageSize.height > 0) {
+      useAreaStore.getState().rotateZonesCW(currentPage, pageSize.height);
+    }
+    rotateCW(currentPage);
+  }, [pageSize.height, pageSize.width, currentPage, rotateCW]);
 
   if (!document) return null;
 
@@ -28,7 +39,7 @@ export function DocumentViewer() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-2 border-b">
         <PageNavigation />
-        <ZoomControls />
+        <ZoomControls onRotate={handleRotate} />
       </div>
       <div
         ref={scrollContainerRef}
@@ -44,6 +55,7 @@ export function DocumentViewer() {
               url={document.url}
               pageIndex={currentPage}
               zoom={zoom}
+              rotation={rotation}
               onPageSizeChange={handlePageSizeChange}
             />
           ) : (
@@ -51,6 +63,7 @@ export function DocumentViewer() {
               key={rendererKey}
               url={document.url}
               zoom={zoom}
+              rotation={rotation}
               onPageSizeChange={handlePageSizeChange}
             />
           )}

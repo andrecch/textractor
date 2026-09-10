@@ -19,7 +19,8 @@ export function useArea() {
     setAreaCroppedImageRaw,
     setAreaCroppedImageProcessed,
   } = useAreaStore();
-  const { currentPage, document } = useDocumentStore();
+  const { currentPage, document, rotationByPage } = useDocumentStore();
+  const rotation = rotationByPage[currentPage] ?? 0;
   const { settings } = useSettingsStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
@@ -142,6 +143,7 @@ export function useArea() {
     activeArea,
     currentPage,
     activeAreaId,
+    rotation,
     settings.preprocessingEnabled,
     setAreaCroppedImageRaw,
     setAreaCroppedImageProcessed,

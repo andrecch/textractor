@@ -5,6 +5,7 @@ interface PDFPageRendererProps {
   url: string;
   pageIndex: number;
   zoom: number;
+  rotation: number;
   onPageSizeChange: (width: number, height: number) => void;
 }
 
@@ -14,6 +15,7 @@ export function PDFPageRenderer({
   url,
   pageIndex,
   zoom,
+  rotation,
   onPageSizeChange,
 }: PDFPageRendererProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,7 +30,7 @@ export function PDFPageRenderer({
     const scale = zoom * SCALE_MULTIPLIER;
     const mySequence = ++sequenceRef.current;
 
-    const cached = getCachedCanvas(url, pageIndex, scale);
+    const cached = getCachedCanvas(url, pageIndex, scale, rotation);
     if (cached) {
       if (mySequence !== sequenceRef.current) return;
       canvas.width = cached.width;
@@ -44,7 +46,8 @@ export function PDFPageRenderer({
       const renderedCanvas = await renderPdfPageToCanvas(
         url,
         pageIndex,
-        scale
+        scale,
+        rotation
       );
 
       if (mySequence !== sequenceRef.current) return;
@@ -64,7 +67,7 @@ export function PDFPageRenderer({
         console.error("Error rendering PDF page:", err);
       }
     }
-  }, [url, pageIndex, zoom, onPageSizeChange]);
+  }, [url, pageIndex, zoom, rotation, onPageSizeChange]);
 
   useEffect(() => {
     if (rafRef.current) {

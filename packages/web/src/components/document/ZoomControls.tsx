@@ -1,9 +1,13 @@
 import { useTranslation } from "react-i18next";
-import { ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import { ZoomIn, ZoomOut, Maximize, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDocumentStore } from "@/stores/documentStore";
 
-export function ZoomControls() {
+interface ZoomControlsProps {
+  onRotate: () => void;
+}
+
+export function ZoomControls({ onRotate }: ZoomControlsProps) {
   const { t } = useTranslation();
   const { zoom, zoomIn, zoomOut, fitToScreen } = useDocumentStore();
 
@@ -35,6 +39,14 @@ export function ZoomControls() {
         title={t("viewer.fitToScreen")}
       >
         <Maximize className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon-sm"
+        onClick={onRotate}
+        title={t("viewer.rotateCw")}
+      >
+        <RotateCw className="h-4 w-4" />
       </Button>
     </div>
   );
