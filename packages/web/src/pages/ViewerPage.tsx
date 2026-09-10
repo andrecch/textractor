@@ -26,11 +26,11 @@ export function ViewerPage() {
   return (
     <div className="flex h-full">
       <AreaPanel width={areaPanel.width} />
-      <ResizeHandle side="left" onResize={areaPanel.resizeBy} />
+      <ResizeHandle side="left" onResize={areaPanel.resizeBy} onReset={areaPanel.reset} />
       <div className="flex-1 min-w-0 overflow-hidden">
         <DocumentViewer />
       </div>
-      <ResizeHandle side="right" onResize={ocrPanel.resizeBy} />
+      <ResizeHandle side="right" onResize={ocrPanel.resizeBy} onReset={ocrPanel.reset} />
       <div className="overflow-hidden shrink-0" style={{ width: ocrPanel.width }}>
         <OCRResultPanel />
       </div>

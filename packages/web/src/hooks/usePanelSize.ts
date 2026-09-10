@@ -23,23 +23,36 @@ function loadWidth(storageKey: string, options: PanelSizeOptions): number {
 }
 
 export function usePanelSize(storageKey: string, options: PanelSizeOptions) {
-  const { min, max } = options;
+  const { defaultWidth, min, max } = options;
   const [width, setWidth] = useState(() => loadWidth(storageKey, options));
+
+  const persist = useCallback(
+    (value: number) => {
+      try {
+        window.localStorage.setItem(storageKey, String(value));
+      } catch {
+        // ignore storage failures
+      }
+    },
+    [storageKey]
+  );
 
   const resizeBy = useCallback(
     (delta: number) => {
       setWidth((prev) => {
         const next = clamp(prev + delta, min, max);
-        try {
-          window.localStorage.setItem(storageKey, String(next));
-        } catch {
-          // ignore storage failures
-        }
+        persist(next);
         return next;
       });
     },
-    [min, max, storageKey]
+    [min, max, persist]
   );
 
-  return { width, resizeBy };
+  const reset = useCallback(() => {
+    const value = clamp(defaultWidth, min, max);
+    persist(value);
+    setWidth(value);
+  }, [defaultWidth, min, max, persist]);
+
+  return { width, resizeBy, reset };
 }

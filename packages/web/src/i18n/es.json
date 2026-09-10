@@ -15,7 +15,7 @@
     "new": "Nuevo"
   },
   "layout": {
-    "resizePanel": "Arrastrar para redimensionar"
+    "resizePanel": "Arrastrar para redimensionar. Doble clic para restablecer"
   },
   "welcome": {
     "title": "Textractor",

@@ -15,7 +15,7 @@
     "new": "New"
   },
   "layout": {
-    "resizePanel": "Drag to resize"
+    "resizePanel": "Drag to resize. Double-click to reset"
   },
   "welcome": {
     "title": "Textractor",

@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils";
 interface ResizeHandleProps {
   side: "left" | "right";
   onResize: (delta: number) => void;
+  onReset: () => void;
   className?: string;
 }
 
-export function ResizeHandle({ side, onResize, className }: ResizeHandleProps) {
+export function ResizeHandle({ side, onResize, onReset, className }: ResizeHandleProps) {
   const { t } = useTranslation();
   const lastXRef = useRef(0);
   const draggingRef = useRef(false);
@@ -47,6 +48,7 @@ export function ResizeHandle({ side, onResize, className }: ResizeHandleProps) {
       onPointerMove={handlePointerMove}
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
+      onDoubleClick={onReset}
       className={cn(
         "group relative z-20 -mx-[3px] w-1.5 shrink-0 cursor-col-resize touch-none select-none",
         className
