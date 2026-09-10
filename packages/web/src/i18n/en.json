@@ -55,6 +55,7 @@
     "add": "Add area",
     "delete": "Delete",
     "rename": "Rename",
+    "deleteZone": "Delete zone",
     "save": "Save",
     "cancel": "Cancel",
     "defaultName": "Area",

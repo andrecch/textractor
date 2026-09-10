@@ -18,6 +18,7 @@ interface AreaState {
   removeArea: (id: string) => void;
   renameArea: (id: string, name: string) => void;
   updateAreaZone: (id: string, pageIndex: number, zone: AreaZone) => void;
+  clearAreaZone: (id: string) => void;
   rotateZonesCW: (pageIndex: number, pageHeight: number) => void;
   setAreaCroppedImageRaw: (id: string, image: string | null) => void;
   setAreaCroppedImageProcessed: (id: string, image: string | null) => void;
@@ -85,6 +86,24 @@ export const useAreaStore = create<AreaState>((set, get) => ({
           : a
       ),
     })),
+
+  clearAreaZone: (id) => {
+    clearAreaImages(id);
+    set((state) => ({
+      areas: state.areas.map((a) =>
+        a.id === id
+          ? {
+              ...a,
+              zone: null,
+              status: "empty" as const,
+              extractedText: null,
+              errorMessage: null,
+              updatedAt: new Date().toISOString(),
+            }
+          : a
+      ),
+    }));
+  },
 
   rotateZonesCW: (pageIndex, pageHeight) =>
     set((state) => ({

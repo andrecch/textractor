@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { X } from "lucide-react";
 import { useArea } from "@/hooks/useArea";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useAreaStore } from "@/stores/areaStore";
@@ -39,7 +40,7 @@ export function AreaOverlay({
     handleMouseUp,
   } = useArea();
   const { currentPage } = useDocumentStore();
-  const { areas } = useAreaStore();
+  const { areas, clearAreaZone } = useAreaStore();
   const { t } = useTranslation();
 
   const visibleZones = areas.flatMap((area, index) =>
@@ -75,7 +76,7 @@ export function AreaOverlay({
           <div
             key={area.id}
             className={cn(
-              "absolute pointer-events-none",
+              "absolute group/zone",
               borderWidth,
               color.border,
               color.bg,
@@ -96,6 +97,23 @@ export function AreaOverlay({
             >
               {area.name}
             </span>
+            <button
+              type="button"
+              title={t("area.deleteZone")}
+              aria-label={t("area.deleteZone")}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                clearAreaZone(area.id);
+              }}
+              className={cn(
+                "absolute -top-2 -right-2 z-10 flex h-4 w-4 items-center justify-center rounded-full",
+                "bg-destructive text-destructive-foreground opacity-0 transition-opacity",
+                "pointer-events-auto group-hover/zone:opacity-100 hover:bg-destructive/80"
+              )}
+            >
+              <X className="h-3 w-3" />
+            </button>
           </div>
         );
       })}

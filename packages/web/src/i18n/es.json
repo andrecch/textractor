@@ -55,6 +55,7 @@
     "add": "Agregar area",
     "delete": "Eliminar",
     "rename": "Renombrar",
+    "deleteZone": "Eliminar zona",
     "save": "Guardar",
     "cancel": "Cancelar",
     "defaultName": "Area",
