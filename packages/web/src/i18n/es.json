@@ -123,6 +123,7 @@
     "page": "Pagina",
     "date": "Fecha",
     "provider": "Proveedor",
+    "unknownProvider": "Desconocido",
     "view": "Ver texto",
     "clear": "Limpiar historial",
     "clearConfirmTitle": "Borrar historial",

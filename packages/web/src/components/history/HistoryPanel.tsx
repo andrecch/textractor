@@ -16,6 +16,10 @@ import { getHistory, clearHistory, type HistoryResponse } from "@/services/api";
 
 const PAGE_SIZE = 20;
 
+const PROVIDER_LABELS: Record<string, string> = {
+  "nvidia-build": "NVIDIA NIM",
+};
+
 interface HistoryRecord {
   id: string;
   documentName: string;
@@ -32,6 +36,13 @@ export function HistoryPanel() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
+
+  const formatProvider = useCallback(
+    (provider: string) =>
+      PROVIDER_LABELS[provider] ??
+      (provider === "unknown" ? t("history.unknownProvider") : provider),
+    [t]
+  );
 
   const fetchPage = useCallback(
     async (offset: number, append: boolean) => {
@@ -127,7 +138,10 @@ export function HistoryPanel() {
       ) : (
         <>
           <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pr-2">
-            {records.map((record) => (
+            {records.map((record) => {
+              const sectionLabel =
+                record.sectionName === "Unknown" ? "—" : record.sectionName;
+              return (
               <div
                 key={record.id}
                 className="flex items-center justify-between rounded border p-3"
@@ -137,8 +151,8 @@ export function HistoryPanel() {
                   <div>
                     <p className="text-sm font-medium">{record.documentName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {record.sectionName} · {t("history.page")} {record.pageIndex + 1} ·{" "}
-                      {record.provider} ·{" "}
+                      {sectionLabel} · {t("history.page")} {record.pageIndex + 1} ·{" "}
+                      {formatProvider(record.provider)} ·{" "}
                       {new Date(record.createdAt).toLocaleString()}
                     </p>
                   </div>
@@ -151,7 +165,7 @@ export function HistoryPanel() {
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
                         <DialogTitle>
-                          {record.documentName} — {record.sectionName}
+                          {record.documentName} — {sectionLabel}
                         </DialogTitle>
                       </DialogHeader>
                       <pre className="whitespace-pre-wrap text-sm max-h-96 overflow-auto p-4 bg-muted rounded">
@@ -170,7 +184,8 @@ export function HistoryPanel() {
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
           {hasMore && (
             <div className="flex justify-center pt-4 flex-shrink-0">

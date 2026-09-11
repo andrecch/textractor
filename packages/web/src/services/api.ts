@@ -166,7 +166,7 @@ export async function getHistory(
 
 export async function saveExtraction(data: {
   documentName: string;
-  areaName: string;
+  sectionName: string;
   pageIndex: number;
   zone: { x: number; y: number; width: number; height: number };
   extractedText: string;

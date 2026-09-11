@@ -48,7 +48,7 @@ export interface ExtractionDeps {
   ) => Promise<{ text: string; provider: string }>;
   saveExtraction: (data: {
     documentName: string;
-    areaName: string;
+    sectionName: string;
     pageIndex: number;
     zone: { x: number; y: number; width: number; height: number };
     extractedText: string;
@@ -175,7 +175,7 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
 
     await doSaveExtraction({
       documentName: doc.name,
-      areaName: area.name,
+      sectionName: area.name,
       pageIndex: area.pageIndex,
       zone: area.zone,
       extractedText: cleanText,
