@@ -2,7 +2,6 @@ export interface OCRModel {
   id: string;
   name: string;
   description: string;
-  recommended?: boolean;
 }
 
 export const OCR_MODELS: OCRModel[] = [
@@ -10,13 +9,11 @@ export const OCR_MODELS: OCRModel[] = [
     id: "nvidia/nemotron-ocr-v2",
     name: "Nemotron OCR v2",
     description: "Modelo OCR especializado de NVIDIA. Rapido y preciso para extraccion de texto.",
-    recommended: true,
   },
   {
     id: "meta/llama-3.2-11b-vision-instruct",
-    name: "Llama 3.2 11B Vision (lineas)",
+    name: "Llama 3.2 11B Vision",
     description: "VLM por chat. Respeta saltos de linea entre renglones. Ideal para listas y tablas.",
-    recommended: true,
   },
   {
     id: "nvidia/nemotron-parse",
