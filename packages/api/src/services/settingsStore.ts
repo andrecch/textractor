@@ -53,6 +53,12 @@ export function resolveApiKey(): string | null {
   return getUserApiKey() ?? process.env.NVIDIA_API_KEY ?? null;
 }
 
+export function getApiKeyHint(): string | null {
+  const key = resolveApiKey();
+  if (!key || key.length <= 6) return null;
+  return key.slice(-6);
+}
+
 export function getApiKeySource(): "user" | "server" | "none" {
   if (getUserApiKey()) return "user";
   if (process.env.NVIDIA_API_KEY) return "server";

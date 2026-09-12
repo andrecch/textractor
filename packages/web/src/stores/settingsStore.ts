@@ -24,21 +24,18 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "textractor-settings",
-      version: 1,
+      version: 2,
       migrate: (persistedState) => {
         const state = persistedState as Partial<SettingsState> | undefined;
-        const settings = state?.settings;
-        if (!settings || !isValidOcrModel(settings.ocrModel)) {
-          return {
-            ...(state ?? {}),
-            settings: {
-              ...DEFAULT_SETTINGS,
-              ...(settings ?? {}),
-              ocrModel: DEFAULT_OCR_MODEL,
-            },
-          } as SettingsState;
+        const { ocrEnabled: _legacyOcrEnabled, ...settings } = (state?.settings ??
+          {}) as Partial<AppSettings> & { ocrEnabled?: boolean };
+        if (!isValidOcrModel(settings.ocrModel ?? "")) {
+          settings.ocrModel = DEFAULT_OCR_MODEL;
         }
-        return state as SettingsState;
+        return {
+          ...(state ?? {}),
+          settings: { ...DEFAULT_SETTINGS, ...settings },
+        } as SettingsState;
       },
     }
   )

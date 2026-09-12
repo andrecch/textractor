@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAreaStore } from "@/stores/areaStore";
 import { useOCRStore } from "@/stores/ocrStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { useOCR } from "@/hooks/useOCR";
 import { useAreaImage } from "@/hooks/useAreaImage";
 import { getAreaImage } from "@/stores/imageStore";
@@ -20,6 +21,30 @@ export function OCRResultPanel() {
   const activeArea = getActiveArea();
   const croppedImageRaw = useAreaImage(activeAreaId, "raw");
   const croppedImageProcessed = useAreaImage(activeAreaId, "processed");
+  const autoExtractEnabled = useSettingsStore(
+    (s) => s.settings.autoExtractEnabled
+  );
+
+  useEffect(() => {
+    if (!autoExtractEnabled) return;
+    if (!activeAreaId || !activeArea?.zone) return;
+    if (activeArea.status !== "zone-defined") return;
+    if (isProcessing) return;
+    if (!croppedImageRaw && !croppedImageProcessed) return;
+    const { autoExtractPendingId, consumeAutoExtract } =
+      useAreaStore.getState();
+    if (autoExtractPendingId !== activeAreaId) return;
+    if (!consumeAutoExtract(activeAreaId)) return;
+    void extractActive();
+  }, [
+    autoExtractEnabled,
+    activeArea,
+    activeAreaId,
+    isProcessing,
+    croppedImageRaw,
+    croppedImageProcessed,
+    extractActive,
+  ]);
 
   const buildImageFileName = useCallback(
     (suffix: string) => {

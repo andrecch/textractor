@@ -11,6 +11,7 @@ interface AreaState {
   areas: Area[];
   activeAreaId: string | null;
   areaCounter: number;
+  autoExtractPendingId: string | null;
 
   getActiveArea: () => Area | null;
   setActiveArea: (id: string) => void;
@@ -18,6 +19,7 @@ interface AreaState {
   removeArea: (id: string) => void;
   renameArea: (id: string, name: string) => void;
   updateAreaZone: (id: string, pageIndex: number, zone: AreaZone) => void;
+  consumeAutoExtract: (id: string) => boolean;
   clearAreaZone: (id: string) => void;
   rotateZonesCW: (pageIndex: number, pageHeight: number) => void;
   setAreaCroppedImageRaw: (id: string, image: string | null) => void;
@@ -32,6 +34,7 @@ export const useAreaStore = create<AreaState>((set, get) => ({
   areas: [],
   activeAreaId: null,
   areaCounter: 0,
+  autoExtractPendingId: null,
 
   getActiveArea: () => {
     const { areas, activeAreaId } = get();
@@ -43,7 +46,7 @@ export const useAreaStore = create<AreaState>((set, get) => ({
   addArea: (documentName) =>
     set((state) => {
       const newCounter = state.areaCounter + 1;
-      const newArea = createDefaultArea(`Area ${newCounter}`, documentName);
+      const newArea = createDefaultArea(`Área ${newCounter}`, documentName);
       return {
         areas: [...state.areas, newArea],
         activeAreaId: newArea.id,
@@ -62,6 +65,8 @@ export const useAreaStore = create<AreaState>((set, get) => ({
       return {
         areas: newAreas,
         activeAreaId: newActiveId,
+        autoExtractPendingId:
+          state.autoExtractPendingId === id ? null : state.autoExtractPendingId,
       };
     }),
 
@@ -72,8 +77,10 @@ export const useAreaStore = create<AreaState>((set, get) => ({
       ),
     })),
 
-  updateAreaZone: (id, pageIndex, zone) =>
+  updateAreaZone: (id, pageIndex, zone) => {
+    clearAreaImages(id);
     set((state) => ({
+      autoExtractPendingId: id,
       areas: state.areas.map((a) =>
         a.id === id
           ? {
@@ -85,7 +92,14 @@ export const useAreaStore = create<AreaState>((set, get) => ({
             }
           : a
       ),
-    })),
+    }));
+  },
+
+  consumeAutoExtract: (id) => {
+    if (get().autoExtractPendingId !== id) return false;
+    set({ autoExtractPendingId: null });
+    return true;
+  },
 
   clearAreaZone: (id) => {
     clearAreaImages(id);
@@ -160,16 +174,22 @@ export const useAreaStore = create<AreaState>((set, get) => ({
 
   clearAreas: () => {
     clearAllImages();
-    set({ areas: [], activeAreaId: null, areaCounter: 0 });
+    set({
+      areas: [],
+      activeAreaId: null,
+      areaCounter: 0,
+      autoExtractPendingId: null,
+    });
   },
 
   initializeForNewDocument: (documentName) => {
     clearAllImages();
-    const firstArea = createDefaultArea("Area 1", documentName);
+    const firstArea = createDefaultArea("Área 1", documentName);
     set({
       areas: [firstArea],
       activeAreaId: firstArea.id,
       areaCounter: 1,
+      autoExtractPendingId: null,
     });
   },
 }));

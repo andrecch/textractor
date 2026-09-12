@@ -87,15 +87,23 @@ export async function ocrExtract(
 
 export type ApiKeySource = "server" | "user" | "none";
 
-export async function getApiKeyStatus(): Promise<{
+export interface ApiKeyStatus {
   hasKey: boolean;
   source: ApiKeySource;
-}> {
+  keyHint: string | null;
+}
+
+export async function getApiKeyStatus(): Promise<ApiKeyStatus> {
   const response = await fetch(`${API_BASE}/config/api-key`);
   if (!response.ok) {
-    return { hasKey: false, source: "none" };
+    return { hasKey: false, source: "none", keyHint: null };
   }
-  return response.json();
+  const data: ApiKeyStatus = await response.json();
+  return {
+    hasKey: data.hasKey === true,
+    source: data.source ?? "none",
+    keyHint: typeof data.keyHint === "string" ? data.keyHint : null,
+  };
 }
 
 export async function setApiKey(apiKey: string): Promise<void> {

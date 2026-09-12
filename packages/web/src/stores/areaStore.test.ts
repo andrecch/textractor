@@ -31,7 +31,12 @@ function seedArea(area: Area): void {
 describe("areaStore", () => {
   beforeEach(() => {
     clearAllImages();
-    useAreaStore.setState({ areas: [], activeAreaId: null, areaCounter: 0 });
+    useAreaStore.setState({
+      areas: [],
+      activeAreaId: null,
+      areaCounter: 0,
+      autoExtractPendingId: null,
+    });
   });
 
   describe("updateAreaExtractedText", () => {
@@ -98,6 +103,35 @@ describe("areaStore", () => {
       useAreaStore.getState().removeArea("area-1");
       expect(getAreaImage("area-1", "raw")).toBeNull();
       expect(getAreaImage("area-1", "processed")).toBeNull();
+    });
+  });
+
+  describe("auto extract queue", () => {
+    const newZone = { x: 5, y: 5, width: 50, height: 50 };
+
+    it("updateAreaZone queues the area and clears stale crops", () => {
+      seedArea(makeArea());
+      setAreaImage("area-1", "raw", "data:image/png;base64,RAW");
+      setAreaImage("area-1", "processed", "data:image/png;base64,PROC");
+      useAreaStore.getState().updateAreaZone("area-1", 0, newZone);
+      expect(useAreaStore.getState().autoExtractPendingId).toBe("area-1");
+      expect(getAreaImage("area-1", "raw")).toBeNull();
+      expect(getAreaImage("area-1", "processed")).toBeNull();
+    });
+
+    it("consumeAutoExtract is id-matched and one-shot", () => {
+      seedArea(makeArea());
+      useAreaStore.getState().updateAreaZone("area-1", 0, newZone);
+      expect(useAreaStore.getState().consumeAutoExtract("area-2")).toBe(false);
+      expect(useAreaStore.getState().consumeAutoExtract("area-1")).toBe(true);
+      expect(useAreaStore.getState().consumeAutoExtract("area-1")).toBe(false);
+    });
+
+    it("removeArea unqueues a pending extraction", () => {
+      seedArea(makeArea());
+      useAreaStore.getState().updateAreaZone("area-1", 0, newZone);
+      useAreaStore.getState().removeArea("area-1");
+      expect(useAreaStore.getState().autoExtractPendingId).toBeNull();
     });
   });
 });

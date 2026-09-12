@@ -12,6 +12,7 @@ interface ApiKeySectionProps {
   validationState: ApiKeyValidationState;
   validationError: string;
   keySource: ApiKeySource;
+  keyHint: string | null;
   saving: boolean;
   clearing: boolean;
   hasKey: boolean;
@@ -27,6 +28,7 @@ export function ApiKeySection({
   validationState,
   validationError,
   keySource,
+  keyHint,
   saving,
   clearing,
   hasKey,
@@ -37,6 +39,10 @@ export function ApiKeySection({
   onClear,
 }: ApiKeySectionProps) {
   const { t } = useTranslation();
+
+  const storedKeyPlaceholder = hasKey
+    ? `${"*".repeat(16)}${keyHint ?? ""}`
+    : null;
 
   return (
     <div className="space-y-2">
@@ -66,7 +72,12 @@ export function ApiKeySection({
 
       <Input
         type="password"
-        placeholder={t("settings.apiKeyPlaceholder")}
+        placeholder={storedKeyPlaceholder ?? t("settings.apiKeyPlaceholder")}
+        title={
+          keyHint
+            ? t("settings.apiKeyEndsWith", { hint: keyHint })
+            : undefined
+        }
         value={inputKey}
         onChange={(e) => onInputKeyChange(e.target.value)}
         onKeyDown={(e) => {

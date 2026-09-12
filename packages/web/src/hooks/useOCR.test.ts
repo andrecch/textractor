@@ -49,7 +49,7 @@ function makeDoc(): DocumentFile {
 
 function makeSettings(overrides: Partial<AppSettings> = {}): AppSettings {
   return {
-    ocrEnabled: true,
+    autoExtractEnabled: false,
     preprocessingEnabled: true,
     language: "es",
     ocrModel: "test-model",
@@ -111,16 +111,6 @@ describe("runExtraction", () => {
     clearAllImages();
     useAreaStore.setState({ areas: [], activeAreaId: null, areaCounter: 0 });
     useOCRStore.setState({ isProcessing: false, abortController: null });
-  });
-
-  it("skips when ocrEnabled is false", async () => {
-    seedArea(makeArea());
-    const { deps, mocks } = buildDeps({
-      getSettings: () => makeSettings({ ocrEnabled: false }),
-    });
-    const outcome = await runExtraction(deps);
-    expect(outcome.reason).toBe("skipped");
-    expect(mocks.ocrExtract).not.toHaveBeenCalled();
   });
 
   it("skips when there is no document", async () => {

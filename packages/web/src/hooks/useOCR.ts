@@ -107,7 +107,7 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
   const settings = getSettings();
   const doc = getDocument();
 
-  if (!settings.ocrEnabled || !doc) {
+  if (!doc) {
     return { status: null, reason: "skipped" };
   }
 

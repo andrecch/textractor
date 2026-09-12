@@ -3,6 +3,7 @@ import {
   setUserApiKey,
   clearUserApiKey,
   getApiKeySource,
+  getApiKeyHint,
 } from "../services/settingsStore.js";
 
 const router = Router();
@@ -10,7 +11,8 @@ const router = Router();
 router.get("/api-key", (_req, res) => {
   const source = getApiKeySource();
   const hasKey = source !== "none";
-  res.json({ hasKey, source });
+  const keyHint = hasKey ? getApiKeyHint() : null;
+  res.json({ hasKey, source, keyHint });
 });
 
 router.post("/api-key", (req, res) => {

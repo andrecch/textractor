@@ -3,30 +3,35 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 interface OcrTogglesSectionProps {
-  ocrEnabled: boolean;
+  autoExtractEnabled: boolean;
   preprocessingEnabled: boolean;
-  onToggleOcr: () => void;
+  onToggleAutoExtract: () => void;
   onTogglePreprocessing: () => void;
 }
 
 export function OcrTogglesSection({
-  ocrEnabled,
+  autoExtractEnabled,
   preprocessingEnabled,
-  onToggleOcr,
+  onToggleAutoExtract,
   onTogglePreprocessing,
 }: OcrTogglesSectionProps) {
   const { t } = useTranslation();
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <Label>{t("settings.ocrEnabled")}</Label>
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <Label>{t("settings.autoExtract")}</Label>
+          <p className="text-xs text-muted-foreground">
+            {t("settings.autoExtractHint")}
+          </p>
+        </div>
         <Button
-          variant={ocrEnabled ? "default" : "outline"}
+          variant={autoExtractEnabled ? "default" : "outline"}
           size="sm"
-          onClick={onToggleOcr}
+          onClick={onToggleAutoExtract}
         >
-          {ocrEnabled ? "ON" : "OFF"}
+          {autoExtractEnabled ? "ON" : "OFF"}
         </Button>
       </div>
 

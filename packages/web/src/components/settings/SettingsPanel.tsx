@@ -24,12 +24,14 @@ export function SettingsPanel() {
   const [validationState, setValidationState] = useState<ApiKeyValidationState>("idle");
   const [validationError, setValidationError] = useState("");
   const [keySource, setKeySource] = useState<ApiKeySource>("none");
+  const [keyHint, setKeyHint] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [clearing, setClearing] = useState(false);
 
   const refreshStatus = useCallback(async () => {
     const status = await getApiKeyStatus();
     setKeySource(status.source);
+    setKeyHint(status.keyHint);
   }, []);
 
   useEffect(() => {
@@ -111,9 +113,13 @@ export function SettingsPanel() {
         <Separator />
 
         <OcrTogglesSection
-          ocrEnabled={settings.ocrEnabled}
+          autoExtractEnabled={settings.autoExtractEnabled}
           preprocessingEnabled={settings.preprocessingEnabled}
-          onToggleOcr={() => updateSettings({ ocrEnabled: !settings.ocrEnabled })}
+          onToggleAutoExtract={() =>
+            updateSettings({
+              autoExtractEnabled: !settings.autoExtractEnabled,
+            })
+          }
           onTogglePreprocessing={() =>
             updateSettings({
               preprocessingEnabled: !settings.preprocessingEnabled,
@@ -133,6 +139,7 @@ export function SettingsPanel() {
           validationState={validationState}
           validationError={validationError}
           keySource={keySource}
+          keyHint={keyHint}
           saving={saving}
           clearing={clearing}
           hasKey={hasKey}
