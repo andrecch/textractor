@@ -44,6 +44,13 @@ function formatModel(model: string): string {
     : short;
 }
 
+function parseDbDate(value: string): Date {
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(value)) {
+    return new Date(`${value.replace(" ", "T")}Z`);
+  }
+  return new Date(value);
+}
+
 interface HistoryRecord {
   id: string;
   documentName: string;
@@ -207,7 +214,7 @@ export function HistoryPanel() {
                           ? formatModel(record.model)
                           : formatProvider(record.provider)}
                       </span> ·{" "}
-                      {new Date(record.createdAt).toLocaleString()}
+                      {parseDbDate(record.createdAt).toLocaleString()}
                     </p>
                   </div>
                 </div>
