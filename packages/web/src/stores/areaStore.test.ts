@@ -14,6 +14,7 @@ function makeArea(overrides: Partial<Area> = {}): Area {
     extractedText: null,
     status: "zone-defined",
     errorMessage: null,
+    historyId: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,

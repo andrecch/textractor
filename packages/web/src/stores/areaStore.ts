@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Area, AreaZone } from "@/types/area";
 import { createDefaultArea } from "@/types/area";
+import { updateExtraction } from "@/services/api";
 import {
   setAreaImage,
   clearAreaImages,
@@ -26,6 +27,7 @@ interface AreaState {
   setAreaCroppedImageProcessed: (id: string, image: string | null) => void;
   updateAreaExtractedText: (id: string, text: string) => void;
   updateAreaStatus: (id: string, status: Area["status"], error?: string) => void;
+  setAreaHistoryId: (id: string, historyId: string) => void;
   clearAreas: () => void;
   initializeForNewDocument: (documentName: string) => void;
 }
@@ -70,12 +72,17 @@ export const useAreaStore = create<AreaState>((set, get) => ({
       };
     }),
 
-  renameArea: (id, name) =>
+  renameArea: (id, name) => {
+    const area = get().areas.find((a) => a.id === id);
     set((state) => ({
       areas: state.areas.map((a) =>
         a.id === id ? { ...a, name, updatedAt: new Date().toISOString() } : a
       ),
-    })),
+    }));
+    if (area?.historyId) {
+      updateExtraction(area.historyId, { sectionName: name }).catch(() => {});
+    }
+  },
 
   updateAreaZone: (id, pageIndex, zone) => {
     clearAreaImages(id);
@@ -155,6 +162,13 @@ export const useAreaStore = create<AreaState>((set, get) => ({
               updatedAt: new Date().toISOString(),
             }
           : a
+      ),
+    })),
+
+  setAreaHistoryId: (id, historyId) =>
+    set((state) => ({
+      areas: state.areas.map((a) =>
+        a.id === id ? { ...a, historyId } : a
       ),
     })),
 

@@ -21,6 +21,7 @@ function makeArea(overrides: Partial<Area> = {}): Area {
     extractedText: null,
     status: "zone-defined",
     errorMessage: null,
+    historyId: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,
@@ -62,6 +63,7 @@ function buildDeps(overrides: Partial<ExtractionDeps> = {}): {
   mocks: {
     ocrExtract: ReturnType<typeof vi.fn>;
     saveExtraction: ReturnType<typeof vi.fn>;
+    setAreaHistoryId: ReturnType<typeof vi.fn>;
     updateAreaStatus: ReturnType<typeof vi.fn>;
     updateAreaExtractedText: ReturnType<typeof vi.fn>;
     setProcessing: ReturnType<typeof vi.fn>;
@@ -70,7 +72,8 @@ function buildDeps(overrides: Partial<ExtractionDeps> = {}): {
 } {
   const mocks = {
     ocrExtract: vi.fn(async () => ({ text: "extracted", provider: "test" })),
-    saveExtraction: vi.fn(async () => {}),
+    saveExtraction: vi.fn(async () => ({ id: "hist-1" })),
+    setAreaHistoryId: vi.fn(),
     updateAreaStatus: vi.fn(),
     updateAreaExtractedText: vi.fn(),
     setProcessing: vi.fn(),
@@ -87,6 +90,7 @@ function buildDeps(overrides: Partial<ExtractionDeps> = {}): {
     setAbortController: mocks.setAbortController as ExtractionDeps["setAbortController"],
     ocrExtract: mocks.ocrExtract as ExtractionDeps["ocrExtract"],
     saveExtraction: mocks.saveExtraction as ExtractionDeps["saveExtraction"],
+    setAreaHistoryId: mocks.setAreaHistoryId as ExtractionDeps["setAreaHistoryId"],
     dataUrlToJpegDataUrl: async (dataUrl) => dataUrl,
     getAreaImage: (id, kind) => {
       const map: Record<string, string | null> = {
@@ -141,6 +145,7 @@ describe("runExtraction", () => {
     expect(mocks.updateAreaExtractedText).toHaveBeenCalledWith("area-1", "extracted");
     expect(mocks.updateAreaStatus).toHaveBeenLastCalledWith("area-1", "extracted");
     expect(mocks.saveExtraction).toHaveBeenCalledOnce();
+    expect(mocks.setAreaHistoryId).toHaveBeenCalledWith("area-1", "hist-1");
     expect(mocks.setProcessing).toHaveBeenCalledWith(true);
     expect(mocks.setProcessing).toHaveBeenLastCalledWith(false);
     expect(mocks.setAbortController).toHaveBeenLastCalledWith(null);

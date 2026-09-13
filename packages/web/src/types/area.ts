@@ -16,6 +16,7 @@ export interface Area {
   extractedText: string | null;
   status: AreaStatus;
   errorMessage: string | null;
+  historyId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -31,6 +32,7 @@ export function createDefaultArea(name: string, documentName: string): Area {
     extractedText: null,
     status: "empty",
     errorMessage: null,
+    historyId: null,
     createdAt: now,
     updatedAt: now,
   };

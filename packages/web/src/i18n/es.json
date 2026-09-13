@@ -127,6 +127,13 @@
     "clearConfirmDescription": "Se eliminaran todas las extracciones del historial. Esta accion no se puede deshacer.",
     "cancel": "Cancelar",
     "confirmClear": "Borrar todo",
-    "export": "Exportar extracción"
+    "export": "Exportar extracción",
+    "downloadTxt": "Descargar en .txt",
+    "copyText": "Copiar texto",
+    "copied": "Copiado",
+    "deleteRecord": "Eliminar registro",
+    "deleteConfirmTitle": "Borrar registro",
+    "deleteConfirmDescription": "Se eliminara este registro del historial. Esta accion no se puede deshacer.",
+    "confirmDelete": "Borrar"
   }
 }

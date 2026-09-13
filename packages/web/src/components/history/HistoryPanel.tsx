@@ -1,6 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Trash2, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Trash2,
+  FileText,
+  FileDown,
+  Copy,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,13 +21,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { getHistory, clearHistory, type HistoryResponse } from "@/services/api";
+import {
+  getHistory,
+  clearHistory,
+  deleteHistoryRecord,
+  type HistoryResponse,
+} from "@/services/api";
 
 const PAGE_SIZE = 20;
+const MODEL_DISPLAY_MAX = 32;
 
 const PROVIDER_LABELS: Record<string, string> = {
   "nvidia-build": "NVIDIA NIM",
 };
+
+function formatModel(model: string): string {
+  const short = model.includes("/")
+    ? model.slice(model.lastIndexOf("/") + 1)
+    : model;
+  return short.length > MODEL_DISPLAY_MAX
+    ? `${short.slice(0, MODEL_DISPLAY_MAX)}…`
+    : short;
+}
 
 interface HistoryRecord {
   id: string;
@@ -27,6 +51,7 @@ interface HistoryRecord {
   pageIndex: number;
   extractedText: string;
   provider: string;
+  model: string | null;
   createdAt: string;
 }
 
@@ -36,13 +61,8 @@ export function HistoryPanel() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
-
-  const formatProvider = useCallback(
-    (provider: string) =>
-      PROVIDER_LABELS[provider] ??
-      (provider === "unknown" ? t("history.unknownProvider") : provider),
-    [t]
-  );
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchPage = useCallback(
     async (offset: number, append: boolean) => {
@@ -87,6 +107,36 @@ export function HistoryPanel() {
     a.click();
     URL.revokeObjectURL(url);
   }, []);
+
+  const handleCopy = useCallback(async (record: HistoryRecord) => {
+    await navigator.clipboard.writeText(record.extractedText);
+    setCopiedId(record.id);
+    setTimeout(
+      () => setCopiedId((current) => (current === record.id ? null : current)),
+      2000
+    );
+  }, []);
+
+  const handleDelete = useCallback(
+    async (id: string) => {
+      setDeletingId(id);
+      try {
+        await deleteHistoryRecord(id);
+        setRecords((prev) => prev.filter((r) => r.id !== id));
+        setTotal((prev) => Math.max(0, prev - 1));
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    []
+  );
+
+  const formatProvider = useCallback(
+    (provider: string) =>
+      PROVIDER_LABELS[provider] ??
+      (provider === "unknown" ? t("history.unknownProvider") : provider),
+    [t]
+  );
 
   if (loading) {
     return <div className="p-8 text-center text-muted-foreground">...</div>;
@@ -152,7 +202,11 @@ export function HistoryPanel() {
                     <p className="text-sm font-medium">{record.documentName}</p>
                     <p className="text-xs text-muted-foreground">
                       {sectionLabel} · {t("history.page")} {record.pageIndex + 1} ·{" "}
-                      {formatProvider(record.provider)} ·{" "}
+                      <span title={record.model ?? undefined}>
+                        {record.model
+                          ? formatModel(record.model)
+                          : formatProvider(record.provider)}
+                      </span> ·{" "}
                       {new Date(record.createdAt).toLocaleString()}
                     </p>
                   </div>
@@ -171,6 +225,22 @@ export function HistoryPanel() {
                       <pre className="whitespace-pre-wrap text-sm max-h-96 overflow-auto p-4 bg-muted rounded">
                         {record.extractedText}
                       </pre>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopy(record)}
+                        >
+                          {copiedId === record.id ? (
+                            <Check className="h-4 w-4 mr-1 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4 mr-1" />
+                          )}
+                          {copiedId === record.id
+                            ? t("history.copied")
+                            : t("history.copyText")}
+                        </Button>
+                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
                   <Button
@@ -178,10 +248,49 @@ export function HistoryPanel() {
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => handleExport(record)}
-                    aria-label={t("history.export")}
+                    title={t("history.downloadTxt")}
+                    aria-label={t("history.downloadTxt")}
                   >
-                    <FileText className="h-4 w-4" />
+                    <FileDown className="h-4 w-4" />
                   </Button>
+                  <Dialog>
+                    <DialogTrigger
+                      render={
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          title={t("history.deleteRecord")}
+                          aria-label={t("history.deleteRecord")}
+                        />
+                      }
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{t("history.deleteConfirmTitle")}</DialogTitle>
+                        <DialogDescription>
+                          {t("history.deleteConfirmDescription")}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <DialogClose render={<Button variant="outline" />}>
+                          {t("history.cancel")}
+                        </DialogClose>
+                        <Button
+                          variant="destructive"
+                          disabled={deletingId === record.id}
+                          onClick={() => handleDelete(record.id)}
+                        >
+                          {deletingId === record.id && (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          )}
+                          {t("history.confirmDelete")}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
               );

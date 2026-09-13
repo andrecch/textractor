@@ -15,8 +15,18 @@ function prepareHistoryStatements() {
     ),
     countAll: db.prepare("SELECT COUNT(*) as count FROM extractions"),
     insertOne: db.prepare(
-      `INSERT INTO extractions (id, document_name, section_name, page_index, zone_x, zone_y, zone_width, zone_height, extracted_text, provider)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO extractions (id, document_name, section_name, page_index, zone_x, zone_y, zone_width, zone_height, extracted_text, provider, model)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ),
+    deleteOne: db.prepare("DELETE FROM extractions WHERE id = ?"),
+    updateText: db.prepare(
+      "UPDATE extractions SET extracted_text = ? WHERE id = ?"
+    ),
+    updateSection: db.prepare(
+      "UPDATE extractions SET section_name = ? WHERE id = ?"
+    ),
+    updateBoth: db.prepare(
+      "UPDATE extractions SET extracted_text = ?, section_name = ? WHERE id = ?"
     ),
     clearAll: db.prepare("DELETE FROM extractions"),
   };
@@ -47,6 +57,7 @@ function mapRow(row: ExtractionRow) {
     },
     extractedText: row.extracted_text,
     provider: row.provider,
+    model: row.model,
     createdAt: row.created_at,
   };
 }
@@ -96,7 +107,7 @@ router.get("/", (req, res) => {
 
 router.post("/", (req, res) => {
   try {
-    const { documentName, sectionName, pageIndex, zone, extractedText, provider } =
+    const { documentName, sectionName, pageIndex, zone, extractedText, provider, model } =
       req.body;
 
     if (!documentName || !extractedText) {
@@ -116,12 +127,61 @@ router.post("/", (req, res) => {
       zone?.width ?? 0,
       zone?.height ?? 0,
       extractedText,
-      provider ?? "unknown"
+      provider ?? "unknown",
+      typeof model === "string" && model.length > 0 ? model : null
     );
 
     res.status(201).json({ id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to save";
+    res.status(500).json({ error: message });
+  }
+});
+
+router.put("/:id", (req, res) => {
+  try {
+    const { extractedText, sectionName } = req.body ?? {};
+    const hasText =
+      typeof extractedText === "string" && extractedText.length > 0;
+    const hasSection =
+      typeof sectionName === "string" && sectionName.trim().length > 0;
+
+    if (!hasText && !hasSection) {
+      res.status(400).json({ error: "extractedText or sectionName required" });
+      return;
+    }
+
+    const statements = getHistoryStatements();
+    const id = req.params.id;
+    const result =
+      hasText && hasSection
+        ? statements.updateBoth.run(extractedText, sectionName.trim(), id)
+        : hasText
+          ? statements.updateText.run(extractedText, id)
+          : statements.updateSection.run(sectionName.trim(), id);
+
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Record not found" });
+      return;
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to update";
+    res.status(500).json({ error: message });
+  }
+});
+
+router.delete("/:id", (req, res) => {
+  try {
+    const result = getHistoryStatements().deleteOne.run(req.params.id);
+    if (result.changes === 0) {
+      res.status(404).json({ error: "Record not found" });
+      return;
+    }
+    res.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to delete";
     res.status(500).json({ error: message });
   }
 });

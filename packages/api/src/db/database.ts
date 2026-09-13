@@ -62,6 +62,7 @@ export function runMigrations(): void {
   const migrationFiles = [
     "001_create_extractions.sql",
     "002_create_settings.sql",
+    "003_add_extraction_model.sql",
   ];
 
   for (const file of migrationFiles) {

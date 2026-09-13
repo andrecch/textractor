@@ -53,7 +53,9 @@ export interface ExtractionDeps {
     zone: { x: number; y: number; width: number; height: number };
     extractedText: string;
     provider: string;
-  }) => Promise<void>;
+    model: string;
+  }) => Promise<{ id: string }>;
+  setAreaHistoryId: (areaId: string, historyId: string) => void;
   dataUrlToJpegDataUrl: (dataUrl: string, quality: number) => Promise<string>;
   getAreaImage: (id: string, kind: "raw" | "processed") => string | null;
   getTimeoutMessage: () => string;
@@ -95,6 +97,7 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
     setAbortController,
     ocrExtract: doOcrExtract,
     saveExtraction: doSaveExtraction,
+    setAreaHistoryId,
     dataUrlToJpegDataUrl: convertImage,
     getAreaImage: getImage,
     getTimeoutMessage,
@@ -173,14 +176,17 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
 
     updateAreaExtractedText(area.id, cleanText);
 
-    await doSaveExtraction({
+    const { id: historyId } = await doSaveExtraction({
       documentName: doc.name,
       sectionName: area.name,
       pageIndex: area.pageIndex,
       zone: area.zone,
       extractedText: cleanText,
       provider: response.provider,
+      model: settings.ocrModel,
     });
+
+    setAreaHistoryId(area.id, historyId);
 
     updateAreaStatus(area.id, "extracted");
     finalStatus = "extracted";
@@ -234,8 +240,12 @@ export function useOCR() {
   const { isProcessing, setProcessing, setAbortController } = useOCRStore();
 
   const extractActive = useCallback(async () => {
-    const { updateAreaStatus, updateAreaExtractedText, getActiveArea } =
-      useAreaStore.getState();
+    const {
+      updateAreaStatus,
+      updateAreaExtractedText,
+      setAreaHistoryId,
+      getActiveArea,
+    } = useAreaStore.getState();
 
     if (DEBUG_OCR) console.log(`[OCR] Starting extraction...`);
 
@@ -245,6 +255,7 @@ export function useOCR() {
       getActiveArea,
       updateAreaStatus,
       updateAreaExtractedText,
+      setAreaHistoryId,
       setProcessing,
       setAbortController,
       ocrExtract,

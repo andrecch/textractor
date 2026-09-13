@@ -127,6 +127,13 @@
     "clearConfirmDescription": "All extraction records will be deleted. This action cannot be undone.",
     "cancel": "Cancel",
     "confirmClear": "Clear all",
-    "export": "Export extraction"
+    "export": "Export extraction",
+    "downloadTxt": "Download as .txt",
+    "copyText": "Copy text",
+    "copied": "Copied",
+    "deleteRecord": "Delete record",
+    "deleteConfirmTitle": "Delete record",
+    "deleteConfirmDescription": "This record will be removed from the history. This action cannot be undone.",
+    "confirmDelete": "Delete"
   }
 }

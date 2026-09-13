@@ -6,6 +6,7 @@ import { useOCR } from "@/hooks/useOCR";
 import { useAreaImage } from "@/hooks/useAreaImage";
 import { getAreaImage } from "@/stores/imageStore";
 import { downloadPng, sanitizeFileName } from "@/services/imageExport";
+import { updateExtraction } from "@/services/api";
 import { removeBlankLines } from "@/lib/text";
 import { CropPreviewSection } from "./CropPreviewSection";
 import { RecognitionSection } from "./RecognitionSection";
@@ -79,7 +80,13 @@ export function OCRResultPanel() {
 
   const handleRemoveBlankLines = () => {
     if (!activeAreaId || !activeArea?.extractedText) return;
-    updateAreaExtractedText(activeAreaId, removeBlankLines(activeArea.extractedText));
+    const cleaned = removeBlankLines(activeArea.extractedText);
+    updateAreaExtractedText(activeAreaId, cleaned);
+    if (activeArea.historyId) {
+      updateExtraction(activeArea.historyId, { extractedText: cleaned }).catch(
+        () => {}
+      );
+    }
   };
 
   const handleDownloadCurrent = () => {

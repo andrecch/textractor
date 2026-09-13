@@ -24,5 +24,6 @@ export interface ExtractionRow {
   zone_height: number;
   extracted_text: string;
   provider: string;
+  model: string | null;
   created_at: string;
 }

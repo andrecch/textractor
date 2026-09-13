@@ -150,6 +150,7 @@ export interface HistoryResponse {
     zone: { x: number; y: number; width: number; height: number };
     extractedText: string;
     provider: string;
+    model: string | null;
     createdAt: string;
   }>;
   total: number;
@@ -179,16 +180,41 @@ export async function saveExtraction(data: {
   zone: { x: number; y: number; width: number; height: number };
   extractedText: string;
   provider: string;
-}): Promise<void> {
+  model: string;
+}): Promise<{ id: string }> {
   const response = await fetch(`${API_BASE}/history`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
   if (!response.ok) throw new Error("Failed to save extraction");
+  return response.json();
+}
+
+export async function updateExtraction(
+  id: string,
+  patch: { extractedText?: string; sectionName?: string }
+): Promise<void> {
+  const response = await fetch(
+    `${API_BASE}/history/${encodeURIComponent(id)}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    }
+  );
+  if (!response.ok) throw new Error("Failed to update extraction");
 }
 
 export async function clearHistory(): Promise<void> {
   const response = await fetch(`${API_BASE}/history`, { method: "DELETE" });
   if (!response.ok) throw new Error("Failed to clear history");
+}
+
+export async function deleteHistoryRecord(id: string): Promise<void> {
+  const response = await fetch(
+    `${API_BASE}/history/${encodeURIComponent(id)}`,
+    { method: "DELETE" }
+  );
+  if (!response.ok) throw new Error("Failed to delete extraction");
 }
