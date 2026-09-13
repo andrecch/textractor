@@ -82,18 +82,12 @@ export function OCRResultPanel() {
     updateAreaExtractedText(activeAreaId, removeBlankLines(activeArea.extractedText));
   };
 
-  const handleDownloadRaw = () => {
+  const handleDownloadCurrent = () => {
     if (!activeAreaId) return;
-    const img = getAreaImage(activeAreaId, "raw");
+    const kind = showProcessed ? "processed" : "raw";
+    const img = getAreaImage(activeAreaId, kind);
     if (!img) return;
-    downloadPng(img, buildImageFileName("raw"));
-  };
-
-  const handleDownloadProcessed = () => {
-    if (!activeAreaId) return;
-    const img = getAreaImage(activeAreaId, "processed");
-    if (!img) return;
-    downloadPng(img, buildImageFileName("proc"));
+    downloadPng(img, buildImageFileName(kind === "processed" ? "proc" : "raw"));
   };
 
   const hasCroppedRaw = !!croppedImageRaw;
@@ -109,11 +103,11 @@ export function OCRResultPanel() {
         hasCroppedRaw={hasCroppedRaw}
         hasCroppedProcessed={hasCroppedProcessed}
         imageCollapsed={imageCollapsed}
+        showProcessed={showProcessed}
         currentImageSrc={currentImageSrc}
         hasCurrentImage={hasCurrentImage}
         onToggleProcessed={() => setShowProcessed((prev) => !prev)}
-        onDownloadRaw={handleDownloadRaw}
-        onDownloadProcessed={handleDownloadProcessed}
+        onDownloadCurrent={handleDownloadCurrent}
         onToggleCollapse={() => setImageCollapsed((prev) => !prev)}
       />
       <RecognitionSection
