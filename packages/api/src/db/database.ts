@@ -63,6 +63,7 @@ export function runMigrations(): void {
     "001_create_extractions.sql",
     "002_create_settings.sql",
     "003_add_extraction_model.sql",
+    "004_rename_section_to_area.sql",
   ];
 
   for (const file of migrationFiles) {

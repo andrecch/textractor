@@ -16,7 +16,7 @@ export interface ValidationResult {
 export interface ExtractionRow {
   id: string;
   document_name: string;
-  section_name: string;
+  area_name: string;
   page_index: number;
   zone_x: number;
   zone_y: number;

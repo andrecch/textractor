@@ -54,7 +54,7 @@ function parseDbDate(value: string): Date {
 interface HistoryRecord {
   id: string;
   documentName: string;
-  sectionName: string;
+  areaName: string;
   pageIndex: number;
   extractedText: string;
   provider: string;
@@ -110,7 +110,7 @@ export function HistoryPanel() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `textractor-${record.sectionName}-${record.id.slice(0, 8)}.txt`;
+    a.download = `textractor-${record.areaName}-${record.id.slice(0, 8)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }, []);
@@ -196,8 +196,8 @@ export function HistoryPanel() {
         <>
           <div className="space-y-2 flex-1 min-h-0 overflow-y-auto pr-2">
             {records.map((record) => {
-              const sectionLabel =
-                record.sectionName === "Unknown" ? "—" : record.sectionName;
+              const areaLabel =
+                record.areaName === "Unknown" ? "—" : record.areaName;
               return (
               <div
                 key={record.id}
@@ -208,7 +208,7 @@ export function HistoryPanel() {
                   <div>
                     <p className="text-sm font-medium">{record.documentName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {sectionLabel} · {t("history.page")} {record.pageIndex + 1} ·{" "}
+                      {areaLabel} · {t("history.page")} {record.pageIndex + 1} ·{" "}
                       <span title={record.model ?? undefined}>
                         {record.model
                           ? formatModel(record.model)
@@ -226,7 +226,7 @@ export function HistoryPanel() {
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
                         <DialogTitle>
-                          {record.documentName} — {sectionLabel}
+                          {record.documentName} — {areaLabel}
                         </DialogTitle>
                       </DialogHeader>
                       <pre className="whitespace-pre-wrap text-sm max-h-96 overflow-auto p-4 bg-muted rounded">

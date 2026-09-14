@@ -80,7 +80,7 @@ export const useAreaStore = create<AreaState>((set, get) => ({
       ),
     }));
     if (area?.historyId) {
-      updateExtraction(area.historyId, { sectionName: name }).catch(() => {});
+      updateExtraction(area.historyId, { areaName: name }).catch(() => {});
     }
   },
 

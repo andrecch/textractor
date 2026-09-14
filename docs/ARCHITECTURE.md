@@ -10,14 +10,14 @@ Extracto follows a **monorepo architecture** with clear separation between front
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │                    React Application                       │  │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐   │  │
-│  │  │   Viewer    │  │   Section   │  │   OCR Results   │   │  │
+│  │  │   Viewer    │  │    Area     │  │   OCR Results   │   │  │
 │  │  │   Panel     │  │   Panel     │  │   Panel         │   │  │
 │  │  └──────┬──────┘  └──────┬──────┘  └────────┬────────┘   │  │
 │  │         │                │                   │             │  │
 │  │  ┌──────┴────────────────┴───────────────────┴──────┐     │  │
 │  │  │              Zustand State Stores                 │     │  │
 │  │  │  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌────────┐ │     │  │
-│  │  │  │ document │ │ section  │ │  ocr   │ │settings│ │     │  │
+│  │  │  │ document │ │ area     │ │  ocr   │ │settings│ │     │  │
 │  │  │  │  Store   │ │  Store   │ │ Store  │ │ Store  │ │     │  │
 │  │  │  └──────────┘ └──────────┘ └────────┘ └────────┘ │     │  │
 │  │  └──────────────────────┬────────────────────────────┘     │  │
@@ -79,7 +79,7 @@ textractor/
 │   │       │
 │   │       ├── types/              # TypeScript type definitions
 │   │       │   ├── document.ts     # Document types
-│   │       │   ├── section.ts      # Section types (CORE)
+│   │       │   ├── area.ts      # Area types (CORE)
 │   │       │   ├── ocr.ts          # OCR types
 │   │       │   └── settings.ts     # Settings types
 │   │       │
@@ -93,7 +93,7 @@ textractor/
 │   │       │
 │   │       ├── stores/             # Zustand state management
 │   │       │   ├── documentStore.ts
-│   │       │   ├── sectionStore.ts # CORE - Section management
+│   │       │   ├── areaStore.ts # CORE - Area management
 │   │       │   ├── ocrStore.ts
 │   │       │   └── settingsStore.ts
 │   │       │
@@ -108,7 +108,7 @@ textractor/
 │   │       │
 │   │       ├── hooks/              # Custom React hooks
 │   │       │   ├── useDocument.ts
-│   │       │   ├── useSection.ts   # CORE - Section logic
+│   │       │   ├── useArea.ts   # CORE - Area logic
 │   │       │   └── useOCR.ts
 │   │       │
 │   │       ├── components/         # React components
@@ -124,10 +124,10 @@ textractor/
 │   │       │   │   ├── ImageRenderer.tsx
 │   │       │   │   ├── PageNavigation.tsx
 │   │       │   │   └── ZoomControls.tsx
-│   │       │   ├── section/        # CORE - Section components
-│   │       │   │   ├── SectionPanel.tsx
-│   │       │   │   ├── SectionItem.tsx
-│   │       │   │   └── SectionOverlay.tsx
+│   │       │   ├── area/           # CORE - Area components
+│   │       │   │   ├── AreaPanel.tsx
+│   │       │   │   ├── AreaItem.tsx
+│   │       │   │   └── AreaOverlay.tsx
 │   │       │   ├── ocr/
 │   │       │   │   └── OCRResultPanel.tsx
 │   │       │   ├── history/
@@ -164,32 +164,32 @@ textractor/
 
 ## 3. Core Concepts
 
-### 3.1 Section Model (Central Abstraction)
+### 3.1 Area Model (Central Abstraction)
 
-The **Section** is the core abstraction of Extracto. Every extraction lives within a section.
+The **Area** is the core abstraction of Extracto. Every extraction lives within an area.
 
 ```typescript
-interface Section {
+interface Area {
   id: string;                    // Unique identifier
-  name: string;                  // User-defined name (e.g., "Sección 1")
+  name: string;                  // User-defined name (e.g., "Área 1")
   pageIndex: number;             // Document page where zone is located
-  zone: SectionZone | null;      // Coordinates of the selected area
+  zone: AreaZone | null;         // Coordinates of the selected area
   croppedImage: string | null;   // Base64 of the cropped zone
   extractedText: string | null;  // OCR result
-  status: SectionStatus;         // Lifecycle state
+  status: AreaStatus;            // Lifecycle state
   errorMessage: string | null;   // Error details if status is "error"
   createdAt: string;             // ISO timestamp
   updatedAt: string;             // ISO timestamp
 }
 
-type SectionStatus = 
+type AreaStatus = 
   | "empty"           // No zone defined
   | "zone-defined"    // Zone drawn, ready for OCR
   | "processing"      // OCR in progress
   | "extracted"       // OCR completed successfully
   | "error";          // OCR failed
 
-interface SectionZone {
+interface AreaZone {
   x: number;
   y: number;
   width: number;
@@ -198,10 +198,10 @@ interface SectionZone {
 ```
 
 **Key behaviors:**
-- On document load, "Sección 1" is created automatically
-- Only one section can be active at a time
-- Each section's zone is independent and persists across navigation
-- Switching sections shows only that section's zone on the viewer
+- On document load, "Área 1" is created automatically
+- Only one area can be active at a time
+- Each area's zone is independent and persists across navigation
+- Switching areas shows only that area's zone on the viewer
 
 ### 3.2 OCR Architecture
 
@@ -242,7 +242,7 @@ The OCR system follows the **Strategy Pattern** for extensibility:
 3. Image sent to backend via `/api/ocr/extract`
 4. Backend proxies to NVIDIA Build API
 5. Response returned to frontend
-6. Result stored in active section
+6. Result stored in active area
 
 ### 3.3 State Management
 
@@ -252,15 +252,15 @@ Zustand stores are organized by domain:
 ┌─────────────────────────────────────────────────────────────────┐
 │                         State Layer                              │
 ├──────────────────┬──────────────────┬────────────┬──────────────┤
-│  documentStore   │  sectionStore    │ ocrStore   │ settingsStore│
+│  documentStore   │  areaStore    │ ocrStore   │ settingsStore│
 ├──────────────────┼──────────────────┼────────────┼──────────────┤
-│ document: Doc    │ sections: []     │ processing │ settings: {} │
+│ document: Doc    │ areas: []     │ processing │ settings: {} │
 │ currentPage: 0   │ activeId: str    │            │              │
 │ zoom: 1          │ counter: 0       │            │              │
 ├──────────────────┼──────────────────┼────────────┼──────────────┤
-│ setDocument()    │ addSection()     │ setProc()  │ update()     │
-│ setPage()        │ removeSection()  │            │ reset()      │
-│ setZoom()        │ renameSection()  │            │              │
+│ setDocument()    │ addArea()     │ setProc()  │ update()     │
+│ setPage()        │ removeArea()  │            │ reset()      │
+│ setZoom()        │ renameArea()  │            │              │
 │ zoomIn/Out()     │ updateZone()     │            │              │
 │ clearDocument()  │ updateText()     │            │              │
 │                  │ setActive()      │            │              │
@@ -289,9 +289,9 @@ User drops file
                            │                       │
                            │                       ▼
                     ┌──────┴───────┐     ┌─────────────────┐
-                    │ pdfjs-dist   │     │ sectionStore    │
+                    │ pdfjs-dist   │     │ areaStore    │
                     │ (count pages)│     │ .initialize()   │
-                    └──────────────┘     │ → "Sección 1"   │
+                    └──────────────┘     │ → "Área 1"   │
                                          └─────────────────┘
 ```
 
@@ -302,13 +302,13 @@ User draws rectangle on viewer
       │
       ▼
 ┌─────────────────┐     ┌──────────────┐     ┌─────────────────┐
-│ SectionOverlay  │────▶│ useSection   │────▶│ sectionStore    │
+│ AreaOverlay  │────▶│ useArea   │────▶│ areaStore    │
 │ onMouseUp       │     │ hook         │     │ .updateZone()   │
 └─────────────────┘     └──────────────┘     └─────────────────┘
                                                       │
                                                       ▼
                                               ┌───────────────┐
-                                              │ Section state │
+                                              │ Area state │
                                               │ updated:      │
                                               │ - pageIndex   │
                                               │ - zone        │
@@ -323,13 +323,13 @@ User clicks "Extract"
       │
       ▼
 ┌─────────────┐     ┌──────────────┐     ┌───────────────────┐
-│ SectionPanel│────▶│ useOCR hook  │────▶│ getSourceCanvas() │
+│ AreaPanel│────▶│ useOCR hook  │────▶│ getSourceCanvas() │
 │ Button      │     │              │     │ (render PDF/img)  │
 └─────────────┘     └──────┬───────┘     └─────────┬─────────┘
                            │                        │
                            │                        ▼
                     ┌──────┴───────┐     ┌───────────────────┐
-                     │ sectionStore │     │ cropZone()        │
+                     │ areaStore │     │ cropZone()        │
                     │ .getStatus() │     │ + preprocessImage │
                     └──────────────┘     └─────────┬─────────┘
                                                    │
@@ -349,7 +349,7 @@ User clicks "Extract"
                             │ { text, provider }
                             ▼
                     ┌───────────────┐     ┌───────────────────┐
-                    │ sectionStore  │     │ saveExtraction()  │
+                    │ areaStore  │     │ saveExtraction()  │
                     │ .updateText() │     │ → /api/history    │
                     └───────────────┘     │ → SQLite DB       │
                                           └───────────────────┘
@@ -394,7 +394,7 @@ interface ValidationResult {
 interface ExtractionRecord {
   id: string;
   documentName: string;
-  sectionName: string;
+  areaName: string;
   pageIndex: number;
   zone: { x: number; y: number; width: number; height: number };
   extractedText: string;
@@ -411,7 +411,7 @@ interface ExtractionRecord {
 CREATE TABLE extractions (
   id TEXT PRIMARY KEY,
   document_name TEXT NOT NULL,
-  section_name TEXT NOT NULL,
+  area_name TEXT NOT NULL,
   page_index INTEGER NOT NULL,
   zone_x REAL NOT NULL,
   zone_y REAL NOT NULL,
@@ -440,14 +440,14 @@ App
             ├── ViewerPage
             │   ├── FileUpload (when no document)
             │   └── (when document loaded)
-            │       ├── SectionPanel (left sidebar)
-            │       │   ├── SectionItem[] (list)
+            │       ├── AreaPanel (left sidebar)
+            │       │   ├── AreaItem[] (list)
             │       │   └── Extract Button
             │       ├── DocumentViewer (center)
             │       │   ├── PageNavigation
             │       │   ├── ZoomControls
             │       │   ├── PDFPageRenderer | ImageRenderer
-            │       │   └── SectionOverlay (zone drawing)
+            │       │   └── AreaOverlay (zone drawing)
             │       └── OCRResultPanel (right sidebar)
             │
             ├── HistoryPage
@@ -462,13 +462,13 @@ App
 | Component | Responsibility | Dependencies |
 |-----------|---------------|--------------|
 | `FileUpload` | File selection, drag & drop | `useDocument` |
-| `DocumentViewer` | Container for page rendering | `documentStore`, `SectionOverlay` |
+| `DocumentViewer` | Container for page rendering | `documentStore`, `AreaOverlay` |
 | `PDFPageRenderer` | Render PDF page to canvas | `pdfjs-dist` |
 | `ImageRenderer` | Render image with zoom | - |
-| `SectionPanel` | List sections, add/remove | `useSection`, `useOCR` |
-| `SectionItem` | Display section, edit name | - |
-| `SectionOverlay` | Draw zone on document | `useSection` |
-| `OCRResultPanel` | Show OCR result, copy/export | `sectionStore`, `ocrStore` |
+| `AreaPanel` | List areas, add/remove | `useArea`, `useOCR` |
+| `AreaItem` | Display area, edit name | - |
+| `AreaOverlay` | Draw zone on document | `useArea` |
+| `OCRResultPanel` | Show OCR result, copy/export | `areaStore`, `ocrStore` |
 | `SettingsPanel` | Configure app settings | `settingsStore` |
 | `HistoryPanel` | List past extractions | API client |
 
@@ -517,7 +517,7 @@ Key points:
 | Lazy PDF rendering | Only render current page |
 | Canvas caching | Cache rendered PDF pages |
 | Debounced zoom | Prevent excessive re-renders |
-| Virtualized lists | For long section/history lists (future) |
+| Virtualized lists | For long area/history lists (future) |
 | Web Workers | PDF.js worker for parsing |
 
 ### 9.2 Backend
@@ -606,13 +606,13 @@ Options:
 2. Implement format conversion (e.g., PDF, DOCX)
 3. Add button to UI
 
-### 12.3 Adding Section Features
+### 12.3 Adding Area Features
 
-The section model is designed for extension:
+The area model is designed for extension:
 - **Grouping**: Add `groupId` field
 - **Ordering**: Add `order` field
 - **Templates**: Add `promptTemplate` field
-- **Duplication**: Clone section with new ID
+- **Duplication**: Clone area with new ID
 
 ---
 
@@ -626,7 +626,7 @@ The section model is designed for extension:
 | SQLite | Embedded, no infra | PostgreSQL, MongoDB |
 | Express | Mature, large ecosystem | Fastify, Hono, Koa |
 | Tailwind v4 | Latest features, CSS-first | Styled-components, CSS modules |
-| Sections as core | Organized multi-zone extraction | Flat zone list, no grouping |
+| Areas as core | Organized multi-zone extraction | Flat zone list, no grouping |
 
 ---
 
@@ -634,7 +634,7 @@ The section model is designed for extension:
 
 | Term | Definition |
 |------|------------|
-| Section | Core abstraction containing a zone, its crop, and OCR result |
+| Area | Core abstraction containing a zone, its crop, and OCR result |
 | Zone | Rectangular area selected on the document |
 | OCR | Optical Character Recognition |
 | NVIDIA Build | NVIDIA's platform for accessing AI models via API |

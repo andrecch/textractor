@@ -156,7 +156,7 @@ export interface HistoryResponse {
   records: Array<{
     id: string;
     documentName: string;
-    sectionName: string;
+    areaName: string;
     pageIndex: number;
     zone: { x: number; y: number; width: number; height: number };
     extractedText: string;
@@ -186,7 +186,7 @@ export async function getHistory(
 
 export async function saveExtraction(data: {
   documentName: string;
-  sectionName: string;
+  areaName: string;
   pageIndex: number;
   zone: { x: number; y: number; width: number; height: number };
   extractedText: string;
@@ -204,7 +204,7 @@ export async function saveExtraction(data: {
 
 export async function updateExtraction(
   id: string,
-  patch: { extractedText?: string; sectionName?: string }
+  patch: { extractedText?: string; areaName?: string }
 ): Promise<void> {
   const response = await fetch(
     `${API_BASE}/history/${encodeURIComponent(id)}`,
