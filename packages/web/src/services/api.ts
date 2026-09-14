@@ -14,6 +14,13 @@ export class OcrModelRetiredError extends Error {
   }
 }
 
+export class OcrOfflineError extends Error {
+  constructor() {
+    super("network_unreachable");
+    this.name = "OcrOfflineError";
+  }
+}
+
 const RETIRED_MODEL_PATTERNS = [
   /end of life/i,
   /no longer available/i,
@@ -63,6 +70,9 @@ export async function ocrExtract(
       const serverMessage = errorBody.error;
       if (typeof serverMessage === "string" && serverMessage.length > 0) {
         message = serverMessage;
+        if (serverMessage === "network_unreachable") {
+          throw new OcrOfflineError();
+        }
         if (
           response.status === 410 ||
           RETIRED_MODEL_PATTERNS.some((pattern) => pattern.test(serverMessage))
@@ -73,6 +83,7 @@ export async function ocrExtract(
     } catch (err) {
       if (err instanceof OcrServerError) serverDown = true;
       else if (err instanceof OcrModelRetiredError) throw err;
+      else if (err instanceof OcrOfflineError) throw err;
     }
     if (serverDown) throw new OcrServerError();
     throw new Error(message);

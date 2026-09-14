@@ -1,7 +1,8 @@
 import { Router } from "express";
 import {
   callNvidiaBuildVision,
-  validateNvidiaBuildKey,
+  validateNvidiaNimKey,
+  NETWORK_UNREACHABLE_MESSAGE,
 } from "../services/nvidiaBuild.js";
 import { getCachedOcr, setCachedOcr } from "../services/ocrCache.js";
 
@@ -48,6 +49,11 @@ router.post("/extract", async (req, res) => {
       }
       return;
     }
+    if (err instanceof Error && err.message === NETWORK_UNREACHABLE_MESSAGE) {
+      if (DEBUG_OCR) console.log(`[OCR-API] Upstream unreachable`);
+      res.status(502).json({ error: NETWORK_UNREACHABLE_MESSAGE });
+      return;
+    }
     if (DEBUG_OCR) {
       const errMsg = err instanceof Error ? err.message : String(err);
       console.log(`[OCR-API] Error: ${errMsg}`);
@@ -65,7 +71,7 @@ router.post("/extract", async (req, res) => {
 router.post("/validate", async (req, res) => {
   try {
     const { apiKey } = req.body;
-    const result = await validateNvidiaBuildKey(apiKey || undefined);
+    const result = await validateNvidiaNimKey(apiKey || undefined);
     res.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Validation failed";

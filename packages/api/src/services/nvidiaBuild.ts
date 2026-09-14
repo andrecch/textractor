@@ -37,6 +37,31 @@ const GENERIC_SYSTEM_PROMPT = "You are a strict OCR engine. Your ONLY task is to
 
 const GENERIC_USER_PROMPT = "Transcribe the text in this image. Output ONLY the exact text, preserving line breaks. No preamble.";
 
+export const NETWORK_UNREACHABLE_MESSAGE = "network_unreachable";
+
+const NETWORK_ERROR_CODES = new Set([
+  "ENOTFOUND",
+  "ECONNREFUSED",
+  "EAI_AGAIN",
+  "ENETUNREACH",
+  "EHOSTUNREACH",
+  "ECONNRESET",
+  "UND_ERR_CONNECT_TIMEOUT",
+  "UND_ERR_SOCKET",
+]);
+
+export function isUpstreamNetworkError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const cause = (err as { cause?: unknown }).cause;
+  if (cause && typeof cause === "object" && "code" in cause) {
+    const code = (cause as { code?: unknown }).code;
+    if (typeof code === "string" && NETWORK_ERROR_CODES.has(code)) return true;
+  }
+  return /ENOTFOUND|ECONNREFUSED|EAI_AGAIN|ENETUNREACH|EHOSTUNREACH|fetch failed|network/i.test(
+    err.message
+  );
+}
+
 export async function callNvidiaBuildVision(
   imageBase64: string,
   apiKey?: string,
@@ -103,12 +128,21 @@ export async function callNvidiaBuildVision(
         temperature: 0,
       };
 
-  const response = await fetch(apiUrl, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-    signal: combinedSignal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(apiUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+      signal: combinedSignal,
+    });
+  } catch (err) {
+    if (isUpstreamNetworkError(err)) {
+      if (DEBUG_OCR) console.log(`[OCR-API] Upstream network error: ${String(err)}`);
+      throw new Error(NETWORK_UNREACHABLE_MESSAGE);
+    }
+    throw err;
+  }
 
   const tEnd = performance.now();
   if (DEBUG_OCR) {
@@ -149,7 +183,7 @@ function cleanOcrResponse(text: string): string {
   return text.replace(CONVERSATIONAL_PREFIX, "").trim();
 }
 
-export async function validateNvidiaBuildKey(
+export async function validateNvidiaNimKey(
   apiKey?: string
 ): Promise<{ valid: boolean; error?: string }> {
   try {

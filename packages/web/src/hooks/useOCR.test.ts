@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { runExtraction, type ExtractionDeps, type ExtractionOutcome } from "./useOCR";
-import { OcrServerError, OcrModelRetiredError } from "@/services/api";
+import { OcrServerError, OcrModelRetiredError, OcrOfflineError } from "@/services/api";
 import { useAreaStore } from "@/stores/areaStore";
 import { useOCRStore } from "@/stores/ocrStore";
 import { setAreaImage, clearAllImages } from "@/stores/imageStore";
@@ -102,6 +102,7 @@ function buildDeps(overrides: Partial<ExtractionDeps> = {}): {
     getTimeoutMessage: () => "Timeout",
     getServerDownMessage: () => "Server down",
     getModelRetiredMessage: () => "Model retired",
+    getOfflineMessage: () => "No internet",
     timeoutMs: TEST_TIMEOUT,
     debug: false,
     ...overrides,
@@ -197,6 +198,36 @@ describe("runExtraction", () => {
     expect(mocks.updateAreaExtractedText).not.toHaveBeenCalled();
     expect(mocks.saveExtraction).not.toHaveBeenCalled();
     expect(mocks.setProcessing).toHaveBeenLastCalledWith(false);
+  });
+
+  it("error: ocrExtract throws OcrOfflineError -> area ends in 'error' with offline message", async () => {
+    seedArea(makeArea());
+    const { deps, mocks } = buildDeps({
+      ocrExtract: vi.fn(async () => {
+        throw new OcrOfflineError();
+      }) as ExtractionDeps["ocrExtract"],
+    });
+    const outcome = await runExtraction(deps);
+
+    expect(outcome.reason).toBe("error");
+    expect(mocks.updateAreaStatus).toHaveBeenLastCalledWith("area-1", "error", "No internet");
+    expect(mocks.saveExtraction).not.toHaveBeenCalled();
+  });
+
+  it("offline preflight: navigator.onLine false -> error without calling ocr", async () => {
+    seedArea(makeArea());
+    Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
+    try {
+      const { deps, mocks } = buildDeps();
+      const outcome = await runExtraction(deps);
+
+      expect(outcome.reason).toBe("error");
+      expect(outcome.status).toBe("error");
+      expect(mocks.updateAreaStatus).toHaveBeenLastCalledWith("area-1", "error", "No internet");
+      expect(mocks.ocrExtract).not.toHaveBeenCalled();
+    } finally {
+      delete (navigator as unknown as { onLine?: boolean }).onLine;
+    }
   });
 
   it("error: saveExtraction throws -> area ends in 'error' with text preserved", async () => {

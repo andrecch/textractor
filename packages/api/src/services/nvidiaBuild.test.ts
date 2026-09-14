@@ -153,3 +153,22 @@ test("throws when response is not ok", async () => {
     restore();
   }
 });
+
+test("throws network_unreachable when upstream fetch fails with a network error", async () => {
+  const original = global.fetch;
+  global.fetch = (async () => {
+    const cause = Object.assign(
+      new Error("getaddrinfo ENOTFOUND integrate.api.nvidia.com"),
+      { code: "ENOTFOUND" }
+    );
+    throw Object.assign(new TypeError("fetch failed"), { cause });
+  }) as unknown as typeof fetch;
+  try {
+    await assert.rejects(
+      () => callNvidiaBuildVision(TINY_PNG, "fake-key", "meta/llama-3.2-11b-vision-instruct"),
+      /network_unreachable/
+    );
+  } finally {
+    global.fetch = original;
+  }
+});

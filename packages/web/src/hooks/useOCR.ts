@@ -4,7 +4,7 @@ import { useAreaStore } from "@/stores/areaStore";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { getAreaImage } from "@/stores/imageStore";
-import { ocrExtract, saveExtraction, OcrServerError, OcrModelRetiredError } from "@/services/api";
+import { ocrExtract, saveExtraction, OcrServerError, OcrModelRetiredError, OcrOfflineError } from "@/services/api";
 import i18n from "@/i18n";
 import type { Area } from "@/types/area";
 import type { AppSettings } from "@/types/settings";
@@ -61,6 +61,7 @@ export interface ExtractionDeps {
   getTimeoutMessage: () => string;
   getServerDownMessage: () => string;
   getModelRetiredMessage: () => string;
+  getOfflineMessage: () => string;
   timeoutMs: number;
   debug: boolean;
 }
@@ -79,10 +80,15 @@ function classifyAbort(signal: AbortSignal): "timeout" | "cancelled" | null {
 
 function resolveExtractionErrorMessage(
   err: unknown,
-  messages: { getServerDownMessage: () => string; getModelRetiredMessage: () => string }
+  messages: {
+    getServerDownMessage: () => string;
+    getModelRetiredMessage: () => string;
+    getOfflineMessage: () => string;
+  }
 ): string {
   if (err instanceof OcrServerError) return messages.getServerDownMessage();
   if (err instanceof OcrModelRetiredError) return messages.getModelRetiredMessage();
+  if (err instanceof OcrOfflineError) return messages.getOfflineMessage();
   return err instanceof Error ? err.message : "Unknown error";
 }
 
@@ -103,6 +109,7 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
     getTimeoutMessage,
     getServerDownMessage,
     getModelRetiredMessage,
+    getOfflineMessage,
     timeoutMs,
     debug,
   } = deps;
@@ -117,6 +124,11 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
   const area = getActiveArea();
   if (!area || !area.zone) {
     return { status: null, reason: "skipped" };
+  }
+
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    updateAreaStatus(area.id, "error", getOfflineMessage());
+    return { status: "error", reason: "error" };
   }
 
   const abortController = new AbortController();
@@ -215,7 +227,7 @@ export async function runExtraction(deps: ExtractionDeps): Promise<ExtractionOut
     updateAreaStatus(
       area.id,
       "error",
-      resolveExtractionErrorMessage(err, { getServerDownMessage, getModelRetiredMessage })
+      resolveExtractionErrorMessage(err, { getServerDownMessage, getModelRetiredMessage, getOfflineMessage })
     );
     finalStatus = "error";
     finalReason = "error";
@@ -265,6 +277,7 @@ export function useOCR() {
       getTimeoutMessage: () => i18n.t("ocr.timeout"),
       getServerDownMessage: () => i18n.t("ocr.serverDown"),
       getModelRetiredMessage: () => i18n.t("ocr.modelRetired"),
+      getOfflineMessage: () => i18n.t("ocr.noInternet"),
       timeoutMs: OCR_TIMEOUT_MS,
       debug: DEBUG_OCR,
     });

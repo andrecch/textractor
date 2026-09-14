@@ -90,6 +90,7 @@
     "removeBlankLines": "Remove blank lines",
     "timeout": "Request timed out after 60 seconds. The model took too long to respond.",
     "serverDown": "Could not reach the OCR server. Make sure the API is running.",
+    "noInternet": "No internet connection, or the NVIDIA NIM service is unreachable.",
     "modelRetired": "This model was retired by NVIDIA. Choose another model in Settings."
   },
   "settings": {
@@ -103,6 +104,7 @@
     "validate": "Validate connection",
     "valid": "Connection valid",
     "invalid": "Connection invalid",
+    "dismissMessage": "Dismiss message",
     "saveKey": "Save",
     "clearKey": "Remove",
     "serverKey": "Configured on server (.env)",
