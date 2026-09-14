@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { KeyRound, ArrowRight, Sparkles, ScanLine } from "lucide-react";
 import { FileUpload } from "./FileUpload";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { getApiKeyStatus } from "@/services/api";
 import { OCR_MODELS } from "@/config/ocrModels";
 
 function WelcomeIllustration() {
@@ -48,6 +50,21 @@ export function WelcomeScreen() {
   const ocrModel = useSettingsStore((s) => s.settings.ocrModel);
   const modelName =
     OCR_MODELS.find((m) => m.id === ocrModel)?.name ?? ocrModel;
+  const [keyConfigured, setKeyConfigured] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getApiKeyStatus()
+      .then((status) => {
+        if (!cancelled) setKeyConfigured(status.hasKey);
+      })
+      .catch(() => {
+        if (!cancelled) setKeyConfigured(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-start h-full overflow-auto py-[clamp(16px,5vh,52px)] px-6">
@@ -75,25 +92,27 @@ export function WelcomeScreen() {
           <FileUpload />
         </div>
 
-        <div className="w-full rounded-lg border bg-muted/30 p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <KeyRound className="h-4 w-4 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">{t("welcome.apiKeyTitle")}</p>
-              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                {t("welcome.apiKeyDescription")}
-              </p>
-              <Link
-                to="/settings"
-                className="inline-flex items-center text-xs text-primary hover:underline mt-1"
-              >
-                {t("welcome.goToSettings")} <ArrowRight className="h-3 w-3 ml-1" />
-              </Link>
+        {keyConfigured === false && (
+          <div className="w-full rounded-lg border bg-muted/30 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <KeyRound className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{t("welcome.apiKeyTitle")}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  {t("welcome.apiKeyDescription")}
+                </p>
+                <Link
+                  to="/settings"
+                  className="inline-flex items-center text-xs text-primary hover:underline mt-1"
+                >
+                  {t("welcome.goToSettings")} <ArrowRight className="h-3 w-3 ml-1" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
