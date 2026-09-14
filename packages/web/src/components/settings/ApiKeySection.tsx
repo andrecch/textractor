@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { CheckCircle, XCircle, Loader2, Server, Trash2 } from "lucide-react";
+import { CheckCircle, XCircle, X, Loader2, Server, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ interface ApiKeySectionProps {
   onSave: () => void;
   onValidate: () => void;
   onClear: () => void;
+  onDismissValidation: () => void;
 }
 
 export function ApiKeySection({
@@ -37,6 +38,7 @@ export function ApiKeySection({
   onSave,
   onValidate,
   onClear,
+  onDismissValidation,
 }: ApiKeySectionProps) {
   const { t } = useTranslation();
 
@@ -123,19 +125,50 @@ export function ApiKeySection({
             {t("settings.clearKey")}
           </Button>
         )}
-        {validationState === "valid" && (
-          <span className="flex items-center gap-1 text-sm text-green-600">
-            <CheckCircle className="h-4 w-4" />
-            {t("settings.valid")}
-          </span>
-        )}
-        {validationState === "invalid" && (
-          <span className="flex items-center gap-1 text-sm text-destructive">
-            <XCircle className="h-4 w-4" />
-            {t("settings.invalid")}: {validationError}
-          </span>
-        )}
       </div>
+
+      {validationState === "valid" && (
+        <div
+          role="status"
+          className="relative rounded-lg border border-green-600/25 bg-green-600/10 p-2.5 pr-8 text-sm text-green-600"
+        >
+          <span className="flex items-start gap-1.5">
+            <CheckCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span className="min-w-0 break-words">{t("settings.valid")}</span>
+          </span>
+          <button
+            type="button"
+            onClick={onDismissValidation}
+            title={t("settings.dismissMessage")}
+            aria-label={t("settings.dismissMessage")}
+            className="absolute top-1.5 right-1.5 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+      {validationState === "invalid" && (
+        <div
+          role="alert"
+          className="relative rounded-lg border border-destructive/30 bg-destructive/10 p-2.5 pr-8 text-sm text-destructive"
+        >
+          <span className="flex items-start gap-1.5">
+            <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span className="min-w-0 break-words">
+              {t("settings.invalid")}: {validationError}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={onDismissValidation}
+            title={t("settings.dismissMessage")}
+            aria-label={t("settings.dismissMessage")}
+            className="absolute top-1.5 right-1.5 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

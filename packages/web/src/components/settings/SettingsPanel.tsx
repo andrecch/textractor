@@ -77,7 +77,10 @@ export function SettingsPanel() {
         setValidationState("valid");
       } else {
         setValidationState("invalid");
-        setValidationError(result.error ?? "");
+        const rawError = result.error ?? "";
+        setValidationError(
+          rawError === "network_unreachable" ? t("ocr.noInternet") : rawError
+        );
       }
     } catch {
       setValidationState("invalid");
@@ -148,6 +151,10 @@ export function SettingsPanel() {
           onSave={handleSave}
           onValidate={handleValidate}
           onClear={handleClear}
+          onDismissValidation={() => {
+            setValidationState("idle");
+            setValidationError("");
+          }}
         />
       </div>
     </div>
