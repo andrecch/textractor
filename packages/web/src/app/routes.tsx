@@ -2,16 +2,15 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RootErrorBoundary } from "@/app/RootErrorBoundary";
+import {
+  loadHistoryPage,
+  loadSettingsPage,
+  loadViewerPage,
+} from "@/app/pageLoaders";
 
-const ViewerPage = lazy(() =>
-  import("@/pages/ViewerPage").then((m) => ({ default: m.ViewerPage }))
-);
-const HistoryPage = lazy(() =>
-  import("@/pages/HistoryPage").then((m) => ({ default: m.HistoryPage }))
-);
-const SettingsPage = lazy(() =>
-  import("@/pages/SettingsPage").then((m) => ({ default: m.SettingsPage }))
-);
+const ViewerPage = lazy(loadViewerPage);
+const HistoryPage = lazy(loadHistoryPage);
+const SettingsPage = lazy(loadSettingsPage);
 
 function PageFallback() {
   return (

@@ -4,6 +4,7 @@ import { FileText, History, Settings, FilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDocumentStore } from "@/stores/documentStore";
 import { useAreaStore } from "@/stores/areaStore";
+import { pagePreloaders } from "@/app/pageLoaders";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
@@ -50,10 +51,12 @@ export function Header() {
             <Link
               key={to}
               to={to}
+              onMouseEnter={() => void pagePreloaders[to]?.()}
+              onFocus={() => void pagePreloaders[to]?.()}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                 location.pathname === to
-                  ? "bg-accent text-accent-foreground font-medium"
+                  ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
               )}
             >
