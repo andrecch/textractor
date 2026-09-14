@@ -75,13 +75,13 @@ export function FileUpload() {
       onKeyDown={handleZoneKeyDown}
       aria-label={t("upload.dropzone")}
       className={cn(
-        "flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-12 cursor-pointer transition-colors",
+        "flex flex-col items-center justify-center gap-[clamp(10px,2vh,16px)] rounded-lg border-2 border-dashed p-[clamp(20px,5.5vh,48px)] cursor-pointer transition-colors",
         isDragOver
           ? "border-primary bg-primary/5"
           : "border-border hover:border-primary/50"
       )}
     >
-      <Upload className="h-12 w-12 text-muted-foreground" />
+      <Upload className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground" />
       <div className="text-center">
         <p className="text-lg font-medium">{t("upload.dropzone")}</p>
         <p className="text-sm text-muted-foreground mt-1">

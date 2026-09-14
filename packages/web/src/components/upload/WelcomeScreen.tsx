@@ -11,7 +11,7 @@ function WelcomeIllustration() {
       viewBox="0 0 220 160"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-full max-w-[220px] h-auto text-foreground"
+      className="w-full max-w-[min(220px,24vh)] h-auto text-foreground"
     >
       <rect x="20" y="20" width="80" height="110" rx="4" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground" fill="none" />
       <line x1="32" y1="42" x2="88" y2="42" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground/50" strokeLinecap="round" />
@@ -50,12 +50,12 @@ export function WelcomeScreen() {
     OCR_MODELS.find((m) => m.id === ocrModel)?.name ?? ocrModel;
 
   return (
-    <div className="flex flex-col items-center justify-start h-full overflow-auto pt-8 pb-6 px-6">
-      <div className="w-full max-w-lg flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center justify-start h-full overflow-auto py-[clamp(16px,5vh,52px)] px-6">
+      <div className="w-full max-w-lg flex flex-col items-center gap-[clamp(12px,2.6vh,26px)]">
         <WelcomeIllustration />
 
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">{t("welcome.title")}</h1>
+        <div className="-mt-[clamp(6px,1.5vh,16px)] text-center space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("welcome.title")}</h1>
           <p className="text-sm text-muted-foreground">{t("welcome.subtitle")}</p>
         </div>
 
@@ -63,7 +63,7 @@ export function WelcomeScreen() {
           {t("welcome.description")}
         </p>
 
-        <div className="flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-2 rounded-full border px-4 py-1.5 text-xs text-muted-foreground">
           <Sparkles className="h-3 w-3 text-primary" />
           <span>{modelName}</span>
           <span className="text-border">|</span>
