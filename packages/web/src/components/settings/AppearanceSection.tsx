@@ -1,9 +1,14 @@
 import { useTranslation } from "react-i18next";
-import { Sun, Moon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Sun, Moon, ChevronDown, Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { SegmentedSwitch } from "./SegmentedSwitch";
 
 interface AppearanceSectionProps {
   resolvedTheme: string | undefined;
@@ -24,45 +29,46 @@ export function AppearanceSection({
     <>
       <div className="flex items-center justify-between">
         <Label>{t("settings.darkMode")}</Label>
-        <div className="flex items-center gap-2">
-          <Sun
-            className={cn(
-              "h-4 w-4 transition-opacity",
-              resolvedTheme === "dark" ? "opacity-40" : "opacity-100"
-            )}
-          />
-          <Switch
-            checked={resolvedTheme === "dark"}
-            onCheckedChange={onThemeChange}
-            aria-label={t("settings.darkMode")}
-          />
-          <Moon
-            className={cn(
-              "h-4 w-4 transition-opacity",
-              resolvedTheme === "dark" ? "opacity-100" : "opacity-40"
-            )}
-          />
-        </div>
+        <SegmentedSwitch
+          checked={resolvedTheme === "dark"}
+          onCheckedChange={onThemeChange}
+          leftContent={<Sun className="h-4 w-4" />}
+          rightContent={<Moon className="h-4 w-4" />}
+          aria-label={t("settings.darkMode")}
+        />
       </div>
 
       <div className="flex items-center justify-between">
         <Label>{t("settings.language")}</Label>
-        <div className="flex gap-2">
-          <Button
-            variant={language === "es" ? "default" : "outline"}
-            size="sm"
-            onClick={() => onLanguageChange("es")}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label={t("settings.language")}
+            className={cn(
+              "flex h-8 w-[140px] items-center justify-between gap-2 rounded-md border border-input bg-transparent px-2.5 text-sm shadow-sm transition-colors",
+              "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+              "data-[popup-open]:border-ring/50 data-[popup-open]:ring-1 data-[popup-open]:ring-ring/20"
+            )}
           >
-            ES
-          </Button>
-          <Button
-            variant={language === "en" ? "default" : "outline"}
-            size="sm"
-            onClick={() => onLanguageChange("en")}
-          >
-            EN
-          </Button>
-        </div>
+            <span className="truncate">
+              {language === "es" ? "Español" : "English"}
+            </span>
+            <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onLanguageChange("es")}>
+              <span className="flex-1">Español</span>
+              {language === "es" && (
+                <Check className="h-4 w-4 text-primary" />
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onLanguageChange("en")}>
+              <span className="flex-1">English</span>
+              {language === "en" && (
+                <Check className="h-4 w-4 text-primary" />
+              )}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </>
   );

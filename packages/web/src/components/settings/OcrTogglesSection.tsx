@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { OnOffSwitch } from "./OnOffSwitch";
 
 interface OcrTogglesSectionProps {
   autoExtractEnabled: boolean;
@@ -26,24 +26,18 @@ export function OcrTogglesSection({
             {t("settings.autoExtractHint")}
           </p>
         </div>
-        <Button
-          variant={autoExtractEnabled ? "default" : "outline"}
-          size="sm"
-          onClick={onToggleAutoExtract}
-        >
-          {autoExtractEnabled ? "ON" : "OFF"}
-        </Button>
+        <OnOffSwitch
+          checked={autoExtractEnabled}
+          onCheckedChange={onToggleAutoExtract}
+        />
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <Label>{t("settings.preprocessing")}</Label>
-        <Button
-          variant={preprocessingEnabled ? "default" : "outline"}
-          size="sm"
-          onClick={onTogglePreprocessing}
-        >
-          {preprocessingEnabled ? "ON" : "OFF"}
-        </Button>
+        <OnOffSwitch
+          checked={preprocessingEnabled}
+          onCheckedChange={onTogglePreprocessing}
+        />
       </div>
     </>
   );
