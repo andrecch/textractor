@@ -108,16 +108,6 @@ export function RecognitionSection({
             variant="ghost"
             size="icon"
             className="h-7 w-7"
-            onClick={onRemoveBlankLines}
-            disabled={!hasText || isProcessing}
-            title={t("ocr.removeBlankLines")}
-          >
-            <Eraser className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
             onClick={onCopy}
             disabled={!hasText}
             title={t("ocr.copy")}
@@ -127,6 +117,16 @@ export function RecognitionSection({
             ) : (
               <Copy className="h-4 w-4" />
             )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={onRemoveBlankLines}
+            disabled={!hasText || isProcessing}
+            title={t("ocr.removeBlankLines")}
+          >
+            <Eraser className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
